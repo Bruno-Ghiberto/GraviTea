@@ -1,0 +1,1427 @@
+openapi: 3.1.0
+info:
+  title: Gravitea Authentication API
+  version: 1.0.0
+  description: 'Authentication, authorization, user management, branch management, and JWT token lifecycle.
+
+
+    ## Authentication
+
+    All endpoints require JWT Bearer authentication (unless noted otherwise).
+
+
+    ## Multi-Tenant
+
+    Resources are automatically filtered by tenant_id from JWT claims.'
+  contact:
+    name: Gravitea Development Team
+    email: dev@gravitea.com
+  license:
+    name: Proprietary
+servers:
+- url: http://localhost:8000/api/v1
+  description: Development
+- url: https://api.gravitea.app/api/v1
+  description: Production
+security:
+- bearerAuth: []
+paths:
+  /api/v1/auth/branches/:
+    get:
+      operationId: auth_branches_list
+      description: "\nRetrieve all active branches within the authenticated user's tenant/organization.\n\n**Filters:**\n\
+        - Only active branches (is_active=True)\n- Automatically scoped to current tenant\n\n**Response:**\n- Array of branch\
+        \ objects with location details\n\n**Use Cases:**\n- Populate branch selection dropdowns\n- Display available locations\n\
+        - User default branch assignment\n\n**Permissions:**\n- Requires authentication\n- Returns only branches in same tenant\n\
+        \        "
+      summary: List active branches in tenant
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: El valor del cursor de paginación.
+        schema:
+          type: string
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      tags:
+      - Branch Management
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: List of active branches
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/auth/branches/{id}/:
+    get:
+      operationId: auth_branches_retrieve
+      description: "\nRetrieve detailed information about a specific branch.\n\n**Returns:**\n- Branch name\n- Physical address\n\
+        - Active status\n- Creation timestamp\n\n**Permissions:**\n- Requires authentication\n- Branch must be in same tenant\n\
+        \        "
+      summary: Get branch details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - Branch Management
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Branch details
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/auth/logout/:
+    post:
+      operationId: auth_logout
+      description: "\nInvalidate the provided refresh token by adding it to the blacklist.\n\n**Request Body:**\n- `refresh`\
+        \ (string, required): The JWT refresh token to blacklist\n\n**Security:**\n- Requires valid JWT access token in Authorization\
+        \ header\n- Blacklisted tokens cannot be used to obtain new access tokens\n- Security event logged\n\n**Response Codes:**\n\
+        - 205: Token successfully blacklisted (Reset Content)\n- 400: Missing or invalid refresh token\n- 401: Unauthorized\
+        \ (missing/invalid access token)\n        "
+      summary: Logout and blacklist refresh token
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh:
+                  type: string
+                  description: JWT refresh token to blacklist
+              required:
+              - refresh
+      security:
+      - bearerAuth: []
+      responses:
+        '205':
+          description: Token successfully blacklisted (no content)
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/auth/roles/:
+    get:
+      operationId: auth_roles_list
+      description: "\nRetrieve all roles within the authenticated user's tenant/organization.\n\n**Response:**\n- Array of\
+        \ role objects with permission lists\n- Automatically scoped to current tenant\n\n**Permissions:**\n- Requires authentication\n\
+        - Returns only roles in same tenant\n        "
+      summary: List roles in tenant
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: El valor del cursor de paginación.
+        schema:
+          type: string
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      tags:
+      - Role Management
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: List of roles
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    post:
+      operationId: auth_roles_create
+      description: "\nCreate a new role in the current tenant/organization.\n\n**Required Fields:**\n- name (string): Role\
+        \ name (unique within tenant)\n- permissions (array): List of permission strings\n\n**Permission Format:**\nEach permission\
+        \ string must follow format: `module.action`\n\n**Valid Modules:**\n- users, roles, clients, suppliers, inventory,\
+        \ sales, purchases, finance, reports\n\n**Valid Actions:**\n- view, create, edit, delete, manage\n\n**Examples:**\n\
+        - \"users.view\" - View users\n- \"sales.create\" - Create sales orders\n- \"reports.view\" - View reports\n- \"inventory.manage\"\
+        \ - Full inventory access\n\n**Validation:**\n- Name uniqueness checked within tenant\n- All permissions validated\
+        \ against allowed modules/actions\n- Creates role in same tenant as requester\n\n**Permissions:**\n- Requires authentication\n\
+        \        "
+      summary: Create new role
+      tags:
+      - Role Management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RoleCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RoleCreateRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          description: Role created successfully
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/auth/roles/{id}/:
+    get:
+      operationId: auth_roles_retrieve
+      description: "\nRetrieve detailed information about a specific role.\n\n**Returns:**\n- Role name\n- Full permission\
+        \ list\n- Creation timestamp\n\n**Permissions:**\n- Requires authentication\n- Role must be in same tenant\n     \
+        \   "
+      summary: Get role details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - Role Management
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Role details
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    put:
+      operationId: auth_roles_update
+      description: "Role management viewset.\n\nEndpoints:\n    GET    /api/v1/auth/roles/      - List roles in tenant\n \
+        \   POST   /api/v1/auth/roles/      - Create role\n    GET    /api/v1/auth/roles/{id}/ - Get role details\n    PATCH\
+        \  /api/v1/auth/roles/{id}/ - Update role\n    DELETE /api/v1/auth/roles/{id}/ - Delete role"
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RoleRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RoleRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+          description: ''
+    patch:
+      operationId: auth_roles_partial_update
+      description: "\nPartially update role information.\n\n**Updatable Fields:**\n- name: Role name (must remain unique within\
+        \ tenant)\n- permissions: Permission list (replaces existing permissions)\n\n**Notes:**\n- All fields optional for\
+        \ PATCH request\n- Permission format and validation same as create\n- Changes affect all users with this role\n\n\
+        **Permissions:**\n- Requires authentication\n- Role must be in same tenant\n        "
+      summary: Update role
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - Role Management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRoleRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRoleRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRoleRequest'
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Role updated successfully
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    delete:
+      operationId: auth_roles_destroy
+      description: "\nDelete a role from the system.\n\n**Validation:**\n- Role must not be assigned to any users\n- Returns\
+        \ 400 error if users are assigned\n\n**Recommendation:**\nBefore deleting a role:\n1. Reassign all users to different\
+        \ roles\n2. Verify no users have this role\n3. Then delete the role\n\n**Permissions:**\n- Requires authentication\n\
+        - Role must be in same tenant\n\n**Response:**\n- 204: Role deleted successfully (no content)\n        "
+      summary: Delete role
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - Role Management
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: Role deleted successfully
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/auth/token/:
+    post:
+      operationId: auth_token_create
+      description: "\nAuthenticate user and receive JWT access/refresh token pair.\n\n**Security Features:**\n- Progressive\
+        \ rate limiting (5 attempts → 5min lockout, 10 → 30min, 20 → account lock)\n- IP-based brute force protection\n- Security\
+        \ event logging\n- Account lockout after excessive failures\n\n**Rate Limit Tiers:**\n- Tier 1: 5 failed attempts\
+        \ → 5 minute lockout\n- Tier 2: 10 failed attempts → 30 minute lockout\n- Tier 3: 20 failed attempts → account locked\
+        \ (admin unlock required)\n\n**Response Codes:**\n- 200: Authentication successful, tokens returned\n- 401: Invalid\
+        \ credentials\n- 429: Rate limit exceeded (see retry_after)\n        "
+      summary: Obtain JWT token pair
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User email address
+                  example: admin@gravitea-demo.com
+                password:
+                  type: string
+                  format: password
+                  description: User password
+                  example: admin123
+              required:
+              - email
+              - password
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+          description: Authentication successful
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '429':
+          description: Rate Limit Exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/rate-limit-exceeded
+                title: Rate Limit Exceeded
+                status: 429
+                detail: Too many requests. Please try again later
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/auth/token/refresh/:
+    post:
+      operationId: auth_token_refresh_create
+      description: 'Takes a refresh type JSON web token and returns an access type JSON web
+
+        token if the refresh token is valid.'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/v1/auth/token/verify/:
+    post:
+      operationId: auth_token_verify_create
+      description: 'Takes a token and indicates if it is valid.  This view provides no
+
+        information about a token''s fitness for a particular use.'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/users/:
+    get:
+      operationId: auth_users_list
+      description: "\nRetrieve all users within the authenticated user's tenant/organization.\n\n**Filters:**\n- Results automatically\
+        \ scoped to current tenant\n- Only active users shown by default\n\n**Response:**\n- Array of user objects with role\
+        \ and branch details\n- Includes computed permissions from role\n\n**Permissions:**\n- Requires authentication\n-\
+        \ Returns only users in same tenant\n        "
+      summary: List users in tenant
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: El valor del cursor de paginación.
+        schema:
+          type: string
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      tags:
+      - User Management
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: List of users retrieved successfully
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    post:
+      operationId: auth_users_create
+      description: "\nCreate a new user in the current tenant/organization.\n\n**Required Fields:**\n- email: Valid email\
+        \ address (unique within tenant)\n- full_name: User's full name\n- password: Strong password (validated)\n\n**Optional\
+        \ Fields:**\n- role_id: UUID of role to assign (must be in same tenant)\n- default_branch_id: UUID of default branch\
+        \ (must be in same tenant)\n\n**Password Requirements:**\n- Minimum 8 characters\n- Cannot be entirely numeric\n-\
+        \ Cannot be too similar to user information\n- Cannot be a commonly used password\n\n**Validation:**\n- Email uniqueness\
+        \ checked within tenant\n- Role/branch validated against tenant scope\n\n**Permissions:**\n- Requires authentication\n\
+        - Creates user in same tenant as requester\n        "
+      summary: Create new user
+      tags:
+      - User Management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          description: User created successfully
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/auth/users/me/:
+    get:
+      operationId: auth_users_me
+      description: "\nRetrieve or update the authenticated user's own profile.\n\n**GET /api/v1/auth/users/me/**\nReturns\
+        \ current user's profile with role, branch, and permissions.\n\n**PATCH /api/v1/auth/users/me/**\nUpdate current user's\
+        \ profile (same fields as PATCH /users/{id}/).\n\n**Updatable Fields:**\n- full_name\n- default_branch_id (must be\
+        \ in same tenant)\n\n**Restricted Fields:**\n- Cannot change own role_id (requires admin)\n- Cannot change own is_active\
+        \ status\n- Use /me/change-password/ for password changes\n\n**Permissions:**\n- Requires authentication\n- Always\
+        \ operates on authenticated user\n        "
+      summary: Get/update current user profile
+      tags:
+      - User Management
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Current user profile
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    patch:
+      operationId: auth_users_me_2
+      description: "\nRetrieve or update the authenticated user's own profile.\n\n**GET /api/v1/auth/users/me/**\nReturns\
+        \ current user's profile with role, branch, and permissions.\n\n**PATCH /api/v1/auth/users/me/**\nUpdate current user's\
+        \ profile (same fields as PATCH /users/{id}/).\n\n**Updatable Fields:**\n- full_name\n- default_branch_id (must be\
+        \ in same tenant)\n\n**Restricted Fields:**\n- Cannot change own role_id (requires admin)\n- Cannot change own is_active\
+        \ status\n- Use /me/change-password/ for password changes\n\n**Permissions:**\n- Requires authentication\n- Always\
+        \ operates on authenticated user\n        "
+      summary: Get/update current user profile
+      tags:
+      - User Management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Current user profile
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/auth/users/me/change-password/:
+    post:
+      operationId: auth_users_change_password
+      description: "\nChange the authenticated user's password.\n\n**Request Body:**\n- current_password (string, required):\
+        \ Current password for verification\n- new_password (string, required): New password (must meet strength requirements)\n\
+        \n**Password Requirements:**\n- Minimum 8 characters\n- Cannot be entirely numeric\n- Cannot be too similar to user\
+        \ information\n- Cannot be a commonly used password\n\n**Security:**\n- Requires current password verification\n-\
+        \ Security event logged on success\n- Existing sessions remain valid (tokens not invalidated)\n\n**Permissions:**\n\
+        - Requires authentication\n- User can only change own password\n        "
+      summary: Change current user password
+      tags:
+      - User Management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                current_password:
+                  type: string
+                  format: password
+                  description: Current password
+                new_password:
+                  type: string
+                  format: password
+                  description: New password (min 8 chars)
+              required:
+              - current_password
+              - new_password
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordChangeSuccess'
+              examples:
+                Success:
+                  value:
+                    detail: Password changed successfully.
+          description: Password changed successfully
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/auth/users/{id}/:
+    get:
+      operationId: auth_users_retrieve
+      description: "\nRetrieve detailed information about a specific user.\n\n**Returns:**\n- User profile with role details\n\
+        - Default branch information\n- Computed permission list\n- Activity timestamps\n\n**Permissions:**\n- Requires authentication\n\
+        - User must be in same tenant\n        "
+      summary: Get user details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - User Management
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: User details retrieved successfully
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    put:
+      operationId: auth_users_update
+      description: "User management viewset.\n\nEndpoints:\n    GET    /api/v1/auth/users/           - List users in tenant\n\
+        \    POST   /api/v1/auth/users/           - Create user\n    GET    /api/v1/auth/users/{id}/      - Get user details\n\
+        \    PATCH  /api/v1/auth/users/{id}/      - Update user\n    DELETE /api/v1/auth/users/{id}/      - Deactivate user\
+        \ (soft delete)\n    GET    /api/v1/auth/users/me/        - Get current user\n    PATCH  /api/v1/auth/users/me/  \
+        \      - Update current user\n    POST   /api/v1/auth/users/me/change-password/ - Change password"
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserUpdate'
+          description: ''
+    patch:
+      operationId: auth_users_partial_update
+      description: "\nPartially update user profile information.\n\n**Updatable Fields:**\n- full_name: User's full name\n\
+        - role_id: Assign different role (must be in same tenant)\n- default_branch_id: Change default branch (must be in\
+        \ same tenant)\n- is_active: Activate/deactivate user account\n\n**Notes:**\n- Password changes use separate endpoint:\
+        \ POST /me/change-password/\n- Email cannot be changed after creation\n- All fields optional for PATCH request\n\n\
+        **Permissions:**\n- Requires authentication\n- User must be in same tenant\n        "
+      summary: Update user
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - User Management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserUpdateRequest'
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: User updated successfully
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    delete:
+      operationId: auth_users_destroy
+      description: "\nSoft delete user by setting is_active=False.\n\n**Behavior:**\n- User account marked as inactive (not\
+        \ deleted from database)\n- User cannot login after deactivation\n- User data preserved for audit/history\n- Can be\
+        \ reactivated by setting is_active=True\n\n**Permissions:**\n- Requires authentication\n- User must be in same tenant\n\
+        \n**Response:**\n- 204: User deactivated successfully (no content)\n        "
+      summary: Deactivate user (soft delete)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - User Management
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: User deactivated successfully
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/token/ endpoint. Include tenant_id in token payload.
+  schemas:
+    FieldError:
+      type: object
+      required:
+      - field
+      - message
+      - code
+      properties:
+        field:
+          type: string
+          description: Field name that caused the error
+          example: email
+        message:
+          type: string
+          description: Human-readable error message
+          example: Enter a valid email address.
+        code:
+          type: string
+          description: Machine-readable error code
+          example: invalid
+      description: Field-level validation error details
+    PasswordChangeSuccess:
+      type: object
+      description: Password change success response.
+      properties:
+        detail:
+          type: string
+          default: Password changed successfully.
+          description: Success message
+    PatchedRoleRequest:
+      type: object
+      description: 'Role serializer for read operations.
+
+
+        Returns role details with permission list.'
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Role name (e.g., 'Vendedor', 'Gerente')
+          maxLength: 100
+        permissions:
+          description: List of permission strings
+    PatchedUserRequest:
+      type: object
+      description: 'User serializer for read operations.
+
+
+        Returns user profile with role and branch details.'
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          description: Login email address
+          maxLength: 255
+        full_name:
+          type:
+          - string
+          - 'null'
+          description: User's display name
+        is_active:
+          type: boolean
+          description: Active account flag
+    PatchedUserUpdateRequest:
+      type: object
+      description: 'User serializer for update operations.
+
+
+        Allows updating profile fields without password.'
+      properties:
+        full_name:
+          type:
+          - string
+          - 'null'
+          description: User's display name
+        role_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        default_branch_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        is_active:
+          type: boolean
+          description: Active account flag
+    ProblemDetail:
+      type: object
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - trace_id
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI identifying the error type category
+          example: https://api.gravitea.com/errors/not-found
+        title:
+          type: string
+          description: Human-readable error title
+          example: Not Found
+        status:
+          type: integer
+          description: HTTP status code
+          example: 404
+        detail:
+          type: string
+          description: Detailed explanation of the error
+          example: The requested resource was not found
+        trace_id:
+          type: string
+          format: uuid
+          description: Unique request identifier for log correlation
+          example: 550e8400-e29b-41d4-a716-446655440000
+      description: RFC 7807 Problem Details for HTTP APIs
+    RateLimitError:
+      type: object
+      description: 'RFC 7807 rate limit error with retry information.
+
+
+        Extended ProblemDetail for 429 Too Many Requests responses
+
+        that include retry timing information.'
+      properties:
+        type:
+          type: string
+          format: uri
+          default: about:blank
+          description: URI reference identifying the problem type category
+        title:
+          type: string
+          description: Short, human-readable error summary
+          maxLength: 100
+        status:
+          type: integer
+          maximum: 599
+          minimum: 400
+          description: HTTP status code (400-599)
+        detail:
+          type: string
+          description: Human-readable explanation of this specific error
+          maxLength: 500
+        trace_id:
+          type: string
+          format: uuid
+          description: UUID v4 for log correlation
+        instance:
+          type: string
+          format: uri
+          description: URI of the specific resource that caused the error
+        retry_after:
+          type: integer
+          description: Seconds until the next request attempt is allowed
+      required:
+      - detail
+      - retry_after
+      - status
+      - title
+      - trace_id
+    Role:
+      type: object
+      description: 'Role serializer for read operations.
+
+
+        Returns role details with permission list.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          description: Role name (e.g., 'Vendedor', 'Gerente')
+          maxLength: 100
+        permissions:
+          description: List of permission strings
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+    RoleCreateRequest:
+      type: object
+      description: 'Role serializer for create/update operations.
+
+
+        Validates permission format and uniqueness within tenant.'
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Role name (e.g., 'Vendedor', 'Gerente')
+          maxLength: 100
+        permissions:
+          description: List of permission strings
+      required:
+      - name
+    RoleRequest:
+      type: object
+      description: 'Role serializer for read operations.
+
+
+        Returns role details with permission list.'
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Role name (e.g., 'Vendedor', 'Gerente')
+          maxLength: 100
+        permissions:
+          description: List of permission strings
+      required:
+      - name
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    TokenResponse:
+      type: object
+      description: JWT token pair response.
+      properties:
+        access:
+          type: string
+          description: JWT access token (short-lived)
+        refresh:
+          type: string
+          description: JWT refresh token (long-lived)
+      required:
+      - access
+      - refresh
+    TokenVerifyRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - token
+    UserCreateRequest:
+      type: object
+      description: 'User serializer for create operations.
+
+
+        Validates email uniqueness within tenant and password strength.'
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          description: Login email address
+          maxLength: 255
+        full_name:
+          type:
+          - string
+          - 'null'
+          description: User's display name
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        role_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        default_branch_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+      required:
+      - email
+      - password
+    UserUpdate:
+      type: object
+      description: 'User serializer for update operations.
+
+
+        Allows updating profile fields without password.'
+      properties:
+        full_name:
+          type:
+          - string
+          - 'null'
+          description: User's display name
+        role_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        default_branch_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        is_active:
+          type: boolean
+          description: Active account flag
+    UserUpdateRequest:
+      type: object
+      description: 'User serializer for update operations.
+
+
+        Allows updating profile fields without password.'
+      properties:
+        full_name:
+          type:
+          - string
+          - 'null'
+          description: User's display name
+        role_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        default_branch_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        is_active:
+          type: boolean
+          description: Active account flag
+    ValidationError:
+      allOf:
+      - $ref: '#/components/schemas/ProblemDetail'
+      - type: object
+        properties:
+          errors:
+            type: array
+            items:
+              $ref: '#/components/schemas/FieldError'
+            description: Field-level validation error details
+            example:
+            - field: email
+              message: Enter a valid email address.
+              code: invalid
+            - field: username
+              message: This field is required.
+              code: required
+      description: Validation error response with field-level details

@@ -1,0 +1,408 @@
+# GRAVITEA-ERP — Consolidated Docker Compose
+#
+# Single file for all environments. Use profiles to select services.
+#
+# Profiles:
+#   (default)       Full stack (dev):    docker compose up -d
+#   prod            Production frontend: docker compose --profile prod up -d
+#   observability   + monitoring:        docker compose --profile observability up -d
+#   test            + test services:     docker compose --profile test up -d
+#   load            + locust:            docker compose --profile test --profile load up -d
+#
+# Access:
+#   Frontend:       http://localhost:3000
+#   Backend API:    http://localhost:8000
+#   Grafana:        http://localhost:3002 (admin/admin)
+#   Prometheus:     http://localhost:9090
+#   Jaeger:         http://localhost:16686
+#   Alertmanager:   http://localhost:9093
+#
+# Seed data:
+#   docker compose exec web python manage.py seed_all
+
+services:
+  # ============================================================
+  # Infrastructure (default)
+  # ============================================================
+
+  postgres:
+    image: postgres:18-alpine
+    container_name: gravitea-postgres
+    environment:
+      POSTGRES_USER: gravitea
+      POSTGRES_PASSWORD: gravitea
+      POSTGRES_DB: gravitea_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gravitea -d gravitea_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: gravitea-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================
+  # Backend (Django / DRF) — port 8000
+  # ============================================================
+
+  web:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: gravitea-web
+    ports:
+      - "8000:8080"
+    environment:
+      - DJANGO_SETTINGS_MODULE=gravitea.settings.development
+      - DATABASE_URL=postgresql://gravitea:gravitea@postgres:5432/gravitea_dev
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=docker-dev-secret-key-change-in-production-12345
+      - DEBUG=True
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,host.docker.internal,gravitea-web
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:5173,http://127.0.0.1:3000
+      - ENCRYPTION_KEY=Z3Jhdml0ZWEtZGV2LWVuY3J5cHRpb24ta2V5LTMyYiE=
+      - HMAC_KEY=Z3Jhdml0ZWEtZGV2LWhtYWMta2V5LWZvci1sb2NhbCE=
+      - OTEL_TRACING_ENABLED=true
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://gravitea-jaeger:4317
+      - OTEL_SERVICE_NAME=gravitea-backend
+      - LOG_FORMAT=json
+      # - SEED_DATA=true  # Uncomment to seed test data on startup
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - ./database/SQL:/app/sql-init:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health/live')"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 90s
+    command: python manage.py runserver 0.0.0.0:8080
+
+  # ============================================================
+  # Frontend — Dev server with hot reload (default) — port 3000
+  # ============================================================
+
+  frontend:
+    image: node:22-alpine
+    container_name: gravitea-frontend
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./frontend-prototype:/app
+      - frontend_node_modules:/app/node_modules
+    command: sh -c "npm install && npm run dev -- -H 0.0.0.0"
+    depends_on:
+      web:
+        condition: service_healthy
+
+  # ============================================================
+  # Frontend — Production build (profile: prod) — port 3000
+  # ============================================================
+
+  frontend-prod:
+    build:
+      context: ./frontend-prototype
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    container_name: gravitea-frontend-prod
+    profiles: [prod]
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - HOSTNAME=0.0.0.0
+    depends_on:
+      web:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ============================================================
+  # Observability (profile: observability)
+  # ============================================================
+
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: gravitea-prometheus
+    profiles: [observability]
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./backend/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./backend/observability/alerts:/etc/prometheus/alerts:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9090/-/healthy || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: gravitea-grafana
+    profiles: [observability]
+    ports:
+      - "3002:3000"
+    volumes:
+      - ./backend/observability/dashboards:/var/lib/grafana/dashboards:ro
+      - ./backend/observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    depends_on:
+      - prometheus
+      - loki
+    restart: unless-stopped
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.51
+    container_name: gravitea-jaeger
+    profiles: [observability]
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "4317:4317"    # OTLP gRPC
+      - "4318:4318"    # OTLP HTTP
+      - "14269:14269"  # Admin/health
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - SPAN_STORAGE_TYPE=memory
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:14269/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: gravitea-loki
+    profiles: [observability]
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./backend/observability/loki.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: gravitea-promtail
+    profiles: [observability]
+    volumes:
+      - ./backend/observability/promtail.yml:/etc/promtail/config.yml:ro
+      - /var/log:/var/log:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: -config.file=/etc/promtail/config.yml
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9080/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      - loki
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    container_name: gravitea-alertmanager
+    profiles: [observability]
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./backend/observability/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9093/-/healthy || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # ============================================================
+  # Test Services (profile: test)
+  # ============================================================
+
+  postgres-test:
+    image: postgres:18-alpine
+    container_name: gravitea-postgres-test
+    profiles: [test]
+    environment:
+      POSTGRES_USER: gravitea_test
+      POSTGRES_PASSWORD: gravitea_test
+      POSTGRES_DB: gravitea_test
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gravitea_test -d gravitea_test"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
+  redis-test:
+    image: redis:7-alpine
+    container_name: gravitea-redis-test
+    profiles: [test]
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_test_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
+  web-test:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: gravitea-web-test
+    profiles: [test]
+    ports:
+      - "8001:8080"
+    environment:
+      - DJANGO_SETTINGS_MODULE=gravitea.settings.test
+      - DATABASE_URL=postgresql://gravitea_test:gravitea_test@postgres-test:5432/gravitea_test
+      - REDIS_URL=redis://redis-test:6379/0
+      - SECRET_KEY=test-secret-key-for-testing-only-12345
+      - DEBUG=False
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,host.docker.internal,gravitea-web-test
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000
+      - ENCRYPTION_KEY=dGVzdC1lbmNyeXB0aW9uLWtleS1mb3ItdGVzdGluZy1vbmx5
+      - HMAC_KEY=dGVzdC1obWFjLWtleS1mb3ItdGVzdGluZy1vbmx5LXVzZQ==
+      - CONN_MAX_AGE=0
+      - OTEL_TRACING_ENABLED=true
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger-test:4317
+      - OTEL_SERVICE_NAME=gravitea-backend-test
+      - LOG_FORMAT=json
+      - GUNICORN_GRACEFUL_TIMEOUT=30
+      - GUNICORN_TIMEOUT=60
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health/live')"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    stop_grace_period: 30s
+
+  jaeger-test:
+    image: jaegertracing/all-in-one:1.50
+    container_name: gravitea-jaeger-test
+    profiles: [test]
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16687:16686"  # UI only — no OTLP host mapping to avoid conflict with observability jaeger
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:14269/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  prometheus-test:
+    image: prom/prometheus:v2.47.0
+    container_name: gravitea-prometheus-test
+    profiles: [test]
+    volumes:
+      - ./backend/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9091:9090"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9090/-/healthy || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ============================================================
+  # Load Testing (profile: load — requires profile: test)
+  # ============================================================
+
+  locust:
+    image: locustio/locust:2.20
+    container_name: gravitea-locust
+    profiles: [load]
+    volumes:
+      - ./backend/tests/load:/mnt/locust
+    environment:
+      - LOCUST_HOST=http://web-test:8080
+    ports:
+      - "8089:8089"
+    depends_on:
+      web-test:
+        condition: service_healthy
+
+# ============================================================
+# Volumes
+# ============================================================
+volumes:
+  # Default
+  postgres_data:
+  redis_data:
+  frontend_node_modules:
+  # Observability
+  prometheus_data:
+  grafana_data:
+  loki_data:
+  alertmanager_data:
+  # Test
+  postgres_test_data:
+  redis_test_data:

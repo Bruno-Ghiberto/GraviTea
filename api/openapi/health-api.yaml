@@ -1,0 +1,321 @@
+openapi: 3.1.0
+info:
+  title: Gravitea Health Check API
+  version: 1.0.0
+  description: 'System health check endpoints for monitoring and load balancer probes. Includes Kubernetes-style liveness,
+    readiness, and startup probes.
+
+
+    ## Authentication
+
+    All endpoints require JWT Bearer authentication (unless noted otherwise).
+
+
+    ## Multi-Tenant
+
+    Resources are automatically filtered by tenant_id from JWT claims.'
+  contact:
+    name: Gravitea Development Team
+    email: dev@gravitea.com
+  license:
+    name: Proprietary
+servers:
+- url: http://localhost:8000/api/v1
+  description: Development
+- url: https://api.gravitea.app/api/v1
+  description: Production
+security:
+- bearerAuth: []
+paths:
+  /api/v1/health/:
+    get:
+      operationId: health_check
+      description: "Handle GET request for combined health check.\n\nChecks database connectivity, cache availability, and\
+        \ migration status.\nReturns 200 if all pass, 503 if any fail.\n\nArgs:\n    request: The incoming request.\n\nReturns:\n\
+        \    JSON response with per-check status, version, and timestamp."
+      summary: System health check
+      tags:
+      - health
+      security:
+      - bearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                    - healthy
+                  checks:
+                    type: object
+                    properties:
+                      database:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                          latency_ms:
+                            type: number
+                      cache:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                          latency_ms:
+                            type: number
+                      migrations:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                          pending:
+                            type: integer
+                  version:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+          description: All systems healthy
+        '503':
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/service-unavailable
+                title: Service Unavailable
+                status: 503
+                detail: The service is temporarily unavailable. Please try again later
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /health/live:
+    get:
+      operationId: health_liveness
+      description: Returns 200 if the process is alive. Used by Kubernetes to detect hung processes.
+      summary: Liveness probe
+      tags:
+      - Health Checks
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                    - healthy
+                example:
+                  status: healthy
+          description: Process is alive
+  /health/ready:
+    get:
+      operationId: health_readiness
+      description: Returns 200 if ready to accept traffic. Checks database connectivity.
+      summary: Readiness probe
+      tags:
+      - Health Checks
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                    - healthy
+                    - unhealthy
+                  checks:
+                    type: object
+                    properties:
+                      database:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                          latency_ms:
+                            type: number
+                  timestamp:
+                    type: string
+                    format: date-time
+                example:
+                  status: healthy
+                  checks:
+                    database:
+                      status: healthy
+                      latency_ms: 12.5
+                  timestamp: '2025-12-03T10:30:00Z'
+          description: Ready to accept traffic
+        '503':
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/service-unavailable
+                title: Service Unavailable
+                status: 503
+                detail: The service is temporarily unavailable. Please try again later
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /health/startup:
+    get:
+      operationId: health_startup
+      description: Returns 200 if startup is complete. Checks database and migrations.
+      summary: Startup probe
+      tags:
+      - Health Checks
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                    - healthy
+                    - unhealthy
+                  checks:
+                    type: object
+                    properties:
+                      database:
+                        type: object
+                      migrations:
+                        type: object
+                  timestamp:
+                    type: string
+                    format: date-time
+                example:
+                  status: healthy
+                  checks:
+                    database:
+                      status: healthy
+                      latency_ms: 15.2
+                    migrations:
+                      status: healthy
+                      latency_ms: 25.8
+                  timestamp: '2025-12-03T10:30:00Z'
+          description: Startup complete
+        '503':
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/service-unavailable
+                title: Service Unavailable
+                status: 503
+                detail: The service is temporarily unavailable. Please try again later
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/token/ endpoint. Include tenant_id in token payload.
+  schemas:
+    ProblemDetail:
+      type: object
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - trace_id
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI identifying the error type category
+          example: https://api.gravitea.com/errors/not-found
+        title:
+          type: string
+          description: Human-readable error title
+          example: Not Found
+        status:
+          type: integer
+          description: HTTP status code
+          example: 404
+        detail:
+          type: string
+          description: Detailed explanation of the error
+          example: The requested resource was not found
+        trace_id:
+          type: string
+          format: uuid
+          description: Unique request identifier for log correlation
+          example: 550e8400-e29b-41d4-a716-446655440000
+      description: RFC 7807 Problem Details for HTTP APIs
+    RateLimitError:
+      type: object
+      description: 'RFC 7807 rate limit error with retry information.
+
+
+        Extended ProblemDetail for 429 Too Many Requests responses
+
+        that include retry timing information.'
+      properties:
+        type:
+          type: string
+          format: uri
+          default: about:blank
+          description: URI reference identifying the problem type category
+        title:
+          type: string
+          description: Short, human-readable error summary
+          maxLength: 100
+        status:
+          type: integer
+          maximum: 599
+          minimum: 400
+          description: HTTP status code (400-599)
+        detail:
+          type: string
+          description: Human-readable explanation of this specific error
+          maxLength: 500
+        trace_id:
+          type: string
+          format: uuid
+          description: UUID v4 for log correlation
+        instance:
+          type: string
+          format: uri
+          description: URI of the specific resource that caused the error
+        retry_after:
+          type: integer
+          description: Seconds until the next request attempt is allowed
+      required:
+      - detail
+      - retry_after
+      - status
+      - title
+      - trace_id
+    ValidationError:
+      allOf:
+      - $ref: '#/components/schemas/ProblemDetail'
+      - type: object
+        properties:
+          errors:
+            type: array
+            items:
+              $ref: '#/components/schemas/FieldError'
+            description: Field-level validation error details
+            example:
+            - field: email
+              message: Enter a valid email address.
+              code: invalid
+            - field: username
+              message: This field is required.
+              code: required
+      description: Validation error response with field-level details

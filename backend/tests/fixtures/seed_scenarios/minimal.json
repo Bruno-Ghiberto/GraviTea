@@ -1,0 +1,64 @@
+{
+  "name": "minimal",
+  "description": "Minimal seed data for basic testing - single tenant, single branch, admin user",
+  "version": "1.0.0",
+  "tenants": [
+    {
+      "id": "demo",
+      "data": {
+        "name": "Demo Tenant",
+        "slug": "demo",
+        "is_active": true,
+        "settings": {
+          "currency": "COP",
+          "timezone": "America/Bogota",
+          "language": "es"
+        }
+      }
+    }
+  ],
+  "roles": [
+    {
+      "id": "admin",
+      "data": {
+        "name": "Administrator",
+        "code": "admin",
+        "permissions": ["*"],
+        "is_system": true
+      },
+      "dependencies": ["tenant:demo"]
+    }
+  ],
+  "users": [
+    {
+      "id": "admin",
+      "data": {
+        "email": "admin@demo.gravitea.local",
+        "first_name": "Admin",
+        "last_name": "User",
+        "is_active": true,
+        "is_staff": true
+      },
+      "dependencies": ["tenant:demo", "role:admin"]
+    }
+  ],
+  "branches": [
+    {
+      "id": "main",
+      "data": {
+        "name": "Main Branch",
+        "code": "MAIN",
+        "address": "123 Demo Street",
+        "city": "Bogota",
+        "is_active": true,
+        "is_main": true
+      },
+      "dependencies": ["tenant:demo"]
+    }
+  ],
+  "categories": [],
+  "products": [],
+  "suppliers": [],
+  "price_lists": [],
+  "stock_levels": []
+}

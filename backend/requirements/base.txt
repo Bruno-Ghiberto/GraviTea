@@ -1,0 +1,44 @@
+# Core Django
+Django>=5.2,<5.3
+djangorestframework>=3.15,<4.0
+djangorestframework-simplejwt>=5.3,<6.0
+django-filter>=24.0,<25.0
+django-cors-headers>=4.3,<5.0
+
+# Database
+psycopg[binary]>=3.1,<4.0
+
+# Authentication & Security
+argon2-cffi>=23.1.0
+
+# Encryption
+cryptography>=42.0,<43.0
+
+# Google Cloud
+google-cloud-secret-manager>=2.18,<3.0
+
+# Background Tasks & Caching
+celery>=5.3,<6.0
+redis>=5.0,<6.0
+django-redis>=5.4,<6.0
+
+# Utilities
+python-dotenv>=1.0,<2.0
+
+# Documentation
+drf-spectacular>=0.27.0,<0.28.0
+
+# Observability (004-observability-metrics)
+prometheus-client==0.21.0
+opentelemetry-api==1.27.0
+opentelemetry-sdk==1.27.0
+opentelemetry-instrumentation-django==0.48b0
+opentelemetry-instrumentation-psycopg2==0.48b0
+opentelemetry-exporter-otlp==1.27.0
+python-json-logger==2.0.7
+
+# ARCA Electronic Invoicing (SOAP client)
+zeep>=4.0,<5.0
+
+# Data Export (SPEC-020) — Python fallback for XLSX generation
+openpyxl>=3.1,<4.0

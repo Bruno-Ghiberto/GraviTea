@@ -1,0 +1,162 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* shadcn/ui semantic tokens */
+  --color-background: oklch(var(--background));
+  --color-foreground: oklch(var(--foreground));
+  --color-card: oklch(var(--card));
+  --color-card-foreground: oklch(var(--card-foreground));
+  --color-popover: oklch(var(--popover));
+  --color-popover-foreground: oklch(var(--popover-foreground));
+  --color-primary: oklch(var(--primary));
+  --color-primary-foreground: oklch(var(--primary-foreground));
+  --color-secondary: oklch(var(--secondary));
+  --color-secondary-foreground: oklch(var(--secondary-foreground));
+  --color-muted: oklch(var(--muted));
+  --color-muted-foreground: oklch(var(--muted-foreground));
+  --color-accent: oklch(var(--accent));
+  --color-accent-foreground: oklch(var(--accent-foreground));
+  --color-destructive: oklch(var(--destructive));
+  --color-destructive-foreground: oklch(var(--destructive-foreground));
+  --color-border: oklch(var(--border));
+  --color-input: oklch(var(--input));
+  --color-ring: oklch(var(--ring));
+
+  /* Sidebar tokens */
+  --color-sidebar: oklch(var(--sidebar));
+  --color-sidebar-foreground: oklch(var(--sidebar-foreground));
+  --color-sidebar-primary: oklch(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: oklch(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: oklch(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: oklch(var(--sidebar-accent-foreground));
+  --color-sidebar-border: oklch(var(--sidebar-border));
+  --color-sidebar-ring: oklch(var(--sidebar-ring));
+
+  /* Extra tokens */
+  --color-background-color: oklch(var(--background-color));
+  --color-semantic-background: oklch(var(--semantic-background));
+  --color-semantic-border: oklch(var(--semantic-border));
+  --color-semantic-foreground: oklch(var(--semantic-foreground));
+
+  /* Radius scale */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+:root {
+  --radius: 0.625rem;
+
+  /* Base */
+  --background: 1.0000 0.0000 0.0;        /* white */
+  --foreground: 0.1448 0.0000 0.0;        /* neutral-950 */
+
+  --card: 1.0000 0.0000 0.0;              /* white */
+  --card-foreground: 0.1448 0.0000 0.0;   /* neutral-950 */
+
+  --popover: 1.0000 0.0000 0.0;           /* white */
+  --popover-foreground: 0.1448 0.0000 0.0;/* neutral-950 */
+
+  /* Brand */
+  --primary: 0.5106 0.2301 277.0;         /* indigo-600 */
+  --primary-foreground: 0.9619 0.0179 272.3; /* indigo-50 */
+
+  --secondary: 0.9299 0.0334 272.8;       /* indigo-100 */
+  --secondary-foreground: 0.2573 0.0861 281.3; /* indigo-950 */
+
+  --muted: 0.9702 0.0000 0.0;             /* neutral-100 */
+  --muted-foreground: 0.5555 0.0000 0.0;  /* neutral-500 */
+
+  --accent: 0.9619 0.0179 272.3;          /* indigo-50 */
+  --accent-foreground: 0.5106 0.2301 277.0; /* indigo-600 */
+
+  --destructive: 0.5771 0.2152 27.3;      /* red-600 */
+  --destructive-foreground: 1.0000 0.0000 0.0; /* white */
+
+  --border: 0.9219 0.0000 0.0;            /* neutral-200 */
+  --input: 0.9219 0.0000 0.0;             /* neutral-200 */
+  --ring: 0.5854 0.2041 277.1;            /* indigo-500 */
+
+  /* Sidebar */
+  --sidebar: 0.9851 0.0000 0.0;           /* neutral-50 */
+  --sidebar-foreground: 0.1448 0.0000 0.0;/* neutral-950 */
+  --sidebar-primary: 0.2046 0.0000 0.0;   /* neutral-900 */
+  --sidebar-primary-foreground: 0.9851 0.0000 0.0; /* neutral-50 */
+  --sidebar-accent: 0.9702 0.0000 0.0;    /* neutral-100 */
+  --sidebar-accent-foreground: 0.2046 0.0000 0.0; /* neutral-900 */
+  --sidebar-border: 0.8699 0.0000 0.0;    /* neutral-300 */
+  --sidebar-ring: 0.5555 0.0000 0.0;      /* neutral-500 */
+
+  /* Extra (opacidades) */
+  --background-color: 0.0000 0.0000 0.0 / 0.05; /* black/5 */
+  --semantic-background: 0.5555 0.0000 0.0;     /* neutral-500 */
+  --semantic-border: 0.5555 0.0000 0.0;         /* neutral-500 */
+  --semantic-foreground: 1.0000 0.0000 0.0;     /* white */
+}
+
+.dark {
+  /* Base */
+  --background: 0.1448 0.0000 0.0;        /* neutral-950 */
+  --foreground: 0.9851 0.0000 0.0;        /* neutral-50 */
+
+  --card: 0.2046 0.0000 0.0;              /* neutral-900 */
+  --card-foreground: 0.9851 0.0000 0.0;   /* neutral-50 */
+
+  --popover: 0.2686 0.0000 0.0;           /* neutral-800 */
+  --popover-foreground: 0.9851 0.0000 0.0;/* neutral-50 */
+
+  /* Brand */
+  --primary: 0.9299 0.0334 272.8;         /* indigo-100 */
+  --primary-foreground: 0.2573 0.0861 281.3; /* indigo-950 */
+
+  --secondary: 0.3588 0.1354 278.7;       /* indigo-900 */
+  --secondary-foreground: 0.9619 0.0179 272.3; /* indigo-50 */
+
+  --muted: 0.2686 0.0000 0.0;             /* neutral-800 */
+  --muted-foreground: 0.7155 0.0000 0.0;  /* neutral-400 */
+
+  --accent: 0.3588 0.1354 278.7;          /* indigo-900 */
+  --accent-foreground: 0.9619 0.0179 272.3; /* indigo-50 */
+
+  --destructive: 0.7106 0.1661 22.2;      /* red-400 */
+  --destructive-foreground: 0.1448 0.0000 0.0; /* neutral-950 */
+
+  --border: 0.3715 0.0000 0.0;            /* neutral-700 */
+  --input: 0.2046 0.0000 0.0;             /* neutral-900 */
+  --ring: 0.5854 0.2041 277.1;            /* indigo-500 */
+
+  /* Sidebar */
+  --sidebar: 0.2046 0.0000 0.0;           /* neutral-900 */
+  --sidebar-foreground: 0.9851 0.0000 0.0;/* neutral-50 */
+  --sidebar-primary: 0.6231 0.1880 259.8; /* blue-500 */
+  --sidebar-primary-foreground: 0.9851 0.0000 0.0; /* neutral-50 */
+  --sidebar-accent: 0.2686 0.0000 0.0;    /* neutral-800 */
+  --sidebar-accent-foreground: 0.9851 0.0000 0.0; /* neutral-50 */
+  --sidebar-border: 1.0000 0.0000 0.0 / 0.10; /* white/10 */
+  --sidebar-ring: 0.5555 0.0000 0.0;      /* neutral-500 */
+
+  /* Extra */
+  --background-color: 0.0000 0.0000 0.0 / 0.05; /* black/5 */
+  --semantic-background: 0.2686 0.0000 0.0;     /* neutral-800 */
+  --semantic-border: 0.4386 0.0000 0.0;         /* neutral-600 */
+  --semantic-foreground: 1.0000 0.0000 0.0;     /* white */
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+

@@ -1,0 +1,12 @@
+[build-system]
+requires = ["maturin>=1.12,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "gravitea-rust"
+version = "0.1.0"
+description = "Rust acceleration layer for GRAVITEA-ERP"
+requires-python = ">=3.12"
+
+[tool.maturin]
+strip = true

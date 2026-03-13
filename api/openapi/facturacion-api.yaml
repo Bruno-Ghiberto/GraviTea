@@ -1,0 +1,2685 @@
+openapi: 3.1.0
+info:
+  title: Gravitea Electronic Invoicing (ARCA) API
+  version: 1.0.0
+  description: 'Electronic invoicing via Argentina''s ARCA system. CAEA management, comprobante lifecycle, and fiscal credentials.
+
+
+    ## Authentication
+
+    All endpoints require JWT Bearer authentication (unless noted otherwise).
+
+
+    ## Multi-Tenant
+
+    Resources are automatically filtered by tenant_id from JWT claims.'
+  contact:
+    name: Gravitea Development Team
+    email: dev@gravitea.com
+  license:
+    name: Proprietary
+servers:
+- url: http://localhost:8000/api/v1
+  description: Development
+- url: https://api.gravitea.app/api/v1
+  description: Production
+security:
+- bearerAuth: []
+paths:
+  /api/v1/facturacion/caeas/:
+    get:
+      operationId: facturacion_caeas_list
+      description: "CAEA (offline invoicing code) management viewset.\n\nProvides read-only list/retrieve for existing CAEAs\
+        \ and custom actions\nto request, report, and declare no-movement for CAEA periods.\n\nEndpoints:\n    GET    /api/v1/facturacion/caeas/\
+        \                    - List CAEAs\n    GET    /api/v1/facturacion/caeas/{id}/                - Get CAEA detail\n \
+        \   POST   /api/v1/facturacion/caeas/solicitar/           - Request new CAEA\n    POST   /api/v1/facturacion/caeas/{id}/sin-movimiento/\
+        \ - Report no movement"
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: El valor del cursor de paginación.
+        schema:
+          type: string
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      tags:
+      - facturacion
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCAEAReadList'
+          description: ''
+  /api/v1/facturacion/caeas/solicitar/:
+    post:
+      operationId: facturacion_caeas_solicitar_create
+      description: "\n        Request a CAEA code for a punto de venta and billing period.\n\n        **Flow:**\n        1.\
+        \ Validate input (punto_venta, periodo, orden).\n        2. Authenticate via WSAA (cached).\n        3. Call FECAEASolicitar.\n\
+        \        4. Save CAEA record and return it.\n\n        **Possible outcomes:**\n        - **201**: CAEA issued successfully.\n\
+        \        - **400**: Validation errors (invalid periodo, inactive punto_venta).\n        - **502**: ARCA service error.\n\
+        \        "
+      summary: Request a new CAEA from ARCA
+      tags:
+      - facturacion-caea
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CAEASolicitarRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CAEASolicitarRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CAEASolicitarRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CAEARead'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacturacionError'
+          description: ARCA service error
+  /api/v1/facturacion/caeas/{id}/:
+    get:
+      operationId: facturacion_caeas_retrieve
+      description: "CAEA (offline invoicing code) management viewset.\n\nProvides read-only list/retrieve for existing CAEAs\
+        \ and custom actions\nto request, report, and declare no-movement for CAEA periods.\n\nEndpoints:\n    GET    /api/v1/facturacion/caeas/\
+        \                    - List CAEAs\n    GET    /api/v1/facturacion/caeas/{id}/                - Get CAEA detail\n \
+        \   POST   /api/v1/facturacion/caeas/solicitar/           - Request new CAEA\n    POST   /api/v1/facturacion/caeas/{id}/sin-movimiento/\
+        \ - Report no movement"
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - facturacion
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CAEARead'
+          description: ''
+  /api/v1/facturacion/caeas/{id}/sin-movimiento/:
+    post:
+      operationId: facturacion_caeas_sin_movimiento_create
+      description: "\n        Declare that no comprobantes were issued during this CAEA period.\n\n        Must be called\
+        \ before the CAEA reporting deadline (fch_tope_inf).\n        Updates the CAEA status to REPORTED_NO_MOVEMENT.\n\n\
+        \        **Possible outcomes:**\n        - **200**: No-movement report accepted.\n        - **400**: CAEA not in ACTIVE\
+        \ status.\n        - **502**: ARCA service error.\n        "
+      summary: Report no movement for a CAEA period
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - facturacion-caea
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CAEARead'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacturacionError'
+          description: ARCA service error
+  /api/v1/facturacion/comprobantes/:
+    get:
+      operationId: facturacion_comprobantes_list
+      description: "\n    List electronic comprobantes with cursor pagination and filtering.\n\n    **Immutability:** Authorized\
+        \ comprobantes (AUTORIZADO, OBSERVADO) cannot\n    be modified or deleted. They are fiscal records.\n\n    **Filters:**\n\
+        \    - cbte_tipo: Filter by CbteTipo code\n    - punto_venta: Filter by punto de venta ID\n    - status: Filter by\
+        \ status (BORRADOR, VALIDANDO, AUTORIZADO, RECHAZADO, OBSERVADO)\n    - fecha_from: Filter by fecha >= date\n    -\
+        \ fecha_to: Filter by fecha <= date\n    "
+      summary: List comprobantes
+      parameters:
+      - in: query
+        name: cbte_tipo
+        schema:
+          type: integer
+        description: Filter by CbteTipo code (e.g. 1=Factura A, 6=Factura B)
+      - in: query
+        name: cursor
+        schema:
+          type: string
+        description: Pagination cursor
+      - in: query
+        name: fecha_from
+        schema:
+          type: string
+          format: date
+        description: Comprobante date >= this date (YYYY-MM-DD)
+      - in: query
+        name: fecha_to
+        schema:
+          type: string
+          format: date
+        description: Comprobante date <= this date (YYYY-MM-DD)
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      - in: query
+        name: punto_venta
+        schema:
+          type: string
+          format: uuid
+        description: Filter by punto de venta ID
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - AUTORIZADO
+          - BORRADOR
+          - OBSERVADO
+          - RECHAZADO
+          - VALIDANDO
+        description: Filter by comprobante status
+      tags:
+      - facturacion-comprobantes
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaginatedComprobanteListList'
+          description: ''
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/facturacion/comprobantes/emitir/:
+    post:
+      operationId: facturacion_comprobantes_emitir_create
+      description: "\n        Create and authorize a comprobante via ARCA (FECAESolicitar).\n\n        **Flow:**\n       \
+        \ 1. Validate input data.\n        2. Authenticate via WSAA (cached).\n        3. Allocate next CbteNro (FECompUltimoAutorizado).\n\
+        \        4. Submit to ARCA for CAE authorization.\n        5. Return the authorized comprobante.\n\n        **Possible\
+        \ outcomes:**\n        - **201**: Comprobante authorized (AUTORIZADO) or observed (OBSERVADO).\n        - **400**:\
+        \ Input validation errors.\n        - **422**: ARCA rejected the comprobante (RECHAZADO). Includes\n          observations\
+        \ and error details from ARCA.\n        - **502**: ARCA service unavailable or authentication failure.\n        "
+      summary: Issue a new comprobante
+      tags:
+      - facturacion-comprobantes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComprobanteEmitirRequest'
+            examples:
+              FacturaB-Producto:
+                value:
+                  punto_venta: a1b2c3d4-...
+                  cbte_tipo: 6
+                  concepto: 1
+                  doc_tipo: 80
+                  doc_nro: '20345678901'
+                  cbte_fch: '2026-02-10'
+                  imp_total: '1210.00'
+                  imp_neto: '1000.00'
+                  imp_iva: '210.00'
+                  imp_trib: '0.00'
+                  imp_op_ex: '0.00'
+                  imp_tot_conc: '0.00'
+                  emitter_condicion_iva: 1
+                  receptor_condicion_iva: 5
+                  alic_iva:
+                  - iva_id: 5
+                    base_imp: '1000.00'
+                    importe: '210.00'
+                summary: Factura B - Producto
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ComprobanteEmitirRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ComprobanteEmitirRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComprobanteRead'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacturacionError'
+          description: Comprobante rejected by ARCA
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacturacionError'
+          description: ARCA service error
+  /api/v1/facturacion/comprobantes/{id}/:
+    get:
+      operationId: facturacion_comprobantes_retrieve
+      description: "\n    Retrieve comprobante with nested AlicIva, Tributo, and CbteAsoc entries.\n\n    Includes CAE/CAEA\
+        \ authorization data and fiscal QR code URL if authorized.\n    "
+      summary: Get comprobante details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - facturacion-comprobantes
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComprobanteRead'
+          description: ''
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/facturacion/comprobantes/{id}/authorize/:
+    post:
+      operationId: facturacion_comprobantes_authorize_create
+      description: "\n        Submit an existing DRAFT comprobante to ARCA for CAE authorization.\n\n        Used for comprobantes\
+        \ created from the sale confirmation flow\n        (or any other flow that creates DRAFT comprobantes).\n\n      \
+        \  **Flow:**\n        1. Validate comprobante is in DRAFT status.\n        2. Authenticate via WSAA (cached).\n  \
+        \      3. Allocate next CbteNro (FECompUltimoAutorizado).\n        4. Submit to ARCA for CAE authorization.\n    \
+        \    5. Return the authorized comprobante.\n        "
+      summary: Authorize an existing DRAFT comprobante
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - facturacion-comprobantes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComprobanteReadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ComprobanteReadRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ComprobanteReadRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComprobanteRead'
+          description: ''
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/conflict
+                title: Conflict
+                status: 409
+                detail: The request conflicts with the current state of the resource
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacturacionError'
+          description: Comprobante rejected by ARCA
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacturacionError'
+          description: ARCA service error
+  /api/v1/facturacion/comprobantes/{id}/qr/:
+    get:
+      operationId: facturacion_comprobantes_qr_retrieve
+      description: "\n        Return the fiscal QR code URL for an authorized comprobante.\n\n        The QR URL points to\
+        \ ARCA's verification endpoint with a base64url-encoded\n        JSON payload containing all required fiscal data\
+        \ per RG 4291.\n\n        Only available for comprobantes with status AUTORIZADO or OBSERVADO.\n        "
+      summary: Get fiscal QR code URL
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - facturacion-comprobantes
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  qr_url:
+                    type: string
+                    format: uri
+                    description: ARCA fiscal verification URL for QR rendering
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/facturacion/credentials/:
+    get:
+      operationId: facturacion_credentials_list
+      description: "\n    List ARCA (ex-AFIP) credentials with cursor pagination.\n\n    **Security:** Private keys and certificate\
+        \ PEM content are never\n    returned in list responses — only metadata and expiry information.\n    "
+      summary: List ARCA credentials
+      parameters:
+      - in: query
+        name: cursor
+        schema:
+          type: string
+        description: Pagination cursor
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+        description: Filter by active status
+      - in: query
+        name: is_production
+        schema:
+          type: boolean
+        description: Filter by environment (true=production, false=homologacion)
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      tags:
+      - facturacion-credentials
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaginatedARCACredentialListList'
+          description: ''
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    post:
+      operationId: facturacion_credentials_create
+      description: "\n    Register a new ARCA credential with certificate and private key.\n\n    **Security:**\n    - Private\
+        \ key is encrypted at rest using AES-256-GCM.\n    - Certificate is stored as PEM for WSAA authentication.\n    -\
+        \ Only one active credential per environment per tenant is recommended.\n    "
+      summary: Create ARCA credential
+      tags:
+      - facturacion-credentials
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ARCACredentialWriteRequest'
+            examples:
+              HomologacionCredential:
+                value:
+                  cuit: '20123456789'
+                  certificate_pem: '-----BEGIN CERTIFICATE-----
+
+                    ...
+
+                    -----END CERTIFICATE-----'
+                  private_key_pem: '-----BEGIN RSA PRIVATE KEY-----
+
+                    ...
+
+                    -----END RSA PRIVATE KEY-----'
+                  is_production: false
+                summary: Homologacion Credential
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ARCACredentialWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ARCACredentialWriteRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ARCACredentialRead'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/facturacion/credentials/{id}/:
+    get:
+      operationId: facturacion_credentials_retrieve
+      description: Retrieve credential metadata. Private key is never returned.
+      summary: Get ARCA credential details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - facturacion-credentials
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ARCACredentialRead'
+          description: ''
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    put:
+      operationId: facturacion_credentials_update
+      description: "\n    Update credential for certificate rotation.\n\n    **Use case:** Rotate certificates before expiration.\n\
+        \    Supply new certificate_pem and private_key_pem.\n    "
+      summary: Update ARCA credential
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - facturacion-credentials
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ARCACredentialWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ARCACredentialWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ARCACredentialWriteRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ARCACredentialRead'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    patch:
+      operationId: facturacion_credentials_partial_update
+      description: Partially update credential fields (e.g. certificate rotation).
+      summary: Partial update ARCA credential
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - facturacion-credentials
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedARCACredentialWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedARCACredentialWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedARCACredentialWriteRequest'
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ARCACredentialRead'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    delete:
+      operationId: facturacion_credentials_destroy
+      description: "\n    Soft-deactivate credential by setting is_active=False.\n\n    **Warning:** Deactivating a credential\
+        \ will prevent WSAA authentication\n    for this environment until a new credential is activated.\n    "
+      summary: Deactivate ARCA credential
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - facturacion-credentials
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/facturacion/puntos-de-venta/:
+    get:
+      operationId: facturacion_puntos_de_venta_list
+      description: "\n    List puntos de venta (points of sale) with cursor pagination.\n\n    **Filters:**\n    - numero:\
+        \ Filter by punto de venta number\n    - tipo: Filter by type (CAE or CAEA)\n    - is_active: Filter by active status\n\
+        \    "
+      summary: List puntos de venta
+      parameters:
+      - in: query
+        name: cursor
+        schema:
+          type: string
+        description: Pagination cursor
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+        description: Filter by active status
+      - in: query
+        name: numero
+        schema:
+          type: integer
+        description: Filter by punto de venta number
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      - in: query
+        name: tipo
+        schema:
+          type: string
+          enum:
+          - CAE
+          - CAEA
+        description: Filter by type
+      tags:
+      - facturacion-puntos-de-venta
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaginatedPuntoDeVentaListList'
+          description: ''
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    post:
+      operationId: facturacion_puntos_de_venta_create
+      description: "\n    Register a new punto de venta (point of sale).\n\n    **Constraints:**\n    - Number must be between\
+        \ 1 and 99999.\n    - Number must be unique per tenant.\n    - Type determines CAE vs CAEA authorization mode.\n \
+        \   "
+      summary: Create punto de venta
+      tags:
+      - facturacion-puntos-de-venta
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PuntoDeVentaRequest'
+            examples:
+              CAEPuntoDeVenta:
+                value:
+                  numero: 1
+                  tipo: CAE
+                  descripcion: Punto de venta principal
+                summary: CAE Punto de Venta
+              CAEAPuntoDeVenta:
+                value:
+                  numero: 2
+                  tipo: CAEA
+                  descripcion: Punto de venta offline
+                summary: CAEA Punto de Venta
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PuntoDeVentaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PuntoDeVentaRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuntoDeVenta'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/facturacion/puntos-de-venta/{id}/:
+    get:
+      operationId: facturacion_puntos_de_venta_retrieve
+      description: Retrieve punto de venta details.
+      summary: Get punto de venta details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - facturacion-puntos-de-venta
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuntoDeVenta'
+          description: ''
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    put:
+      operationId: facturacion_puntos_de_venta_update
+      description: Update punto de venta description or active status.
+      summary: Update punto de venta
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - facturacion-puntos-de-venta
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PuntoDeVentaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PuntoDeVentaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PuntoDeVentaRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuntoDeVenta'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    patch:
+      operationId: facturacion_puntos_de_venta_partial_update
+      description: Partially update punto de venta fields.
+      summary: Partial update punto de venta
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - facturacion-puntos-de-venta
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPuntoDeVentaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPuntoDeVentaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPuntoDeVentaRequest'
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuntoDeVenta'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    delete:
+      operationId: facturacion_puntos_de_venta_destroy
+      description: Soft-deactivate punto de venta by setting is_active=False.
+      summary: Deactivate punto de venta
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - facturacion-puntos-de-venta
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/token/ endpoint. Include tenant_id in token payload.
+  schemas:
+    ARCACredentialRead:
+      type: object
+      description: 'ARCACredential serializer for read operations.
+
+
+        Redacts private_key_pem — never exposes secrets over the API.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        cuit_holder:
+          type: string
+          readOnly: true
+          description: Certificate holder CUIT (11 digits, no hyphens)
+        cuit_represented:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+          description: Represented company CUIT (delegation model)
+        is_production:
+          type: boolean
+          readOnly: true
+          description: True=production, False=homologacion
+        is_active:
+          type: boolean
+          readOnly: true
+          description: Soft-disable without deletion
+        certificate_expires_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          readOnly: true
+          description: Certificate expiration (for system check warnings)
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - certificate_expires_at
+      - created_at
+      - cuit_holder
+      - cuit_represented
+      - id
+      - is_active
+      - is_production
+      - updated_at
+    ARCACredentialWriteRequest:
+      type: object
+      description: 'ARCACredential serializer for create/update operations.
+
+
+        Validates PEM format, CUIT check digit, and environment
+
+        uniqueness per tenant.'
+      properties:
+        cuit_holder:
+          type: string
+          minLength: 1
+          description: Certificate holder CUIT (11 digits, no hyphens)
+          maxLength: 11
+        cuit_represented:
+          type:
+          - string
+          - 'null'
+          description: Represented company CUIT (delegation model)
+        certificate_pem:
+          type: string
+          minLength: 1
+          description: X.509 certificate in PEM format
+        private_key_pem:
+          type: string
+          minLength: 1
+          description: RSA private key (AES-256-GCM encrypted at rest)
+        is_production:
+          type: boolean
+          description: True=production, False=homologacion
+      required:
+      - certificate_pem
+      - cuit_holder
+      - private_key_pem
+    AlicIvaEmitRequest:
+      type: object
+      description: Nested writable serializer for IVA rate breakdown entries.
+      properties:
+        iva_id:
+          enum:
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+          - 6
+          - 8
+          - 9
+          type: integer
+          x-spec-enum-id: ef1f4484bfcc3f9f
+          description: 'ARCA IVA code (3=0%, 4=10.5%, 5=21%, 6=27%, 8=5%, 9=2.5%)
+
+
+            * `1` - No Gravado
+
+            * `2` - Exento
+
+            * `3` - 0%
+
+            * `4` - 10.5%
+
+            * `5` - 21%
+
+            * `6` - 27%
+
+            * `8` - 5%
+
+            * `9` - 2.5%'
+        base_imp:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Taxable base amount
+        importe:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: IVA amount
+      required:
+      - base_imp
+      - importe
+      - iva_id
+    AlicIvaRead:
+      type: object
+      description: Read-only serializer for IVA rate breakdown entries.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        iva_id:
+          type: integer
+          readOnly: true
+          description: ARCA IVA code (3=0%, 4=10.5%, 5=21%, 6=27%, 8=5%, 9=2.5%)
+        base_imp:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          readOnly: true
+          description: Taxable base amount
+        importe:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          readOnly: true
+          description: IVA amount
+      required:
+      - base_imp
+      - id
+      - importe
+      - iva_id
+    CAEARead:
+      type: object
+      description: Read-only serializer for CAEA objects.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        punto_venta:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Associated punto de venta
+        punto_venta_numero:
+          type: integer
+          readOnly: true
+        caea_code:
+          type: string
+          readOnly: true
+          description: 14-digit CAEA from ARCA
+        periodo:
+          type: string
+          readOnly: true
+          description: Period YYYYMM
+        orden:
+          type: integer
+          readOnly: true
+          description: 1=first quincena, 2=second
+        fch_vig_desde:
+          type: string
+          format: date
+          readOnly: true
+          description: Validity start date
+        fch_vig_hasta:
+          type: string
+          format: date
+          readOnly: true
+          description: Validity end date
+        fch_tope_inf:
+          type: string
+          format: date
+          readOnly: true
+          description: Reporting deadline
+        status:
+          enum:
+          - ACTIVE
+          - REPORTED
+          - REPORTED_NO_MOVEMENT
+          - EXPIRED
+          type: string
+          x-spec-enum-id: 92bfd34629f0de54
+          readOnly: true
+          description: 'CAEA lifecycle status
+
+
+            * `ACTIVE` - Activo
+
+            * `REPORTED` - Informado
+
+            * `REPORTED_NO_MOVEMENT` - Sin movimiento informado
+
+            * `EXPIRED` - Vencido'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - caea_code
+      - created_at
+      - fch_tope_inf
+      - fch_vig_desde
+      - fch_vig_hasta
+      - id
+      - orden
+      - periodo
+      - punto_venta
+      - punto_venta_numero
+      - status
+    CAEASolicitarRequest:
+      type: object
+      description: Write serializer for requesting a new CAEA from ARCA.
+      properties:
+        punto_venta:
+          type: string
+          format: uuid
+          description: UUID of the PuntoDeVenta to request CAEA for.
+        periodo:
+          type: string
+          minLength: 1
+          description: Period in YYYYMM format (e.g. '202602').
+          pattern: ^\d{6}$
+        orden:
+          enum:
+          - 1
+          - 2
+          type: integer
+          x-spec-enum-id: bab8dbc6f38f8916
+          description: '1 = first quincena, 2 = second quincena.
+
+
+            * `1` - Primera quincena
+
+            * `2` - Segunda quincena'
+      required:
+      - orden
+      - periodo
+      - punto_venta
+    CbteAsocEmitRequest:
+      type: object
+      description: Nested writable serializer for associated comprobante references.
+      properties:
+        tipo:
+          enum:
+          - 1
+          - 2
+          - 3
+          - 6
+          - 7
+          - 8
+          - 11
+          - 12
+          - 13
+          - 51
+          - 52
+          - 53
+          type: integer
+          x-spec-enum-id: 4a0ecf299727e908
+          description: 'Associated CbteTipo code
+
+
+            * `1` - Factura A
+
+            * `2` - Nota de Débito A
+
+            * `3` - Nota de Crédito A
+
+            * `6` - Factura B
+
+            * `7` - Nota de Débito B
+
+            * `8` - Nota de Crédito B
+
+            * `11` - Factura C
+
+            * `12` - Nota de Débito C
+
+            * `13` - Nota de Crédito C
+
+            * `51` - Factura M
+
+            * `52` - Nota de Débito M
+
+            * `53` - Nota de Crédito M'
+        pto_vta:
+          type: integer
+          maximum: 99999
+          minimum: 1
+          description: Associated punto de venta number
+        nro:
+          type: integer
+          minimum: 1
+          description: Associated comprobante number
+        cuit:
+          type: string
+          minLength: 1
+          description: Associated CUIT (defaults to emitter CUIT)
+          maxLength: 11
+      required:
+      - nro
+      - pto_vta
+      - tipo
+    CbteAsocRead:
+      type: object
+      description: Read-only serializer for associated comprobante references.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        tipo:
+          type: integer
+          readOnly: true
+          description: Associated CbteTipo code
+        pto_vta:
+          type: integer
+          readOnly: true
+          description: Associated PtoVta number
+        nro:
+          type: integer
+          readOnly: true
+          description: Associated CbteNro
+        cuit:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+          description: Associated emitter CUIT (optional)
+      required:
+      - cuit
+      - id
+      - nro
+      - pto_vta
+      - tipo
+    ComprobanteEmitirRequest:
+      type: object
+      description: 'Serializer for CAE invoice issuance (FECAESolicitar).
+
+
+        Accepts comprobante data with nested AlicIva, Tributo, and CbteAsoc
+
+        entries. Runs all ARCA validators (amounts, IVA breakdown, service
+
+        dates, tributos, CbtesAsoc type compatibility) in the validate() method.
+
+
+        This is a plain Serializer (not ModelSerializer) because the service
+
+        layer handles Comprobante creation after ARCA authorization.'
+      properties:
+        punto_venta:
+          type: string
+          format: uuid
+          description: UUID of the PuntoDeVenta to issue against
+        cbte_tipo:
+          enum:
+          - 1
+          - 2
+          - 3
+          - 6
+          - 7
+          - 8
+          - 11
+          - 12
+          - 13
+          - 51
+          - 52
+          - 53
+          type: integer
+          x-spec-enum-id: 4a0ecf299727e908
+          description: 'CbteTipo code
+
+
+            * `1` - Factura A
+
+            * `2` - Nota de Débito A
+
+            * `3` - Nota de Crédito A
+
+            * `6` - Factura B
+
+            * `7` - Nota de Débito B
+
+            * `8` - Nota de Crédito B
+
+            * `11` - Factura C
+
+            * `12` - Nota de Débito C
+
+            * `13` - Nota de Crédito C
+
+            * `51` - Factura M
+
+            * `52` - Nota de Débito M
+
+            * `53` - Nota de Crédito M'
+        concepto:
+          enum:
+          - 1
+          - 2
+          - 3
+          type: integer
+          x-spec-enum-id: b43c52857d81dac2
+          description: '1=Productos, 2=Servicios, 3=Ambos
+
+
+            * `1` - Productos
+
+            * `2` - Servicios
+
+            * `3` - Productos y Servicios'
+        doc_tipo:
+          enum:
+          - 80
+          - 86
+          - 87
+          - 89
+          - 90
+          - 91
+          - 92
+          - 93
+          - 95
+          - 96
+          - 94
+          - 99
+          - 0
+          type: integer
+          x-spec-enum-id: 9c68951ebcb09fce
+          description: 'Buyer document type code
+
+
+            * `80` - CUIT
+
+            * `86` - CUIL
+
+            * `87` - CDI
+
+            * `89` - Libreta de Enrolamiento
+
+            * `90` - Libreta Cívica
+
+            * `91` - CI Extranjera
+
+            * `92` - En trámite
+
+            * `93` - Acta de Nacimiento
+
+            * `95` - CI Buenos Aires
+
+            * `96` - DNI
+
+            * `94` - Pasaporte
+
+            * `99` - Doc. (Otro) / Sin identificar
+
+            * `0` - CI Policía Federal'
+        doc_nro:
+          type: string
+          minLength: 1
+          description: Buyer document number
+          maxLength: 20
+        cbte_fch:
+          type: string
+          format: date
+          description: Invoice date (YYYY-MM-DD)
+        fch_serv_desde:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Service start date (required for Concepto 2,3)
+        fch_serv_hasta:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Service end date (required for Concepto 2,3)
+        fch_vto_pago:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Payment due date (required for Concepto 2,3)
+        imp_total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Total amount
+        imp_neto:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Net taxable amount
+        imp_iva:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          default: '0.000'
+          description: Total IVA amount
+        imp_trib:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          default: '0.000'
+          description: Other taxes total
+        imp_op_ex:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          default: '0.000'
+          description: IVA-exempt amount
+        imp_tot_conc:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          default: '0.000'
+          description: Non-taxable conceptual amount
+        mon_id:
+          type: string
+          minLength: 1
+          default: PES
+          description: Currency code (PES=ARS)
+          maxLength: 3
+        mon_cotiz:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,6})?$
+          default: '1.000000'
+          description: Exchange rate
+        emitter_condicion_iva:
+          enum:
+          - 1
+          - 4
+          - 5
+          - 6
+          - 7
+          - 8
+          - 9
+          - 10
+          - 13
+          type: integer
+          x-spec-enum-id: 10af7b39e6e0a5cc
+          description: 'Emitter IVA condition code
+
+
+            * `1` - IVA Responsable Inscripto
+
+            * `4` - IVA Sujeto Exento
+
+            * `5` - Consumidor Final
+
+            * `6` - Responsable Monotributo
+
+            * `7` - Sujeto No Categorizado
+
+            * `8` - Proveedor del Exterior
+
+            * `9` - Cliente del Exterior
+
+            * `10` - IVA Liberado – Ley Nº 19.640
+
+            * `13` - Monotributista Social'
+        receptor_condicion_iva:
+          enum:
+          - 1
+          - 4
+          - 5
+          - 6
+          - 7
+          - 8
+          - 9
+          - 10
+          - 13
+          type: integer
+          x-spec-enum-id: 10af7b39e6e0a5cc
+          description: 'Buyer IVA condition code
+
+
+            * `1` - IVA Responsable Inscripto
+
+            * `4` - IVA Sujeto Exento
+
+            * `5` - Consumidor Final
+
+            * `6` - Responsable Monotributo
+
+            * `7` - Sujeto No Categorizado
+
+            * `8` - Proveedor del Exterior
+
+            * `9` - Cliente del Exterior
+
+            * `10` - IVA Liberado – Ley Nº 19.640
+
+            * `13` - Monotributista Social'
+        alic_iva:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlicIvaEmitRequest'
+          description: IVA rate breakdown entries
+        tributos:
+          type: array
+          items:
+            $ref: '#/components/schemas/TributoEmitRequest'
+          description: Other tax entries
+        cbtes_asoc:
+          type: array
+          items:
+            $ref: '#/components/schemas/CbteAsocEmitRequest'
+          description: Associated comprobante references (NC/ND)
+      required:
+      - cbte_fch
+      - cbte_tipo
+      - concepto
+      - doc_nro
+      - doc_tipo
+      - emitter_condicion_iva
+      - imp_neto
+      - imp_total
+      - punto_venta
+      - receptor_condicion_iva
+    ComprobanteRead:
+      type: object
+      description: 'Comprobante serializer for read operations.
+
+
+        Includes nested AlicIva, Tributo, and CbteAsoc entries.
+
+        Exposes a computed qr_url for authorized comprobantes.
+
+        Formats amounts to 2 decimal places for display.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        punto_venta:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Associated punto de venta
+        punto_venta_numero:
+          type: integer
+          readOnly: true
+        cbte_tipo:
+          type: integer
+          readOnly: true
+          description: CbteTipo code (1,2,3,6,7,8,11,12,13,51,52,53)
+        cbte_nro:
+          type: integer
+          readOnly: true
+          description: Sequential number per PtoVta+CbteTipo
+        concepto:
+          type: integer
+          readOnly: true
+          description: 1=Productos, 2=Servicios, 3=Ambos
+        doc_tipo:
+          type: integer
+          readOnly: true
+          description: Buyer document type (DocTipo code)
+        doc_nro:
+          type: string
+          readOnly: true
+          description: Buyer document number
+        cbte_fch:
+          type: string
+          format: date
+          readOnly: true
+          description: Invoice date
+        fch_serv_desde:
+          type:
+          - string
+          - 'null'
+          format: date
+          readOnly: true
+          description: Service start date (Concepto 2,3)
+        fch_serv_hasta:
+          type:
+          - string
+          - 'null'
+          format: date
+          readOnly: true
+          description: Service end date (Concepto 2,3)
+        fch_vto_pago:
+          type:
+          - string
+          - 'null'
+          format: date
+          readOnly: true
+          description: Payment due date (Concepto 2,3)
+        imp_total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,15}(?:\.\d{0,2})?$
+        imp_neto:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,15}(?:\.\d{0,2})?$
+        imp_iva:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,15}(?:\.\d{0,2})?$
+        imp_trib:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,15}(?:\.\d{0,2})?$
+        imp_op_ex:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,15}(?:\.\d{0,2})?$
+        imp_tot_conc:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,15}(?:\.\d{0,2})?$
+        mon_id:
+          type: string
+          readOnly: true
+          description: Currency code (PES=ARS)
+        mon_cotiz:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,6})?$
+          readOnly: true
+          description: Exchange rate
+        emitter_cuit:
+          type: string
+          readOnly: true
+          description: Emitter CUIT (11 digits)
+        emitter_condicion_iva:
+          type: integer
+          readOnly: true
+          description: Emitter CondicionIVA code
+        receptor_condicion_iva:
+          type: integer
+          readOnly: true
+          description: Buyer CondicionIVA code
+        cae:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+          description: 14-digit CAE from ARCA
+        cae_fch_vto:
+          type:
+          - string
+          - 'null'
+          format: date
+          readOnly: true
+          description: CAE expiration date
+        caea:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          readOnly: true
+          description: CAEA reference (offline mode)
+        status:
+          enum:
+          - DRAFT
+          - VALIDANDO
+          - AUTORIZADO
+          - OBSERVADO
+          - RECHAZADO
+          type: string
+          x-spec-enum-id: 72689616f374cb97
+          readOnly: true
+          description: 'Comprobante lifecycle status
+
+
+            * `DRAFT` - Borrador
+
+            * `VALIDANDO` - Validando con ARCA
+
+            * `AUTORIZADO` - Autorizado (CAE otorgado)
+
+            * `OBSERVADO` - Observado (CAE con advertencias)
+
+            * `RECHAZADO` - Rechazado por ARCA'
+        arca_errors:
+          oneOf:
+          - {}
+          - type: 'null'
+          readOnly: true
+          description: ARCA error/observation details
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        sale_order_id:
+          type: string
+          format: uuid
+          readOnly: true
+        customer_name:
+          type: string
+          readOnly: true
+        qr_url:
+          type:
+          - string
+          - 'null'
+          description: Return QR URL for authorized comprobantes only.
+          readOnly: true
+        aliciva_set:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlicIvaRead'
+          readOnly: true
+        tributo_set:
+          type: array
+          items:
+            $ref: '#/components/schemas/TributoRead'
+          readOnly: true
+        cbteasoc_set:
+          type: array
+          items:
+            $ref: '#/components/schemas/CbteAsocRead'
+          readOnly: true
+      required:
+      - aliciva_set
+      - arca_errors
+      - cae
+      - cae_fch_vto
+      - caea
+      - cbte_fch
+      - cbte_nro
+      - cbte_tipo
+      - cbteasoc_set
+      - concepto
+      - created_at
+      - customer_name
+      - doc_nro
+      - doc_tipo
+      - emitter_condicion_iva
+      - emitter_cuit
+      - fch_serv_desde
+      - fch_serv_hasta
+      - fch_vto_pago
+      - id
+      - imp_iva
+      - imp_neto
+      - imp_op_ex
+      - imp_tot_conc
+      - imp_total
+      - imp_trib
+      - mon_cotiz
+      - mon_id
+      - punto_venta
+      - punto_venta_numero
+      - qr_url
+      - receptor_condicion_iva
+      - sale_order_id
+      - status
+      - tributo_set
+    ComprobanteReadRequest:
+      type: object
+      description: 'Comprobante serializer for read operations.
+
+
+        Includes nested AlicIva, Tributo, and CbteAsoc entries.
+
+        Exposes a computed qr_url for authorized comprobantes.
+
+        Formats amounts to 2 decimal places for display.'
+      properties:
+        imp_total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,15}(?:\.\d{0,2})?$
+        imp_neto:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,15}(?:\.\d{0,2})?$
+        imp_iva:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,15}(?:\.\d{0,2})?$
+        imp_trib:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,15}(?:\.\d{0,2})?$
+        imp_op_ex:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,15}(?:\.\d{0,2})?$
+        imp_tot_conc:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,15}(?:\.\d{0,2})?$
+      required:
+      - imp_iva
+      - imp_neto
+      - imp_op_ex
+      - imp_tot_conc
+      - imp_total
+      - imp_trib
+    FacturacionError:
+      type: object
+      description: RFC 7807 Problem Details for HTTP APIs error response (facturacion-specific).
+      properties:
+        type:
+          type: string
+          default: about:blank
+          description: URI reference identifying the problem type
+        title:
+          type: string
+          description: Short, human-readable summary
+        status:
+          type: integer
+          description: HTTP status code
+        detail:
+          type: string
+          description: Human-readable explanation
+        instance:
+          type: string
+          description: URI reference identifying specific occurrence
+      required:
+      - status
+      - title
+    FieldError:
+      type: object
+      required:
+      - field
+      - message
+      - code
+      properties:
+        field:
+          type: string
+          description: Field name that caused the error
+          example: email
+        message:
+          type: string
+          description: Human-readable error message
+          example: Enter a valid email address.
+        code:
+          type: string
+          description: Machine-readable error code
+          example: invalid
+      description: Field-level validation error details
+    PaginatedARCACredentialList:
+      type: object
+      properties:
+        next:
+          type:
+          - string
+          - 'null'
+          format: uri
+        previous:
+          type:
+          - string
+          - 'null'
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ARCACredentialRead'
+      required:
+      - next
+      - previous
+      - results
+    PaginatedCAEAReadList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CAEARead'
+    PaginatedComprobanteList:
+      type: object
+      properties:
+        next:
+          type:
+          - string
+          - 'null'
+          format: uri
+        previous:
+          type:
+          - string
+          - 'null'
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComprobanteRead'
+      required:
+      - next
+      - previous
+      - results
+    PaginatedPaginatedARCACredentialListList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaginatedARCACredentialList'
+    PaginatedPaginatedComprobanteListList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaginatedComprobanteList'
+    PaginatedPaginatedPuntoDeVentaListList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaginatedPuntoDeVentaList'
+    PaginatedPuntoDeVentaList:
+      type: object
+      properties:
+        next:
+          type:
+          - string
+          - 'null'
+          format: uri
+        previous:
+          type:
+          - string
+          - 'null'
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PuntoDeVenta'
+      required:
+      - next
+      - previous
+      - results
+    PatchedARCACredentialWriteRequest:
+      type: object
+      description: 'ARCACredential serializer for create/update operations.
+
+
+        Validates PEM format, CUIT check digit, and environment
+
+        uniqueness per tenant.'
+      properties:
+        cuit_holder:
+          type: string
+          minLength: 1
+          description: Certificate holder CUIT (11 digits, no hyphens)
+          maxLength: 11
+        cuit_represented:
+          type:
+          - string
+          - 'null'
+          description: Represented company CUIT (delegation model)
+        certificate_pem:
+          type: string
+          minLength: 1
+          description: X.509 certificate in PEM format
+        private_key_pem:
+          type: string
+          minLength: 1
+          description: RSA private key (AES-256-GCM encrypted at rest)
+        is_production:
+          type: boolean
+          description: True=production, False=homologacion
+    PatchedPuntoDeVentaRequest:
+      type: object
+      description: 'PuntoDeVenta serializer for read and write operations.
+
+
+        Validates numero uniqueness within tenant and injects tenant
+
+        from request context on create.'
+      properties:
+        numero:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Punto de venta number (1-99999)
+        tipo:
+          enum:
+          - electronic
+          - manual
+          type: string
+          x-spec-enum-id: 39c7b30ce92318cb
+          description: 'Emission type
+
+
+            * `electronic` - Electrónico
+
+            * `manual` - Manual'
+        description:
+          type: string
+          description: Human-readable label
+          maxLength: 100
+        is_active:
+          type: boolean
+          description: Active flag
+        fecha_alta:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: ARCA registration date
+    ProblemDetail:
+      type: object
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - trace_id
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI identifying the error type category
+          example: https://api.gravitea.com/errors/not-found
+        title:
+          type: string
+          description: Human-readable error title
+          example: Not Found
+        status:
+          type: integer
+          description: HTTP status code
+          example: 404
+        detail:
+          type: string
+          description: Detailed explanation of the error
+          example: The requested resource was not found
+        trace_id:
+          type: string
+          format: uuid
+          description: Unique request identifier for log correlation
+          example: 550e8400-e29b-41d4-a716-446655440000
+      description: RFC 7807 Problem Details for HTTP APIs
+    PuntoDeVenta:
+      type: object
+      description: 'PuntoDeVenta serializer for read and write operations.
+
+
+        Validates numero uniqueness within tenant and injects tenant
+
+        from request context on create.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        numero:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Punto de venta number (1-99999)
+        tipo:
+          enum:
+          - electronic
+          - manual
+          type: string
+          x-spec-enum-id: 39c7b30ce92318cb
+          description: 'Emission type
+
+
+            * `electronic` - Electrónico
+
+            * `manual` - Manual'
+        description:
+          type: string
+          description: Human-readable label
+          maxLength: 100
+        is_active:
+          type: boolean
+          description: Active flag
+        fecha_alta:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: ARCA registration date
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - numero
+      - updated_at
+    PuntoDeVentaRequest:
+      type: object
+      description: 'PuntoDeVenta serializer for read and write operations.
+
+
+        Validates numero uniqueness within tenant and injects tenant
+
+        from request context on create.'
+      properties:
+        numero:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Punto de venta number (1-99999)
+        tipo:
+          enum:
+          - electronic
+          - manual
+          type: string
+          x-spec-enum-id: 39c7b30ce92318cb
+          description: 'Emission type
+
+
+            * `electronic` - Electrónico
+
+            * `manual` - Manual'
+        description:
+          type: string
+          description: Human-readable label
+          maxLength: 100
+        is_active:
+          type: boolean
+          description: Active flag
+        fecha_alta:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: ARCA registration date
+      required:
+      - numero
+    RateLimitError:
+      type: object
+      description: 'RFC 7807 rate limit error with retry information.
+
+
+        Extended ProblemDetail for 429 Too Many Requests responses
+
+        that include retry timing information.'
+      properties:
+        type:
+          type: string
+          format: uri
+          default: about:blank
+          description: URI reference identifying the problem type category
+        title:
+          type: string
+          description: Short, human-readable error summary
+          maxLength: 100
+        status:
+          type: integer
+          maximum: 599
+          minimum: 400
+          description: HTTP status code (400-599)
+        detail:
+          type: string
+          description: Human-readable explanation of this specific error
+          maxLength: 500
+        trace_id:
+          type: string
+          format: uuid
+          description: UUID v4 for log correlation
+        instance:
+          type: string
+          format: uri
+          description: URI of the specific resource that caused the error
+        retry_after:
+          type: integer
+          description: Seconds until the next request attempt is allowed
+      required:
+      - detail
+      - retry_after
+      - status
+      - title
+      - trace_id
+    TributoEmitRequest:
+      type: object
+      description: Nested writable serializer for other tax entries.
+      properties:
+        tributo_id:
+          type: integer
+          minimum: 1
+          description: ARCA tributo code
+        desc:
+          type: string
+          minLength: 1
+          description: Tributo description
+          maxLength: 255
+        base_imp:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Taxable base amount
+        alic:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          description: Tax rate percentage
+        importe:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Tributo amount
+      required:
+      - alic
+      - base_imp
+      - desc
+      - importe
+      - tributo_id
+    TributoRead:
+      type: object
+      description: Read-only serializer for other tax entries.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        tributo_id:
+          type: integer
+          readOnly: true
+          description: ARCA tribute type code
+        desc:
+          type: string
+          readOnly: true
+          description: Tax description
+        base_imp:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          readOnly: true
+          description: Taxable base
+        alic:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          readOnly: true
+          description: Tax rate (%)
+        importe:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          readOnly: true
+          description: Tax amount
+      required:
+      - alic
+      - base_imp
+      - desc
+      - id
+      - importe
+      - tributo_id
+    ValidationError:
+      allOf:
+      - $ref: '#/components/schemas/ProblemDetail'
+      - type: object
+        properties:
+          errors:
+            type: array
+            items:
+              $ref: '#/components/schemas/FieldError'
+            description: Field-level validation error details
+            example:
+            - field: email
+              message: Enter a valid email address.
+              code: invalid
+            - field: username
+              message: This field is required.
+              code: required
+      description: Validation error response with field-level details

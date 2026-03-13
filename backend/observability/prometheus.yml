@@ -1,0 +1,48 @@
+# Prometheus Configuration for GRAVITEA-ERP
+# Part of 004-observability-metrics feature
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    environment: development
+    service: gravitea
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+rule_files:
+  - '/etc/prometheus/alerts/*.yml'
+
+scrape_configs:
+  # GRAVITEA Backend - Django application metrics
+  # Uses container name on default network
+  - job_name: 'gravitea-backend'
+    static_configs:
+      - targets: ['gravitea-web:8080']  # Container name on default network
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    honor_labels: true
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Alertmanager monitoring
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+
+  # Jaeger tracing backend
+  - job_name: 'jaeger'
+    static_configs:
+      - targets: ['jaeger:14269']
+
+  # Loki log aggregation
+  - job_name: 'loki'
+    static_configs:
+      - targets: ['loki:3100']

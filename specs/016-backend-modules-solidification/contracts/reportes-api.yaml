@@ -1,0 +1,355 @@
+openapi: 3.0.3
+info:
+  title: GRAVITEA-ERP Reportes API
+  description: Reporting infrastructure endpoints — report definitions, saved reports, export jobs
+  version: 1.0.0
+
+servers:
+  - url: /api/v1/reportes
+    description: Reportes module base URL
+
+paths:
+  /definitions/:
+    get:
+      operationId: listReportDefinitions
+      summary: List report definitions for current tenant
+      tags: [ReportDefinitions]
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - name: report_type
+          in: query
+          schema:
+            type: string
+            enum: [sales, stock, purchases, fiscal, accounting_export]
+        - name: is_active
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Paginated report definition list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedReportDefinitionList"
+    post:
+      operationId: createReportDefinition
+      summary: Create a report definition
+      tags: [ReportDefinitions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportDefinitionCreate"
+      responses:
+        "201":
+          description: Report definition created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportDefinition"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+
+  /definitions/{id}/:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
+    get:
+      operationId: getReportDefinition
+      summary: Retrieve a report definition
+      tags: [ReportDefinitions]
+      responses:
+        "200":
+          description: Report definition details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportDefinition"
+    put:
+      operationId: updateReportDefinition
+      summary: Full update of a report definition
+      tags: [ReportDefinitions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportDefinitionCreate"
+      responses:
+        "200":
+          description: Updated
+    patch:
+      operationId: partialUpdateReportDefinition
+      summary: Partial update of a report definition
+      tags: [ReportDefinitions]
+      responses:
+        "200":
+          description: Updated
+    delete:
+      operationId: deleteReportDefinition
+      summary: Delete a report definition
+      tags: [ReportDefinitions]
+      responses:
+        "204":
+          description: Deleted
+
+  /saved-reports/:
+    get:
+      operationId: listSavedReports
+      summary: List saved reports for current tenant
+      tags: [SavedReports]
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - name: report_definition_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, COMPLETED, FAILED]
+      responses:
+        "200":
+          description: Paginated saved report list
+    post:
+      operationId: createSavedReport
+      summary: Create a saved report reference
+      tags: [SavedReports]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SavedReportCreate"
+      responses:
+        "201":
+          description: Saved report created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavedReport"
+
+  /saved-reports/{id}/:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
+    get:
+      operationId: getSavedReport
+      summary: Retrieve a saved report
+      tags: [SavedReports]
+      responses:
+        "200":
+          description: Saved report details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavedReport"
+    delete:
+      operationId: deleteSavedReport
+      summary: Delete a saved report
+      tags: [SavedReports]
+      responses:
+        "204":
+          description: Deleted
+
+  /export-jobs/:
+    get:
+      operationId: listExportJobs
+      summary: List export jobs for current tenant
+      tags: [ExportJobs]
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, PROCESSING, COMPLETED, FAILED]
+      responses:
+        "200":
+          description: Paginated export job list
+    post:
+      operationId: createExportJob
+      summary: Create an export job
+      tags: [ExportJobs]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExportJobCreate"
+      responses:
+        "201":
+          description: Export job created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportJob"
+
+  /export-jobs/{id}/:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
+    get:
+      operationId: getExportJob
+      summary: Retrieve an export job
+      tags: [ExportJobs]
+      responses:
+        "200":
+          description: Export job details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportJob"
+
+components:
+  parameters:
+    ResourceId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CursorParam:
+      name: cursor
+      in: query
+      schema:
+        type: string
+
+  responses:
+    ValidationError:
+      description: Validation error (RFC 9457 Problem+JSON)
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+
+  schemas:
+    ProblemDetail:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+
+    ReportDefinitionCreate:
+      type: object
+      required: [name, report_type]
+      properties:
+        name:
+          type: string
+          maxLength: 200
+        report_type:
+          type: string
+          enum: [sales, stock, purchases, fiscal, accounting_export]
+        parameters:
+          type: object
+          default: {}
+        filters:
+          type: object
+          default: {}
+        output_format:
+          type: string
+          enum: [PDF, EXCEL, CSV]
+          default: CSV
+        is_active:
+          type: boolean
+          default: true
+
+    ReportDefinition:
+      allOf:
+        - $ref: "#/components/schemas/ReportDefinitionCreate"
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+
+    PaginatedReportDefinitionList:
+      type: object
+      properties:
+        next:
+          type: string
+          nullable: true
+        previous:
+          type: string
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReportDefinition"
+
+    SavedReportCreate:
+      type: object
+      required: [report_definition_id]
+      properties:
+        report_definition_id:
+          type: string
+          format: uuid
+        file_reference:
+          type: string
+          nullable: true
+        result_metadata:
+          type: object
+          default: {}
+        status:
+          type: string
+          enum: [PENDING, COMPLETED, FAILED]
+          default: PENDING
+
+    SavedReport:
+      allOf:
+        - $ref: "#/components/schemas/SavedReportCreate"
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            generated_at:
+              type: string
+              format: date-time
+
+    ExportJobCreate:
+      type: object
+      required: [saved_report_id, export_format]
+      properties:
+        saved_report_id:
+          type: string
+          format: uuid
+        export_format:
+          type: string
+          enum: [PDF, EXCEL, CSV]
+
+    ExportJob:
+      allOf:
+        - $ref: "#/components/schemas/ExportJobCreate"
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            status:
+              type: string
+              enum: [PENDING, PROCESSING, COMPLETED, FAILED]
+            file_path:
+              type: string
+              nullable: true
+            created_at:
+              type: string
+              format: date-time
+            completed_at:
+              type: string
+              format: date-time
+              nullable: true

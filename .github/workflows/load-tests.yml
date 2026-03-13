@@ -1,0 +1,206 @@
+# Load Testing CI Workflow
+# Runs load tests using Locust for performance validation
+# FR-024: System MUST handle 100 concurrent users with p95 latency < 500ms
+
+name: Load Tests
+
+on:
+  # Manual trigger for load tests
+  workflow_dispatch:
+    inputs:
+      users:
+        description: 'Number of concurrent users'
+        required: false
+        default: '100'
+      spawn_rate:
+        description: 'Users spawned per second'
+        required: false
+        default: '10'
+      run_time:
+        description: 'Test duration (e.g., 5m, 10m)'
+        required: false
+        default: '5m'
+      test_type:
+        description: 'Test type to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - baseline
+          - peak
+          - sustained
+
+  # Run on schedule (weekly performance baseline)
+  schedule:
+    - cron: '0 2 * * 0'  # Every Sunday at 2 AM
+
+  # Run on PR to main for critical paths
+  pull_request:
+    branches: [main]
+    paths:
+      - 'backend/apps/**'
+      - 'backend/gravitea/**'
+      - 'backend/tests/load/**'
+
+env:
+  PYTHON_VERSION: '3.12'
+  BACKEND_URL: http://localhost:8000
+
+jobs:
+  load-tests:
+    name: Run Load Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: gravitea_test
+          POSTGRES_PASSWORD: gravitea_test
+          POSTGRES_DB: gravitea_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/development.txt
+          pip install locust
+
+      - name: Set up environment
+        working-directory: backend
+        run: |
+          cp .env.example .env.test 2>/dev/null || echo "No .env.example found"
+          echo "DATABASE_URL=postgresql://gravitea_test:gravitea_test@localhost:5432/gravitea_test" >> .env.test
+          echo "REDIS_URL=redis://localhost:6379/0" >> .env.test
+
+      - name: Run database migrations
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: gravitea.settings.test
+        run: |
+          python manage.py migrate --no-input
+
+      - name: Start backend server
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: gravitea.settings.test
+        run: |
+          python manage.py runserver 0.0.0.0:8000 &
+          sleep 10
+          curl -f http://localhost:8000/health/live || exit 1
+
+      - name: Run load tests
+        working-directory: backend
+        run: |
+          USERS=${{ github.event.inputs.users || '100' }}
+          SPAWN_RATE=${{ github.event.inputs.spawn_rate || '10' }}
+          RUN_TIME=${{ github.event.inputs.run_time || '5m' }}
+          TEST_TYPE=${{ github.event.inputs.test_type || 'all' }}
+
+          echo "Running load tests: $USERS users, $SPAWN_RATE spawn rate, $RUN_TIME duration"
+
+          if [ -f "tests/load/locustfile.py" ]; then
+            locust \
+              -f tests/load/locustfile.py \
+              --headless \
+              --users $USERS \
+              --spawn-rate $SPAWN_RATE \
+              --run-time $RUN_TIME \
+              --host $BACKEND_URL \
+              --html=load-test-report.html \
+              --csv=load-test-results \
+              --only-summary
+          else
+            echo "No locustfile.py found, running marker-based tests"
+            pytest tests/ -v -m load --timeout=600 || true
+          fi
+
+      - name: Validate performance SLAs
+        working-directory: backend
+        run: |
+          if [ -f "load-test-results_stats.csv" ]; then
+            echo "Checking performance SLAs..."
+            # Extract p95 latency and check against 500ms threshold (FR-024)
+            P95=$(tail -1 load-test-results_stats.csv | cut -d',' -f10)
+            echo "P95 Latency: ${P95}ms"
+
+            if [ -n "$P95" ] && [ "$P95" -gt 500 ]; then
+              echo "::warning::P95 latency ${P95}ms exceeds 500ms SLA threshold"
+            else
+              echo "P95 latency within SLA threshold"
+            fi
+          fi
+
+      - name: Upload load test report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: load-test-report
+          path: |
+            backend/load-test-report.html
+            backend/load-test-results*.csv
+          retention-days: 30
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let summary = '## Load Test Results\n\n';
+
+            try {
+              if (fs.existsSync('backend/load-test-results_stats.csv')) {
+                const stats = fs.readFileSync('backend/load-test-results_stats.csv', 'utf8');
+                const lines = stats.trim().split('\n');
+                if (lines.length > 1) {
+                  const headers = lines[0].split(',');
+                  const values = lines[lines.length - 1].split(',');
+                  summary += '| Metric | Value |\n|--------|-------|\n';
+                  summary += `| Total Requests | ${values[2] || 'N/A'} |\n`;
+                  summary += `| Failures | ${values[3] || 'N/A'} |\n`;
+                  summary += `| Median Response | ${values[5] || 'N/A'}ms |\n`;
+                  summary += `| P95 Response | ${values[10] || 'N/A'}ms |\n`;
+                }
+              } else {
+                summary += 'Load test results not available.\n';
+              }
+            } catch (e) {
+              summary += `Error reading results: ${e.message}\n`;
+            }
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });

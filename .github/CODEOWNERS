@@ -1,0 +1,119 @@
+# CODEOWNERS - Control de Revisiones Obligatorias
+# Este archivo define quién debe aprobar cambios en diferentes partes del código
+# Formato: pattern @username
+# Los usuarios listados aquí serán agregados automáticamente como revisores en PRs
+
+# ============================================
+# OWNER GLOBAL - Bruno tiene control total
+# ============================================
+* @Bruno-Ghiberto
+
+# ============================================
+# BACKEND - Solo Bruno aprueba
+# ============================================
+/backend/ @Bruno-Ghiberto
+/backend/**/*.js @Bruno-Ghiberto
+/backend/**/*.py @Bruno-Ghiberto
+/backend/**/*.ts @Bruno-Ghiberto
+/backend/src/ @Bruno-Ghiberto
+/backend/tests/ @Bruno-Ghiberto
+/backend/package.json @Bruno-Ghiberto
+/backend/package-lock.json @Bruno-Ghiberto
+
+# ============================================
+# FRONTEND - Frontend Developer
+# ============================================
+# Reemplazar 'frontend-developer' con el username real
+# /frontend/ @frontend-developer @Bruno-Ghiberto
+# /frontend/**/*.jsx @frontend-developer
+# /frontend/**/*.tsx @frontend-developer
+# /frontend/**/*.css @frontend-developer
+# /frontend/**/*.scss @frontend-developer
+# /frontend/src/components/ @frontend-developer
+# /frontend/src/pages/ @frontend-developer
+# /frontend/public/ @frontend-developer
+
+# Por ahora, Bruno controla frontend también
+/frontend/ @Bruno-Ghiberto
+
+# ============================================
+# DATABASE - Database Developer
+# ============================================
+# Reemplazar 'database-developer' con el username real
+# /database/ @database-developer @Bruno-Ghiberto
+# /database/**/*.sql @database-developer
+# /database/migrations/ @database-developer @Bruno-Ghiberto
+# /database/schemas/ @database-developer
+# /database/seeds/ @database-developer
+
+# Por ahora, Bruno controla database también
+/database/ @Bruno-Ghiberto
+
+# ============================================
+# DOCUMENTACIÓN - Admin only
+# ============================================
+/Docs/ @Bruno-Ghiberto
+*.md @Bruno-Ghiberto
+/README.md @Bruno-Ghiberto
+/CHANGELOG.md @Bruno-Ghiberto
+/LICENSE @Bruno-Ghiberto
+
+# ============================================
+# CONFIGURACIÓN CRÍTICA - Solo Admin
+# ============================================
+/.github/ @Bruno-Ghiberto
+/.github/workflows/ @Bruno-Ghiberto
+/.github/ISSUE_TEMPLATE/ @Bruno-Ghiberto
+/.github/PULL_REQUEST_TEMPLATE/ @Bruno-Ghiberto
+/package.json @Bruno-Ghiberto
+/package-lock.json @Bruno-Ghiberto
+/.env.example @Bruno-Ghiberto
+/.gitignore @Bruno-Ghiberto
+/.gitattributes @Bruno-Ghiberto
+
+# ============================================
+# DEVOPS & INFRAESTRUCTURA - Solo Admin
+# ============================================
+/docker-compose.yml @Bruno-Ghiberto
+/docker-compose.*.yml @Bruno-Ghiberto
+/Dockerfile @Bruno-Ghiberto
+/*.dockerfile @Bruno-Ghiberto
+/kubernetes/ @Bruno-Ghiberto
+/.dockerignore @Bruno-Ghiberto
+/nginx.conf @Bruno-Ghiberto
+/terraform/ @Bruno-Ghiberto
+/.terraform/ @Bruno-Ghiberto
+
+# ============================================
+# SCRIPTS Y HERRAMIENTAS - Admin only
+# ============================================
+/scripts/ @Bruno-Ghiberto
+*.sh @Bruno-Ghiberto
+*.ps1 @Bruno-Ghiberto
+*.py @Bruno-Ghiberto
+/Makefile @Bruno-Ghiberto
+
+# ============================================
+# ARCHIVOS COMPARTIDOS - Requiere consenso
+# ============================================
+/shared/ @Bruno-Ghiberto
+/shared/types/ @Bruno-Ghiberto
+/shared/utils/ @Bruno-Ghiberto
+
+# ============================================
+# CONFIGURACIÓN DE TESTS - Admin supervisa
+# ============================================
+/jest.config.js @Bruno-Ghiberto
+/cypress.config.js @Bruno-Ghiberto
+/.eslintrc.js @Bruno-Ghiberto
+/.prettierrc @Bruno-Ghiberto
+/tsconfig.json @Bruno-Ghiberto
+
+# ============================================
+# NOTAS IMPORTANTES:
+# ============================================
+# 1. Cuando agregues colaboradores, actualiza este archivo con sus usernames
+# 2. Los revisores aquí listados serán agregados automáticamente a los PRs
+# 3. Para archivos críticos, puedes requerir múltiples aprobaciones
+# 4. Ejemplo: /critical/file.js @user1 @user2 @user3
+# 5. El orden importa - la última regla que coincida será la que se aplique

@@ -1,0 +1,839 @@
+openapi: 3.1.0
+info:
+  title: Gravitea Sync API
+  version: 1.0.0
+  description: 'Offline-first synchronization with device sessions, push/pull operations, and conflict resolution.
+
+
+    ## Authentication
+
+    All endpoints require JWT Bearer authentication (unless noted otherwise).
+
+
+    ## Multi-Tenant
+
+    Resources are automatically filtered by tenant_id from JWT claims.'
+  contact:
+    name: Gravitea Development Team
+    email: dev@gravitea.com
+  license:
+    name: Proprietary
+servers:
+- url: http://localhost:8000/api/v1
+  description: Development
+- url: https://api.gravitea.app/api/v1
+  description: Production
+security:
+- bearerAuth: []
+paths:
+  /api/v1/sync/pull/:
+    post:
+      operationId: sync_pull_create
+      description: 'Retrieve changes from server since last synchronization.
+
+
+        POS terminals periodically pull changes to stay synchronized with the server. Changes include new products, stock
+        updates, price changes, and other entity modifications since the last_sync_at timestamp.
+
+
+        **Pull Process:**
+
+        1. Specify last_sync_at timestamp (or omit for initial sync)
+
+        2. Optionally filter by entity_types (e.g., [''Product'', ''BranchStock''])
+
+        3. Server returns all changes since that timestamp
+
+        4. Update local database with received changes
+
+        5. Store server_timestamp for next pull request
+
+
+        **Pagination:**
+
+        Large changesets use cursor-based pagination. If has_more is true, use the next_cursor value in a follow-up request
+        to retrieve additional changes.
+
+
+        **Entity Types:**
+
+        Common entity types: Product, BranchStock, Category, PaymentMethod, User'
+      summary: Pull server changes
+      tags:
+      - Sync Operations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyncPullRequest'
+            examples:
+              PullServerChanges:
+                value:
+                  device_id: POS-BRANCH-001-TERMINAL-01
+                  last_sync_at: '2025-12-03T09:00:00Z'
+                  entity_types:
+                  - Product
+                  - BranchStock
+                summary: Pull Server Changes
+                description: Request changes from server since last sync
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SyncPullRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SyncPullRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Changes retrieved successfully. Apply the changes to your local database and store server_timestamp
+            for the next pull request.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/sync/push/:
+    post:
+      operationId: sync_push_create
+      description: 'Accept batch of operations created offline for server-side processing.
+
+
+        POS terminals collect operations while offline and push them to the server when connectivity is restored. Operations
+        use client-generated UUIDs for idempotency - duplicate operations with the same ID are automatically skipped.
+
+
+        **Operation Processing:**
+
+        1. Validate device registration
+
+        2. Check each operation for idempotency
+
+        3. Queue new operations for background processing
+
+        4. Skip operations that already exist
+
+        5. Return summary with created/skipped/error counts
+
+
+        **Sync Vector:**
+
+        The sync_vector tracks the client''s current sync state per entity type. Update this after successful pulls to inform
+        the server of your latest state.'
+      summary: Push offline operations
+      tags:
+      - Sync Operations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyncPushRequest'
+            examples:
+              PushOfflineOperations:
+                value:
+                  device_id: POS-BRANCH-001-TERMINAL-01
+                  sync_vector:
+                    Sale: 42
+                    Payment: 15
+                  operations:
+                  - id: 550e8400-e29b-41d4-a716-446655440000
+                    operation_type: create
+                    entity_type: Sale
+                    entity_id: local-sale-001
+                    payload:
+                      items:
+                      - product_id: prod-123
+                        quantity: 2
+                        unit_price: '19.99'
+                      total: '39.98'
+                    client_timestamp: '2025-12-03T09:30:00Z'
+                summary: Push Offline Operations
+                description: Push batch of offline operations from POS terminal
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SyncPushRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SyncPushRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncPushResponse'
+              examples:
+                PushAccepted:
+                  value:
+                    status: accepted
+                    created: 1
+                    skipped: 0
+                    errors: []
+                    server_timestamp: '2025-12-03T10:05:00Z'
+                  summary: Push Accepted
+                  description: Operations successfully queued for processing
+          description: Operations accepted and queued for processing. Check the response for created/skipped/error counts
+            to verify successful submission.
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/sync/sessions/:
+    get:
+      operationId: sync_sessions_list
+      description: 'Retrieve all registered POS terminals for the current tenant.
+
+
+        Returns a list of sync sessions with their current status, last sync timestamp, and branch information. Use this endpoint
+        to monitor all registered devices and their synchronization state.'
+      summary: List sync sessions
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: El valor del cursor de paginación.
+        schema:
+          type: string
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      tags:
+      - Sync Management
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: List of sync sessions retrieved successfully
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    post:
+      operationId: sync_sessions_create
+      description: 'Register a new POS terminal for offline synchronization.
+
+
+        Creates a sync session that tracks the device''s synchronization state. The device_id must be unique within the tenant.
+        Returns the created session with initial status and empty sync vector.
+
+
+        **Sync Session Lifecycle:**
+
+        1. Register device (this endpoint)
+
+        2. Push offline operations periodically
+
+        3. Pull server changes periodically
+
+        4. Monitor status for conflicts or errors
+
+        5. Unregister device when decommissioning'
+      summary: Register POS terminal
+      tags:
+      - Sync Management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyncSessionCreateRequest'
+            examples:
+              RegisterPOSTerminal:
+                value:
+                  branch: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                  device_id: POS-BRANCH-001-TERMINAL-01
+                summary: Register POS Terminal
+                description: Register a new POS terminal for offline synchronization
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SyncSessionCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SyncSessionCreateRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          description: POS terminal registered successfully
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/sync/sessions/{id}/:
+    get:
+      operationId: sync_sessions_retrieve
+      description: 'Retrieve detailed information about a specific sync session.
+
+
+        Returns the session''s current status, sync vector state, last sync timestamp, and any error messages. Use this to
+        inspect a specific device''s synchronization configuration and state.'
+      summary: Get sync session details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - Sync Management
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Sync session details retrieved successfully
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    delete:
+      operationId: sync_sessions_destroy
+      description: 'Unregister a POS terminal and delete its sync session.
+
+
+        This removes the sync session and deletes all pending operations for this device. Use this endpoint when decommissioning
+        a POS terminal or resetting its sync state.
+
+
+        **Warning:** This operation cannot be undone. Any pending operations for this device will be permanently deleted.'
+      summary: Unregister POS terminal
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - Sync Management
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: POS terminal unregistered successfully
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/sync/status/{device_id}/:
+    get:
+      operationId: sync_status_retrieve
+      description: 'Retrieve current sync status and pending operations for a device.
+
+
+        Use this endpoint to monitor sync health and detect issues:
+
+        - Check for pending operations awaiting server processing
+
+        - Detect conflicts requiring manual resolution
+
+        - Verify last successful sync timestamp
+
+        - Monitor sync vector state
+
+
+        **Status Values:**
+
+        - `pending`: Operations queued, not yet processed
+
+        - `processing`: Server actively processing operations
+
+        - `completed`: All operations processed successfully
+
+        - `error`: Processing failed, check error_message
+
+
+        **Monitoring Recommendations:**
+
+        - Poll this endpoint every 5-10 minutes during business hours
+
+        - Alert if pending_operations exceeds threshold (e.g., 100)
+
+        - Alert if conflicts > 0 - manual intervention required
+
+        - Alert if status is ''error'' for extended period'
+      summary: Get sync status
+      parameters:
+      - in: path
+        name: device_id
+        schema:
+          type: string
+        description: Device identifier (e.g., 'POS-BRANCH-001-TERMINAL-01')
+        required: true
+      tags:
+      - Sync Operations
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncStatusResponse'
+              examples:
+                SyncStatus:
+                  value:
+                    device_id: POS-BRANCH-001-TERMINAL-01
+                    status: pending
+                    last_sync_at: '2025-12-03T09:00:00Z'
+                    pending_operations: 3
+                    conflicts: 0
+                    sync_vector:
+                      Sale: 42
+                      Payment: 15
+                  summary: Sync Status
+                  description: Current sync status for device
+          description: Sync status retrieved successfully
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/token/ endpoint. Include tenant_id in token payload.
+  schemas:
+    FieldError:
+      type: object
+      required:
+      - field
+      - message
+      - code
+      properties:
+        field:
+          type: string
+          description: Field name that caused the error
+          example: email
+        message:
+          type: string
+          description: Human-readable error message
+          example: Enter a valid email address.
+        code:
+          type: string
+          description: Machine-readable error code
+          example: invalid
+      description: Field-level validation error details
+    PendingOperationCreateRequest:
+      type: object
+      description: 'Pending operation serializer for creating offline operations.
+
+
+        Accepts operations from POS terminals for later processing.'
+      properties:
+        id:
+          type: string
+          format: uuid
+        operation_type:
+          enum:
+          - CREATE
+          - UPDATE
+          - DELETE
+          type: string
+          x-spec-enum-id: 643ffe20b1005b86
+          description: 'Type of operation (PostgreSQL ENUM)
+
+
+            * `CREATE` - Create
+
+            * `UPDATE` - Update
+
+            * `DELETE` - Delete'
+        entity_type:
+          type: string
+          minLength: 1
+          description: Type of entity (Sale, StockMovement, etc.)
+          maxLength: 50
+        entity_id:
+          type: string
+          format: uuid
+          description: UUID of the affected entity
+        payload:
+          description: Operation data as JSON
+        client_timestamp:
+          type: string
+          format: date-time
+          description: Timestamp from client device
+      required:
+      - client_timestamp
+      - entity_id
+      - entity_type
+      - id
+      - operation_type
+      - payload
+    ProblemDetail:
+      type: object
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - trace_id
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI identifying the error type category
+          example: https://api.gravitea.com/errors/not-found
+        title:
+          type: string
+          description: Human-readable error title
+          example: Not Found
+        status:
+          type: integer
+          description: HTTP status code
+          example: 404
+        detail:
+          type: string
+          description: Detailed explanation of the error
+          example: The requested resource was not found
+        trace_id:
+          type: string
+          format: uuid
+          description: Unique request identifier for log correlation
+          example: 550e8400-e29b-41d4-a716-446655440000
+      description: RFC 7807 Problem Details for HTTP APIs
+    RateLimitError:
+      type: object
+      description: 'RFC 7807 rate limit error with retry information.
+
+
+        Extended ProblemDetail for 429 Too Many Requests responses
+
+        that include retry timing information.'
+      properties:
+        type:
+          type: string
+          format: uri
+          default: about:blank
+          description: URI reference identifying the problem type category
+        title:
+          type: string
+          description: Short, human-readable error summary
+          maxLength: 100
+        status:
+          type: integer
+          maximum: 599
+          minimum: 400
+          description: HTTP status code (400-599)
+        detail:
+          type: string
+          description: Human-readable explanation of this specific error
+          maxLength: 500
+        trace_id:
+          type: string
+          format: uuid
+          description: UUID v4 for log correlation
+        instance:
+          type: string
+          format: uri
+          description: URI of the specific resource that caused the error
+        retry_after:
+          type: integer
+          description: Seconds until the next request attempt is allowed
+      required:
+      - detail
+      - retry_after
+      - status
+      - title
+      - trace_id
+    SyncPullRequest:
+      type: object
+      description: 'Serializer for sync pull request.
+
+
+        Returns changes since last sync for POS terminal.'
+      properties:
+        device_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        last_sync_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        entity_types:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 50
+          description: Entity types to pull (empty for all)
+      required:
+      - device_id
+    SyncPushRequest:
+      type: object
+      description: 'Serializer for sync push request.
+
+
+        Accepts batch of operations from POS terminal.'
+      properties:
+        device_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PendingOperationCreateRequest'
+        sync_vector: {}
+      required:
+      - device_id
+      - operations
+    SyncPushResponse:
+      type: object
+      description: Response format for sync push operations.
+      properties:
+        status:
+          enum:
+          - accepted
+          type: string
+          x-spec-enum-id: 44408a9f6e6d5b57
+          description: 'Operation status (always ''accepted'' on success)
+
+
+            * `accepted` - accepted'
+        created:
+          type: integer
+          description: Number of operations successfully created and queued
+        skipped:
+          type: integer
+          description: Number of operations skipped due to idempotency (already exist)
+        errors:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          description: List of operations that failed validation with error details
+        server_timestamp:
+          type: string
+          format: date-time
+          description: Server timestamp for sync vector tracking
+      required:
+      - created
+      - errors
+      - server_timestamp
+      - skipped
+      - status
+    SyncSessionCreateRequest:
+      type: object
+      description: 'Sync session serializer for device registration.
+
+
+        Registers a new POS terminal for sync.'
+      properties:
+        branch:
+          type: string
+          format: uuid
+          description: Branch the POS terminal belongs to
+        device_id:
+          type: string
+          minLength: 1
+          description: Unique identifier for the POS terminal
+          maxLength: 100
+      required:
+      - branch
+      - device_id
+    SyncStatusResponse:
+      type: object
+      description: Response format for sync status endpoint.
+      properties:
+        device_id:
+          type: string
+          description: Device identifier
+        status:
+          type: string
+          description: Current sync status (pending, processing, completed, error)
+        last_sync_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Timestamp of last successful sync
+        pending_operations:
+          type: integer
+          description: Number of operations pending server-side processing
+        conflicts:
+          type: integer
+          description: Number of operations with detected conflicts requiring resolution
+        sync_vector:
+          description: Sync vector state tracking per-entity sync progress
+      required:
+      - conflicts
+      - device_id
+      - last_sync_at
+      - pending_operations
+      - status
+      - sync_vector
+    ValidationError:
+      allOf:
+      - $ref: '#/components/schemas/ProblemDetail'
+      - type: object
+        properties:
+          errors:
+            type: array
+            items:
+              $ref: '#/components/schemas/FieldError'
+            description: Field-level validation error details
+            example:
+            - field: email
+              message: Enter a valid email address.
+              code: invalid
+            - field: username
+              message: This field is required.
+              code: required
+      description: Validation error response with field-level details

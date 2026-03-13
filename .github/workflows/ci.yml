@@ -1,0 +1,447 @@
+# Main CI Workflow
+# Runs unit tests, integration tests, and quality checks
+# Supports all test markers defined in pytest.ini
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/ci.yml'
+
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+
+  workflow_dispatch:
+    inputs:
+      test_markers:
+        description: 'Test markers to run (e.g., unit, integration, security)'
+        required: false
+        default: 'unit'
+      coverage_threshold:
+        description: 'Minimum coverage percentage'
+        required: false
+        default: '80'
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff mypy
+
+      - name: Run ruff linting
+        working-directory: backend
+        run: |
+          ruff check . --output-format=github
+
+      - name: Run ruff formatting check
+        working-directory: backend
+        run: |
+          ruff format --check .
+
+      - name: Run mypy type checking
+        working-directory: backend
+        continue-on-error: true
+        run: |
+          mypy apps/ --ignore-missing-imports || true
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: gravitea_test
+          POSTGRES_PASSWORD: gravitea_test
+          POSTGRES_DB: gravitea_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/development.txt
+
+      - name: Run migrations
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: gravitea.settings.test
+          DATABASE_URL: postgresql://gravitea_test:gravitea_test@localhost:5432/gravitea_test
+        run: |
+          python manage.py migrate --no-input
+
+      - name: Run unit tests
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: gravitea.settings.test
+          DATABASE_URL: postgresql://gravitea_test:gravitea_test@localhost:5432/gravitea_test
+          REDIS_URL: redis://localhost:6379/0
+        run: |
+          MARKERS="${{ github.event.inputs.test_markers || 'unit' }}"
+          COVERAGE="${{ github.event.inputs.coverage_threshold || '80' }}"
+
+          pytest tests/ \
+            -v \
+            -m "$MARKERS" \
+            --cov=apps \
+            --cov-report=xml \
+            --cov-report=html:htmlcov \
+            --cov-report=term-missing \
+            --cov-fail-under=$COVERAGE \
+            --tb=short \
+            --timeout=300
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: backend/htmlcov/
+          retention-days: 7
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: backend/coverage.xml
+          fail_ci_if_error: false
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: gravitea_test
+          POSTGRES_PASSWORD: gravitea_test
+          POSTGRES_DB: gravitea_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/development.txt
+
+      - name: Run migrations
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: gravitea.settings.test
+          DATABASE_URL: postgresql://gravitea_test:gravitea_test@localhost:5432/gravitea_test
+        run: |
+          python manage.py migrate --no-input
+
+      - name: Run integration tests
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: gravitea.settings.test
+          DATABASE_URL: postgresql://gravitea_test:gravitea_test@localhost:5432/gravitea_test
+          REDIS_URL: redis://localhost:6379/0
+        run: |
+          pytest tests/ \
+            -v \
+            -m integration \
+            --tb=short \
+            --timeout=300
+
+  docker-tests:
+    name: Docker Integration Tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: gravitea_test
+          POSTGRES_PASSWORD: gravitea_test
+          POSTGRES_DB: gravitea_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/development.txt
+
+      - name: Run migrations
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: gravitea.settings.test
+          DATABASE_URL: postgresql://gravitea_test:gravitea_test@localhost:5432/gravitea_test
+        run: |
+          python manage.py migrate --no-input
+
+      - name: Run Docker marker tests
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: gravitea.settings.test
+          DATABASE_URL: postgresql://gravitea_test:gravitea_test@localhost:5432/gravitea_test
+        run: |
+          pytest tests/ \
+            -v \
+            -m docker \
+            --tb=short \
+            --timeout=300
+
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: gravitea_test
+          POSTGRES_PASSWORD: gravitea_test
+          POSTGRES_DB: gravitea_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/development.txt
+
+      - name: Run migrations
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: gravitea.settings.test
+          DATABASE_URL: postgresql://gravitea_test:gravitea_test@localhost:5432/gravitea_test
+        run: |
+          python manage.py migrate --no-input
+
+      - name: Run performance tests
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: gravitea.settings.test
+          DATABASE_URL: postgresql://gravitea_test:gravitea_test@localhost:5432/gravitea_test
+        run: |
+          pytest tests/ \
+            -v \
+            -m performance \
+            --tb=short \
+            --timeout=600
+
+  critical-path-tests:
+    name: Critical Path Tests (95% Coverage)
+    runs-on: ubuntu-latest
+    needs: unit-tests
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: gravitea_test
+          POSTGRES_PASSWORD: gravitea_test
+          POSTGRES_DB: gravitea_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/development.txt
+
+      - name: Run migrations
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: gravitea.settings.test
+          DATABASE_URL: postgresql://gravitea_test:gravitea_test@localhost:5432/gravitea_test
+        run: |
+          python manage.py migrate --no-input
+
+      - name: Run critical path tests
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: gravitea.settings.test
+          DATABASE_URL: postgresql://gravitea_test:gravitea_test@localhost:5432/gravitea_test
+        run: |
+          pytest tests/ \
+            -v \
+            -m critical \
+            --cov=apps \
+            --cov-report=term-missing \
+            --cov-fail-under=95 \
+            --tb=short \
+            --timeout=300
+
+  traceability-check:
+    name: Test-to-Requirement Traceability
+    runs-on: ubuntu-latest
+    needs: unit-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/development.txt
+
+      - name: Run traceability tests
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: gravitea.settings.test
+        run: |
+          pytest tests/traceability/ \
+            -v \
+            -m traceability \
+            --tb=short \
+            --timeout=120 || true
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [lint, unit-tests, integration-tests, docker-tests, critical-path-tests, traceability-check]
+    if: always()
+
+    steps:
+      - name: Generate summary
+        run: |
+          echo "# CI Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Test Suite | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint & Type Check | ${{ needs.lint.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Unit Tests | ${{ needs.unit-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Integration Tests | ${{ needs.integration-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Docker Tests | ${{ needs.docker-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Critical Path Tests | ${{ needs.critical-path-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Traceability Check | ${{ needs.traceability-check.result }} |" >> $GITHUB_STEP_SUMMARY

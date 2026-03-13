@@ -1,0 +1,37 @@
+[package]
+name = "gravitea-core"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "gravitea_rust"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+pyo3 = "0.28"
+thiserror = "2.0"
+aes-gcm = "0.10"
+hmac = "0.12"
+sha2 = "0.10"
+rand = "0.8"
+base64 = "0.22"
+hex = "0.4"
+unicode-normalization = "0.1"
+rust_decimal = "1.36"
+rust_decimal_macros = "1.36"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+csv = "1"
+rust_xlsxwriter = "0.92"
+regex = "1.10"
+url = "2.5"
+
+[dev-dependencies]
+proptest = "1"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

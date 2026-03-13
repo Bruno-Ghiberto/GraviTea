@@ -1,0 +1,206 @@
+{
+  "name": "multi_tenant",
+  "description": "Multi-tenant seed data for isolation testing - two tenants with separate data",
+  "version": "1.0.0",
+  "tenants": [
+    {
+      "id": "alpha",
+      "data": {
+        "name": "Alpha Company",
+        "slug": "alpha",
+        "is_active": true,
+        "settings": {
+          "currency": "COP",
+          "timezone": "America/Bogota",
+          "language": "es"
+        }
+      }
+    },
+    {
+      "id": "beta",
+      "data": {
+        "name": "Beta Corporation",
+        "slug": "beta",
+        "is_active": true,
+        "settings": {
+          "currency": "USD",
+          "timezone": "America/New_York",
+          "language": "en"
+        }
+      }
+    }
+  ],
+  "roles": [
+    {
+      "id": "alpha-admin",
+      "data": {
+        "name": "Administrator",
+        "code": "admin",
+        "permissions": ["*"],
+        "is_system": true
+      },
+      "dependencies": ["tenant:alpha"]
+    },
+    {
+      "id": "beta-admin",
+      "data": {
+        "name": "Administrator",
+        "code": "admin",
+        "permissions": ["*"],
+        "is_system": true
+      },
+      "dependencies": ["tenant:beta"]
+    }
+  ],
+  "users": [
+    {
+      "id": "alpha-admin",
+      "data": {
+        "email": "admin@alpha.gravitea.local",
+        "first_name": "Alpha",
+        "last_name": "Admin",
+        "is_active": true,
+        "is_staff": true
+      },
+      "dependencies": ["tenant:alpha", "role:alpha-admin"]
+    },
+    {
+      "id": "beta-admin",
+      "data": {
+        "email": "admin@beta.gravitea.local",
+        "first_name": "Beta",
+        "last_name": "Admin",
+        "is_active": true,
+        "is_staff": true
+      },
+      "dependencies": ["tenant:beta", "role:beta-admin"]
+    }
+  ],
+  "branches": [
+    {
+      "id": "alpha-main",
+      "data": {
+        "name": "Alpha Main Store",
+        "code": "ALPHA-MAIN",
+        "address": "Calle 80 #10-50",
+        "city": "Bogota",
+        "is_active": true,
+        "is_main": true
+      },
+      "dependencies": ["tenant:alpha"]
+    },
+    {
+      "id": "beta-main",
+      "data": {
+        "name": "Beta Headquarters",
+        "code": "BETA-HQ",
+        "address": "123 Business Ave",
+        "city": "New York",
+        "is_active": true,
+        "is_main": true
+      },
+      "dependencies": ["tenant:beta"]
+    }
+  ],
+  "categories": [
+    {
+      "id": "alpha-beverages",
+      "data": {
+        "name": "Bebidas",
+        "code": "BEB",
+        "description": "Bebidas calientes y frias",
+        "is_active": true
+      },
+      "dependencies": ["tenant:alpha"]
+    },
+    {
+      "id": "beta-beverages",
+      "data": {
+        "name": "Beverages",
+        "code": "BEV",
+        "description": "Hot and cold drinks",
+        "is_active": true
+      },
+      "dependencies": ["tenant:beta"]
+    }
+  ],
+  "products": [
+    {
+      "id": "alpha-coffee",
+      "data": {
+        "name": "Cafe Colombiano",
+        "sku": "ALPHA-001",
+        "barcode": "7701111111111",
+        "description": "Cafe premium colombiano 500g",
+        "base_price": "25000.00",
+        "cost_price": "15000.00",
+        "tax_rate": "0.19",
+        "unit": "unit",
+        "is_active": true
+      },
+      "dependencies": ["tenant:alpha", "category:alpha-beverages"]
+    },
+    {
+      "id": "beta-coffee",
+      "data": {
+        "name": "Premium Coffee Blend",
+        "sku": "BETA-001",
+        "barcode": "7702222222222",
+        "description": "Premium coffee blend 500g",
+        "base_price": "15.99",
+        "cost_price": "9.50",
+        "tax_rate": "0.08",
+        "unit": "unit",
+        "is_active": true
+      },
+      "dependencies": ["tenant:beta", "category:beta-beverages"]
+    }
+  ],
+  "suppliers": [],
+  "price_lists": [
+    {
+      "id": "alpha-retail",
+      "data": {
+        "name": "Precios Retail",
+        "code": "RETAIL",
+        "is_default": true,
+        "markup_percentage": "0.00",
+        "is_active": true
+      },
+      "dependencies": ["tenant:alpha"]
+    },
+    {
+      "id": "beta-retail",
+      "data": {
+        "name": "Retail Prices",
+        "code": "RETAIL",
+        "is_default": true,
+        "markup_percentage": "0.00",
+        "is_active": true
+      },
+      "dependencies": ["tenant:beta"]
+    }
+  ],
+  "stock_levels": [
+    {
+      "id": "alpha-main-coffee",
+      "data": {
+        "quantity": 100,
+        "min_quantity": 10,
+        "max_quantity": 200,
+        "reorder_point": 20
+      },
+      "dependencies": ["branch:alpha-main", "product:alpha-coffee"]
+    },
+    {
+      "id": "beta-main-coffee",
+      "data": {
+        "quantity": 150,
+        "min_quantity": 15,
+        "max_quantity": 300,
+        "reorder_point": 30
+      },
+      "dependencies": ["branch:beta-main", "product:beta-coffee"]
+    }
+  ]
+}

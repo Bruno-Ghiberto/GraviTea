@@ -1,0 +1,74 @@
+# Root-level .dockerignore for the GRAVITEA-ERP monorepo.
+# Used when docker compose context is "." (repo root) with backend/Dockerfile.
+#
+# Patterns are relative to the repo root (the build context).
+
+# ── Backend virtual environments (CRITICAL: these are large) ──────────────────
+backend/venv-wsl/
+backend/venv/
+backend/.venv/
+backend/env/
+
+# ── Rust compiled artifacts (CRITICAL: these are very large) ──────────────────
+rust/gravitea-core/target/
+
+# ── Frontend node modules ─────────────────────────────────────────────────────
+frontend-prototype/node_modules/
+frontend-prototype/.next/
+frontend/node_modules/
+frontend/.next/
+
+# ── Python bytecode ───────────────────────────────────────────────────────────
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.egg-info/
+
+# ── Test artifacts ────────────────────────────────────────────────────────────
+**/.pytest_cache/
+**/htmlcov/
+**/.coverage
+**/.coverage.*
+**/coverage.json
+**/.hypothesis/
+
+# ── IDE / editor ──────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+**/*.swp
+**/*.swo
+
+# ── Environment files ─────────────────────────────────────────────────────────
+.env
+.env.*
+backend/.env
+backend/.env.*
+
+# ── Git ───────────────────────────────────────────────────────────────────────
+.git/
+.gitignore
+
+# ── Docker compose (prevent recursive context) ───────────────────────────────
+docker-compose*.yml
+backend/Dockerfile
+backend/.dockerignore
+
+# ── AI agent / docs artifacts (not needed in image) ──────────────────────────
+.serena/
+.claude/
+claudedocs/
+Docs/
+specs/
+backend/.serena/
+backend/claudedocs/
+
+# ── Observability configs (mounted separately in compose) ─────────────────────
+backend/observability/
+
+# ── OS files ──────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Tests (keep backend/tests/ out of the image) ─────────────────────────────
+backend/tests/
+tests/

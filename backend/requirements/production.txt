@@ -1,0 +1,8 @@
+# Include base requirements
+-r base.txt
+
+# WSGI Server
+gunicorn>=21.0,<22.0
+
+# Monitoring (optional)
+# sentry-sdk>=1.38,<2.0

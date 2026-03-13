@@ -1,0 +1,286 @@
+{
+  "name": "standard",
+  "description": "Standard seed data for comprehensive testing - single tenant, multiple branches, multiple users, products, and inventory",
+  "version": "1.0.0",
+  "tenants": [
+    {
+      "id": "demo",
+      "data": {
+        "name": "Demo Company",
+        "slug": "demo",
+        "is_active": true,
+        "settings": {
+          "currency": "COP",
+          "timezone": "America/Bogota",
+          "language": "es",
+          "tax_rate": "0.19"
+        }
+      }
+    }
+  ],
+  "roles": [
+    {
+      "id": "admin",
+      "data": {
+        "name": "Administrator",
+        "code": "admin",
+        "permissions": ["*"],
+        "is_system": true
+      },
+      "dependencies": ["tenant:demo"]
+    },
+    {
+      "id": "manager",
+      "data": {
+        "name": "Manager",
+        "code": "manager",
+        "permissions": ["inventory.view", "inventory.edit", "sales.view", "sales.create", "reports.view"],
+        "is_system": false
+      },
+      "dependencies": ["tenant:demo"]
+    },
+    {
+      "id": "cashier",
+      "data": {
+        "name": "Cashier",
+        "code": "cashier",
+        "permissions": ["sales.view", "sales.create", "inventory.view"],
+        "is_system": false
+      },
+      "dependencies": ["tenant:demo"]
+    }
+  ],
+  "users": [
+    {
+      "id": "admin",
+      "data": {
+        "email": "admin@demo.gravitea.local",
+        "first_name": "Admin",
+        "last_name": "User",
+        "is_active": true,
+        "is_staff": true
+      },
+      "dependencies": ["tenant:demo", "role:admin"]
+    },
+    {
+      "id": "manager",
+      "data": {
+        "email": "manager@demo.gravitea.local",
+        "first_name": "Maria",
+        "last_name": "Garcia",
+        "is_active": true,
+        "is_staff": false
+      },
+      "dependencies": ["tenant:demo", "role:manager", "branch:main"]
+    },
+    {
+      "id": "cashier",
+      "data": {
+        "email": "cashier@demo.gravitea.local",
+        "first_name": "Juan",
+        "last_name": "Rodriguez",
+        "is_active": true,
+        "is_staff": false
+      },
+      "dependencies": ["tenant:demo", "role:cashier", "branch:main"]
+    }
+  ],
+  "branches": [
+    {
+      "id": "main",
+      "data": {
+        "name": "Main Store",
+        "code": "MAIN",
+        "address": "Calle 100 #15-20",
+        "city": "Bogota",
+        "phone": "+57 1 234 5678",
+        "is_active": true,
+        "is_main": true
+      },
+      "dependencies": ["tenant:demo"]
+    },
+    {
+      "id": "north",
+      "data": {
+        "name": "North Branch",
+        "code": "NORTH",
+        "address": "Carrera 7 #120-30",
+        "city": "Bogota",
+        "phone": "+57 1 345 6789",
+        "is_active": true,
+        "is_main": false
+      },
+      "dependencies": ["tenant:demo"]
+    }
+  ],
+  "categories": [
+    {
+      "id": "beverages",
+      "data": {
+        "name": "Beverages",
+        "code": "BEV",
+        "description": "Hot and cold drinks",
+        "is_active": true
+      },
+      "dependencies": ["tenant:demo"]
+    },
+    {
+      "id": "food",
+      "data": {
+        "name": "Food",
+        "code": "FOOD",
+        "description": "Prepared food items",
+        "is_active": true
+      },
+      "dependencies": ["tenant:demo"]
+    },
+    {
+      "id": "cleaning",
+      "data": {
+        "name": "Cleaning Supplies",
+        "code": "CLEAN",
+        "description": "Cleaning and maintenance products",
+        "is_active": true
+      },
+      "dependencies": ["tenant:demo"]
+    }
+  ],
+  "products": [
+    {
+      "id": "SKU-001",
+      "data": {
+        "name": "Colombian Coffee",
+        "sku": "SKU-001",
+        "barcode": "7701234567890",
+        "description": "Premium Colombian ground coffee 500g",
+        "base_price": "25000.00",
+        "cost_price": "15000.00",
+        "tax_rate": "0.19",
+        "unit": "unit",
+        "is_active": true
+      },
+      "dependencies": ["tenant:demo", "category:beverages"]
+    },
+    {
+      "id": "SKU-002",
+      "data": {
+        "name": "Empanadas",
+        "sku": "SKU-002",
+        "barcode": "7701234567891",
+        "description": "Traditional Colombian empanadas (pack of 6)",
+        "base_price": "12000.00",
+        "cost_price": "7000.00",
+        "tax_rate": "0.19",
+        "unit": "pack",
+        "is_active": true
+      },
+      "dependencies": ["tenant:demo", "category:food"]
+    },
+    {
+      "id": "SKU-003",
+      "data": {
+        "name": "Multi-Surface Cleaner",
+        "sku": "SKU-003",
+        "barcode": "7701234567892",
+        "description": "All-purpose cleaning spray 500ml",
+        "base_price": "8500.00",
+        "cost_price": "5000.00",
+        "tax_rate": "0.19",
+        "unit": "unit",
+        "is_active": true
+      },
+      "dependencies": ["tenant:demo", "category:cleaning"]
+    }
+  ],
+  "suppliers": [
+    {
+      "id": "supplier-001",
+      "data": {
+        "name": "Coffee Imports Co",
+        "code": "SUP-001",
+        "contact_name": "Carlos Mendez",
+        "email": "carlos@coffeeimports.co",
+        "phone": "+57 1 456 7890",
+        "address": "Zona Industrial, Bogota",
+        "is_active": true
+      },
+      "dependencies": ["tenant:demo"]
+    }
+  ],
+  "price_lists": [
+    {
+      "id": "retail",
+      "data": {
+        "name": "Retail Prices",
+        "code": "RETAIL",
+        "is_default": true,
+        "markup_percentage": "0.00",
+        "is_active": true
+      },
+      "dependencies": ["tenant:demo"]
+    },
+    {
+      "id": "wholesale",
+      "data": {
+        "name": "Wholesale Prices",
+        "code": "WHOLESALE",
+        "is_default": false,
+        "markup_percentage": "-10.00",
+        "is_active": true
+      },
+      "dependencies": ["tenant:demo"]
+    }
+  ],
+  "stock_levels": [
+    {
+      "id": "main-SKU-001",
+      "data": {
+        "quantity": 100,
+        "min_quantity": 10,
+        "max_quantity": 200,
+        "reorder_point": 20
+      },
+      "dependencies": ["branch:main", "product:SKU-001"]
+    },
+    {
+      "id": "main-SKU-002",
+      "data": {
+        "quantity": 50,
+        "min_quantity": 5,
+        "max_quantity": 100,
+        "reorder_point": 10
+      },
+      "dependencies": ["branch:main", "product:SKU-002"]
+    },
+    {
+      "id": "main-SKU-003",
+      "data": {
+        "quantity": 30,
+        "min_quantity": 5,
+        "max_quantity": 50,
+        "reorder_point": 8
+      },
+      "dependencies": ["branch:main", "product:SKU-003"]
+    },
+    {
+      "id": "north-SKU-001",
+      "data": {
+        "quantity": 75,
+        "min_quantity": 10,
+        "max_quantity": 150,
+        "reorder_point": 15
+      },
+      "dependencies": ["branch:north", "product:SKU-001"]
+    },
+    {
+      "id": "north-SKU-002",
+      "data": {
+        "quantity": 25,
+        "min_quantity": 5,
+        "max_quantity": 75,
+        "reorder_point": 10
+      },
+      "dependencies": ["branch:north", "product:SKU-002"]
+    }
+  ]
+}

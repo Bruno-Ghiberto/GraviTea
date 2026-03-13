@@ -1,0 +1,64 @@
+name: OpenAPI Contract Validation
+
+on:
+  push:
+    paths:
+      - 'api/openapi/**'
+      - 'backend/apps/**/views.py'
+      - 'backend/apps/**/urls.py'
+      - 'backend/apps/**/schema.py'
+      - 'backend/gravitea/urls.py'
+  pull_request:
+    paths:
+      - 'api/openapi/**'
+      - 'backend/apps/**/views.py'
+      - 'backend/apps/**/urls.py'
+      - 'backend/apps/**/schema.py'
+      - 'backend/gravitea/urls.py'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  validate-contracts:
+    name: Validate OpenAPI Contracts
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14.3'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements/*.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/base.txt
+          pip install pyyaml
+
+      - name: Generate OpenAPI schema
+        env:
+          DJANGO_SETTINGS_MODULE: gravitea.settings.test
+          SECRET_KEY: test-secret-key-for-ci
+          DATABASE_URL: sqlite:///ci-test.db
+        run: |
+          python manage.py spectacular --file openapi-generated.yaml --validate
+
+      - name: Validate contracts for drift
+        run: |
+          python scripts/validate_openapi_contracts.py --verbose
+
+      - name: Upload generated schema
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-generated
+          path: backend/openapi-generated.yaml
+          retention-days: 7

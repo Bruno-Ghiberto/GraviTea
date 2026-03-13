@@ -1,0 +1,3182 @@
+openapi: 3.1.0
+info:
+  title: Gravitea Inventory API
+  version: 1.0.0
+  description: 'Product catalog, stock movements, categories, price lists, cost history, and inventory tracking.
+
+
+    ## Authentication
+
+    All endpoints require JWT Bearer authentication (unless noted otherwise).
+
+
+    ## Multi-Tenant
+
+    Resources are automatically filtered by tenant_id from JWT claims.'
+  contact:
+    name: Gravitea Development Team
+    email: dev@gravitea.com
+  license:
+    name: Proprietary
+servers:
+- url: http://localhost:8000/api/v1
+  description: Development
+- url: https://api.gravitea.app/api/v1
+  description: Production
+security:
+- bearerAuth: []
+paths:
+  /api/v1/categories/:
+    get:
+      operationId: categories_list
+      description: "\n    List product categories with cursor pagination.\n\n    **Query Parameters:**\n    - root_only: Set\
+        \ to 'true' to return only root categories (no parent)\n    "
+      summary: List categories
+      parameters:
+      - in: query
+        name: cursor
+        schema:
+          type: string
+        description: Pagination cursor
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      - in: query
+        name: root_only
+        schema:
+          type: boolean
+        description: Return only root categories
+      tags:
+      - inventory-categories
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaginatedCategoryListList'
+          description: ''
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    post:
+      operationId: categories_create
+      description: Create a new product category. Can be a root category or nested under a parent.
+      summary: Create category
+      tags:
+      - inventory-categories
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateRequest'
+            examples:
+              RootCategory:
+                value:
+                  name: Electronics
+                summary: Root Category
+              NestedCategory:
+                value:
+                  name: Laptops
+                  parent: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                summary: Nested Category
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/categories/tree/:
+    get:
+      operationId: categories_tree_list
+      description: "\n    Retrieve hierarchical category tree structure.\n\n    Returns all root categories with their nested\
+        \ children recursively.\n    Useful for building category navigation menus.\n    "
+      summary: Get category tree
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: El valor del cursor de paginación.
+        schema:
+          type: string
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      tags:
+      - inventory-categories
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCategoryTreeNodeList'
+              examples:
+                CategoryTree:
+                  value:
+                    next: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+                    previous: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+                    results:
+                    - - id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                        name: Electronics
+                        children:
+                        - id: 3fa85f64-5717-4562-b3fc-2c963f66afa7
+                          name: Laptops
+                          children: []
+                        - id: 3fa85f64-5717-4562-b3fc-2c963f66afa8
+                          name: Phones
+                          children: []
+                  summary: Category Tree
+          description: ''
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/categories/{id}/:
+    get:
+      operationId: categories_retrieve
+      description: Retrieve category details including parent and immediate children.
+      summary: Get category details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - inventory-categories
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    put:
+      operationId: categories_update
+      description: Update category name or parent. Circular parent relationships are prevented.
+      summary: Update category
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - inventory-categories
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    patch:
+      operationId: categories_partial_update
+      description: Partially update category fields.
+      summary: Partial update category
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - inventory-categories
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoryCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoryCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoryCreateRequest'
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    delete:
+      operationId: categories_destroy
+      description: Delete category. Cannot delete if category has products or child categories.
+      summary: Delete category
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - inventory-categories
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/cost-history/:
+    get:
+      operationId: cost_history_list
+      description: "\n    List product cost history with cursor pagination and filtering.\n\n    **Read-Only:** Cost history\
+        \ is automatically created when product costs change.\n\n    **Filters:**\n    - product: Filter by product ID\n \
+        \   - valid_from_after: Filter by valid_from >= timestamp\n    - valid_from_before: Filter by valid_from <= timestamp\n\
+        \    "
+      summary: List product cost history
+      parameters:
+      - in: query
+        name: cursor
+        schema:
+          type: string
+        description: Pagination cursor
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      - in: query
+        name: product
+        schema:
+          type: string
+          format: uuid
+        description: Filter by product ID
+      - in: query
+        name: valid_from_after
+        schema:
+          type: string
+          format: date-time
+        description: Valid from after timestamp (ISO 8601)
+      - in: query
+        name: valid_from_before
+        schema:
+          type: string
+          format: date-time
+        description: Valid from before timestamp (ISO 8601)
+      tags:
+      - inventory-pricing
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaginatedCostHistoryListList'
+          description: ''
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/cost-history/{id}/:
+    get:
+      operationId: cost_history_retrieve
+      description: Retrieve detailed cost history entry for COGS calculations and inventory valuation.
+      summary: Get cost history entry details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este Product Cost History.
+        required: true
+      tags:
+      - inventory-pricing
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductCostHistory'
+          description: ''
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/movements/:
+    get:
+      operationId: movements_list
+      description: "\n    List stock movements with cursor pagination and filtering.\n\n    **Immutability:** Stock movements\
+        \ are append-only and cannot be modified or deleted.\n\n    **Filters:**\n    - product: Filter by product ID\n  \
+        \  - branch: Filter by branch ID\n    - type: Filter by movement type (SALE, PURCHASE, ADJ, TRANS_IN, TRANS_OUT)\n\
+        \    - reference_id: Filter by external reference ID\n    - created_after: Filter by creation date (>= timestamp)\n\
+        \    - created_before: Filter by creation date (<= timestamp)\n    "
+      summary: List stock movements
+      parameters:
+      - in: query
+        name: branch
+        schema:
+          type: string
+          format: uuid
+        description: Filter by branch ID
+      - in: query
+        name: created_after
+        schema:
+          type: string
+          format: date-time
+        description: Created after timestamp (ISO 8601)
+      - in: query
+        name: created_before
+        schema:
+          type: string
+          format: date-time
+        description: Created before timestamp (ISO 8601)
+      - in: query
+        name: cursor
+        schema:
+          type: string
+        description: Pagination cursor
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      - in: query
+        name: product
+        schema:
+          type: string
+          format: uuid
+        description: Filter by product ID
+      - in: query
+        name: reference_id
+        schema:
+          type: string
+          format: uuid
+        description: External reference ID
+      - in: query
+        name: type
+        schema:
+          type: string
+          enum:
+          - ADJ
+          - PURCHASE
+          - SALE
+          - TRANS_IN
+          - TRANS_OUT
+        description: Movement type
+      tags:
+      - inventory-stock
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaginatedStockMovementListList'
+          description: ''
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    post:
+      operationId: movements_create
+      description: "\n    Create a new stock movement and update branch stock.\n\n    **Movement Types:**\n    - SALE: Stock\
+        \ sold (quantity_delta will be negative)\n    - PURCHASE: Stock received (quantity_delta will be positive)\n    -\
+        \ ADJ: Manual adjustment (can be positive or negative)\n    - TRANS_IN: Transfer from another branch (positive)\n\
+        \    - TRANS_OUT: Transfer to another branch (negative)\n\n    **Automatic Quantity Sign Adjustment:**\n    The system\
+        \ automatically adjusts quantity_delta sign based on movement type.\n    For SALE/TRANS_OUT, positive values are converted\
+        \ to negative.\n    "
+      summary: Create stock movement
+      tags:
+      - inventory-stock
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StockMovementCreateRequest'
+            examples:
+              PurchaseMovement:
+                value:
+                  product: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                  branch: 3fa85f64-5717-4562-b3fc-2c963f66afa7
+                  type: PURCHASE
+                  quantity_delta: '100.0000'
+                  cost_snapshot: '50.00'
+                  notes: Initial stock purchase
+                summary: Purchase Movement
+              SaleMovement:
+                value:
+                  product: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                  branch: 3fa85f64-5717-4562-b3fc-2c963f66afa7
+                  type: SALE
+                  quantity_delta: '5.0000'
+                  reference_id: 3fa85f64-5717-4562-b3fc-2c963f66afa8
+                  notes: Sale INV-001
+                summary: Sale Movement
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StockMovementCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StockMovementCreateRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StockMovement'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/movements/{id}/:
+    get:
+      operationId: movements_retrieve
+      description: Retrieve detailed stock movement information.
+      summary: Get stock movement details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - inventory-stock
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StockMovement'
+          description: ''
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/price-history/:
+    get:
+      operationId: price_history_list
+      description: "\n    List product price history with cursor pagination and filtering.\n\n    **Read-Only:** Price history\
+        \ is automatically created when product prices change.\n\n    **Filters:**\n    - product: Filter by product ID\n\
+        \    - price_list: Filter by price list ID\n    - valid_from_after: Filter by valid_from >= timestamp\n    - valid_from_before:\
+        \ Filter by valid_from <= timestamp\n    "
+      summary: List product price history
+      parameters:
+      - in: query
+        name: cursor
+        schema:
+          type: string
+        description: Pagination cursor
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      - in: query
+        name: price_list
+        schema:
+          type: string
+          format: uuid
+        description: Filter by price list ID
+      - in: query
+        name: product
+        schema:
+          type: string
+          format: uuid
+        description: Filter by product ID
+      - in: query
+        name: valid_from_after
+        schema:
+          type: string
+          format: date-time
+        description: Valid from after timestamp (ISO 8601)
+      - in: query
+        name: valid_from_before
+        schema:
+          type: string
+          format: date-time
+        description: Valid from before timestamp (ISO 8601)
+      tags:
+      - inventory-pricing
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaginatedPriceHistoryListList'
+          description: ''
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/price-history/{id}/:
+    get:
+      operationId: price_history_retrieve
+      description: Retrieve detailed price history entry with audit trail information.
+      summary: Get price history entry details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un Cadena UUID que identifique este Product Price History.
+        required: true
+      tags:
+      - inventory-pricing
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductPriceHistory'
+          description: ''
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/price-lists/:
+    get:
+      operationId: price_lists_list
+      description: List price lists with cursor pagination.
+      summary: List price lists
+      parameters:
+      - in: query
+        name: cursor
+        schema:
+          type: string
+        description: Pagination cursor
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      tags:
+      - inventory-pricing
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaginatedPriceListListList'
+          description: ''
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    post:
+      operationId: price_lists_create
+      description: "\n    Create a new price list.\n\n    **Constraint:** Only one price list can be set as default per tenant.\n\
+        \    "
+      summary: Create price list
+      tags:
+      - inventory-pricing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PriceListRequest'
+            examples:
+              RetailPriceList:
+                value:
+                  name: Retail
+                  margin_pct: '30.00'
+                  is_default: true
+                summary: Retail Price List
+              WholesalePriceList:
+                value:
+                  name: Wholesale
+                  margin_pct: '15.00'
+                  is_default: false
+                summary: Wholesale Price List
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PriceListRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PriceListRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceList'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/price-lists/{id}/:
+    get:
+      operationId: price_lists_retrieve
+      description: Retrieve price list details.
+      summary: Get price list details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - inventory-pricing
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceList'
+          description: ''
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    put:
+      operationId: price_lists_update
+      description: Update price list. Name uniqueness enforced per tenant.
+      summary: Update price list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - inventory-pricing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PriceListRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PriceListRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PriceListRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceList'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    patch:
+      operationId: price_lists_partial_update
+      description: Partially update price list fields.
+      summary: Partial update price list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - inventory-pricing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPriceListRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPriceListRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPriceListRequest'
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceList'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    delete:
+      operationId: price_lists_destroy
+      description: Delete price list. Cannot delete if price list has associated price history.
+      summary: Delete price list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - inventory-pricing
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/price-lists/{id}/set_default/:
+    post:
+      operationId: price_lists_set_default_create
+      description: "\n    Set this price list as the default for the tenant.\n\n    Automatically unsets any other default\
+        \ price lists for the tenant.\n    "
+      summary: Set as default price list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - inventory-pricing
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceListDefaultResponse'
+              examples:
+                SetDefaultResponse:
+                  value:
+                    status: default set
+                    id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                  summary: Set Default Response
+          description: ''
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/products/:
+    get:
+      operationId: products_list
+      description: "\n    List products with cursor pagination and filtering.\n\n    **Filters:**\n    - category: Filter\
+        \ by category ID\n    - name: Search by name (case-insensitive partial match)\n    - sku: Search by SKU (exact match)\n\
+        \    - is_active: Filter by active status\n    - min_price: Minimum unit price\n    - max_price: Maximum unit price\n\
+        \    "
+      summary: List products
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+          format: uuid
+        description: Filter by category ID
+      - in: query
+        name: cursor
+        schema:
+          type: string
+        description: Pagination cursor
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+        description: Filter by active status
+      - in: query
+        name: max_price
+        schema:
+          type: number
+          format: double
+        description: Maximum unit price
+      - in: query
+        name: min_price
+        schema:
+          type: number
+          format: double
+        description: Minimum unit price
+      - in: query
+        name: name
+        schema:
+          type: string
+        description: Search by name (case-insensitive partial match)
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      - in: query
+        name: sku
+        schema:
+          type: string
+        description: Search by SKU (exact match)
+      tags:
+      - inventory-products
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaginatedProductListList'
+          description: ''
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    post:
+      operationId: products_create
+      description: Create a new product with encrypted barcode and tenant isolation.
+      summary: Create product
+      tags:
+      - inventory-products
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCreateRequest'
+            examples:
+              BasicProduct:
+                value:
+                  sku: PROD-001
+                  name: Sample Product
+                  description: Product description
+                  unit_price: '150.00'
+                  cost_price: '100.00'
+                  tax_rate: '21.00'
+                  is_active: true
+                summary: Basic Product
+              ProductWithBarcode:
+                value:
+                  sku: PROD-002
+                  barcode: '1234567890123'
+                  name: Barcode Product
+                  unit_price: '200.00'
+                  cost_price: '120.00'
+                  tax_rate: '21.00'
+                  min_stock: '10.0000'
+                  max_stock: '100.0000'
+                summary: Product with Barcode
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProductCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductCreateRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/products/search/:
+    post:
+      operationId: products_search_create
+      description: "\n    Search for product using encrypted barcode with blind index.\n\n    **Privacy:** Barcode is encrypted\
+        \ at rest. Search uses blind index for privacy-preserving lookup.\n    "
+      summary: Search product by barcode
+      tags:
+      - inventory-products
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BarcodeSearchRequestRequest'
+            examples:
+              BarcodeSearch:
+                value:
+                  barcode: '1234567890123'
+                summary: Barcode Search
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BarcodeSearchRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BarcodeSearchRequestRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/products/{id}/:
+    get:
+      operationId: products_retrieve
+      description: Retrieve detailed product information including branch stock levels.
+      summary: Get product details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - inventory-products
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+          description: ''
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    put:
+      operationId: products_update
+      description: Update product details. SKU uniqueness enforced per tenant.
+      summary: Update product
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - inventory-products
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProductCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductCreateRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    patch:
+      operationId: products_partial_update
+      description: Partially update product fields.
+      summary: Partial update product
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - inventory-products
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProductCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProductCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProductCreateRequest'
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    delete:
+      operationId: products_destroy
+      description: Deactivate product by setting is_active=False. Product is not permanently deleted.
+      summary: Soft delete product
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - inventory-products
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/products/{id}/stock/:
+    get:
+      operationId: products_stock_list
+      description: Retrieve current stock levels for this product across all branches.
+      summary: Get product stock by branch
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: El valor del cursor de paginación.
+        schema:
+          type: string
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      tags:
+      - inventory-products
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBranchStockList'
+          description: ''
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/token/ endpoint. Include tenant_id in token payload.
+  schemas:
+    BarcodeSearchRequestRequest:
+      type: object
+      description: Barcode search request body.
+      properties:
+        barcode:
+          type: string
+          minLength: 1
+          description: Product barcode to search for
+      required:
+      - barcode
+    BranchStock:
+      type: object
+      description: 'Branch stock serializer for read operations.
+
+
+        Returns current stock level per branch including product,
+
+        reserved quantity, and computed available quantity.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        branch:
+          type: string
+          format: uuid
+          description: Branch
+        branch_name:
+          type: string
+          readOnly: true
+        product:
+          type: string
+          format: uuid
+          description: Product
+        quantity:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,4})?$
+          description: Current stock quantity
+        reserved_quantity:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,4})?$
+          description: Reserved stock (pending orders)
+        available_quantity:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,4})?$
+          readOnly: true
+        last_updated:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Timestamp of last update
+      required:
+      - available_quantity
+      - branch
+      - branch_name
+      - id
+      - last_updated
+      - product
+    Category:
+      type: object
+      description: 'Product category serializer for read operations.
+
+
+        Returns category details with parent hierarchy and immediate children.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          description: Category name
+          maxLength: 100
+        parent:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Parent category (null for root categories)
+        parent_name:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        children:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - children
+      - created_at
+      - id
+      - name
+      - parent_name
+    CategoryCreateRequest:
+      type: object
+      description: 'Product category serializer for create/update operations.
+
+
+        Validates category name uniqueness and parent references.'
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Category name
+          maxLength: 100
+        parent:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Parent category (null for root categories)
+      required:
+      - name
+    CategoryTreeNode:
+      type: object
+      description: Hierarchical category tree node.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Category ID
+        name:
+          type: string
+          description: Category name
+        children:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          description: Nested child categories
+      required:
+      - children
+      - id
+      - name
+    FieldError:
+      type: object
+      required:
+      - field
+      - message
+      - code
+      properties:
+        field:
+          type: string
+          description: Field name that caused the error
+          example: email
+        message:
+          type: string
+          description: Human-readable error message
+          example: Enter a valid email address.
+        code:
+          type: string
+          description: Machine-readable error code
+          example: invalid
+      description: Field-level validation error details
+    PaginatedBranchStockList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BranchStock'
+    PaginatedCategoryList:
+      type: object
+      properties:
+        next:
+          type:
+          - string
+          - 'null'
+          format: uri
+        previous:
+          type:
+          - string
+          - 'null'
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+      required:
+      - next
+      - previous
+      - results
+    PaginatedCategoryTreeNodeList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryTreeNode'
+    PaginatedCostHistoryList:
+      type: object
+      properties:
+        next:
+          type:
+          - string
+          - 'null'
+          format: uri
+        previous:
+          type:
+          - string
+          - 'null'
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductCostHistory'
+      required:
+      - next
+      - previous
+      - results
+    PaginatedPaginatedCategoryListList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaginatedCategoryList'
+    PaginatedPaginatedCostHistoryListList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaginatedCostHistoryList'
+    PaginatedPaginatedPriceHistoryListList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaginatedPriceHistoryList'
+    PaginatedPaginatedPriceListListList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaginatedPriceListList'
+    PaginatedPaginatedProductListList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaginatedProductList'
+    PaginatedPaginatedStockMovementListList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaginatedStockMovementList'
+    PaginatedPriceHistoryList:
+      type: object
+      properties:
+        next:
+          type:
+          - string
+          - 'null'
+          format: uri
+        previous:
+          type:
+          - string
+          - 'null'
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductPriceHistory'
+      required:
+      - next
+      - previous
+      - results
+    PaginatedPriceListList:
+      type: object
+      properties:
+        next:
+          type:
+          - string
+          - 'null'
+          format: uri
+        previous:
+          type:
+          - string
+          - 'null'
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PriceList'
+      required:
+      - next
+      - previous
+      - results
+    PaginatedProductList:
+      type: object
+      properties:
+        next:
+          type:
+          - string
+          - 'null'
+          format: uri
+        previous:
+          type:
+          - string
+          - 'null'
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+      required:
+      - next
+      - previous
+      - results
+    PaginatedStockMovementList:
+      type: object
+      properties:
+        next:
+          type:
+          - string
+          - 'null'
+          format: uri
+        previous:
+          type:
+          - string
+          - 'null'
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/StockMovement'
+      required:
+      - next
+      - previous
+      - results
+    PatchedCategoryCreateRequest:
+      type: object
+      description: 'Product category serializer for create/update operations.
+
+
+        Validates category name uniqueness and parent references.'
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Category name
+          maxLength: 100
+        parent:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Parent category (null for root categories)
+    PatchedPriceListRequest:
+      type: object
+      description: 'Price list serializer for read and write operations.
+
+
+        Validates single default price list per tenant.'
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Price list name
+          maxLength: 100
+        margin_pct:
+          type:
+          - string
+          - 'null'
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          description: Default margin percentage
+        is_default:
+          type: boolean
+          description: Default price list flag
+    PatchedProductCreateRequest:
+      type: object
+      description: 'Product serializer for create/update operations.
+
+
+        Validates SKU uniqueness within tenant and handles barcode encryption.'
+      properties:
+        sku:
+          type: string
+          minLength: 1
+          description: Stock Keeping Unit (unique per tenant)
+          maxLength: 50
+        barcode:
+          type:
+          - string
+          - 'null'
+          description: Product barcode (will be encrypted)
+        name:
+          type: string
+          minLength: 1
+          description: Product display name
+          maxLength: 255
+        description:
+          type:
+          - string
+          - 'null'
+          description: Product description
+        category:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Product category
+        supplier:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Default supplier
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Default selling price
+        cost_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Last known cost price
+        tax_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          description: VAT rate percentage (default 21% for Argentina)
+        min_stock:
+          type:
+          - string
+          - 'null'
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,4})?$
+          description: Minimum stock level for reorder alerts
+        max_stock:
+          type:
+          - string
+          - 'null'
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,4})?$
+          description: Maximum stock level
+        custom_data:
+          description: Tenant-defined custom fields. Validated against TenantFieldDefinition.
+        ml_tags:
+          description: "\n        ML-generated categorization and predictive analytics metadata.\n\n        Expected schema\
+            \ for ML predictions:\n        {\n            \"category_auto\": \"string - auto-detected product category\",\n\
+            \            \"seasonality\": \"string - seasonal pattern (e.g., 'summer', 'winter',\n                       \
+            \    'spring', 'fall', 'all_year')\",\n            \"price_sensitivity\": \"string - price sensitivity level\n\
+            \                                 ('high', 'medium', 'low')\",\n            \"demand_pattern\": \"string - demand\
+            \ pattern classification\n                              ('steady', 'volatile', 'trending_up', 'trending_down',\n\
+            \                              'seasonal', 'sporadic')\",\n            \"reorder_prediction\": \"float - predicted\
+            \ days until reorder needed\",\n            \"predictions\": {\n                \"demand\": {\n              \
+            \      \"next_7_days\": \"int - predicted demand for next week\",\n                    \"next_30_days\": \"int\
+            \ - predicted demand for next month\",\n                    \"confidence\": \"float - confidence score (0.0-1.0)\"\
+            \n                },\n                \"reorder\": {\n                    \"days_until_stockout\": \"int - predicted\
+            \ days until stockout\",\n                    \"recommended_quantity\": \"int - AI-recommended reorder quantity\"\
+            ,\n                    \"confidence\": \"float - confidence score (0.0-1.0)\"\n                }\n           \
+            \ },\n            \"seasonality_data\": {\n                \"pattern\": \"string - detected seasonal pattern\"\
+            ,\n                \"peak_months\": [\"list of int - peak demand months (1-12)\"],\n                \"multipliers\"\
+            : {\n                    \"month_name\": \"float - seasonal demand multiplier\"\n                }\n         \
+            \   },\n            \"metadata\": {\n                \"last_updated\": \"string - ISO 8601 timestamp of last ML\
+            \ update\",\n                \"model_version\": \"string - ML model version used\",\n                \"accuracy_score\"\
+            : \"float - model accuracy score (0.0-1.0)\"\n            }\n        }\n\n        Note: This field is populated\
+            \ by ML services and should not be manually\n        edited in most cases. The schema may evolve as new ML models\
+            \ are deployed.\n        Empty dict {} is valid and indicates no ML analysis has been performed yet.\n        "
+        is_active:
+          type: boolean
+          description: Active/available for sale
+    PriceList:
+      type: object
+      description: 'Price list serializer for read and write operations.
+
+
+        Validates single default price list per tenant.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          description: Price list name
+          maxLength: 100
+        margin_pct:
+          type:
+          - string
+          - 'null'
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          description: Default margin percentage
+        is_default:
+          type: boolean
+          description: Default price list flag
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+    PriceListDefaultResponse:
+      type: object
+      description: Response for set-default action.
+      properties:
+        status:
+          type: string
+          default: default set
+          description: Operation status
+        id:
+          type: string
+          format: uuid
+          description: Price list ID
+      required:
+      - id
+    PriceListRequest:
+      type: object
+      description: 'Price list serializer for read and write operations.
+
+
+        Validates single default price list per tenant.'
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Price list name
+          maxLength: 100
+        margin_pct:
+          type:
+          - string
+          - 'null'
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          description: Default margin percentage
+        is_default:
+          type: boolean
+          description: Default price list flag
+      required:
+      - name
+    ProblemDetail:
+      type: object
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - trace_id
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI identifying the error type category
+          example: https://api.gravitea.com/errors/not-found
+        title:
+          type: string
+          description: Human-readable error title
+          example: Not Found
+        status:
+          type: integer
+          description: HTTP status code
+          example: 404
+        detail:
+          type: string
+          description: Detailed explanation of the error
+          example: The requested resource was not found
+        trace_id:
+          type: string
+          format: uuid
+          description: Unique request identifier for log correlation
+          example: 550e8400-e29b-41d4-a716-446655440000
+      description: RFC 7807 Problem Details for HTTP APIs
+    Product:
+      type: object
+      description: 'Product serializer for read operations.
+
+
+        Returns product details with computed fields and related object names.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        sku:
+          type: string
+          description: Stock Keeping Unit (unique per tenant)
+          maxLength: 50
+        barcode:
+          type:
+          - string
+          - 'null'
+          description: Product barcode (encrypted)
+        name:
+          type: string
+          description: Product display name
+          maxLength: 255
+        description:
+          type:
+          - string
+          - 'null'
+          description: Product description
+        category:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Product category
+        category_name:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        supplier:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Default supplier
+        supplier_name:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Default selling price
+        cost_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Last known cost price
+        tax_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          description: VAT rate percentage (default 21% for Argentina)
+        price_with_tax:
+          type: string
+          readOnly: true
+        min_stock:
+          type:
+          - string
+          - 'null'
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,4})?$
+          description: Minimum stock level for reorder alerts
+        max_stock:
+          type:
+          - string
+          - 'null'
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,4})?$
+          description: Maximum stock level
+        custom_data:
+          description: Tenant-defined custom fields. Validated against TenantFieldDefinition.
+        ml_tags:
+          description: "\n        ML-generated categorization and predictive analytics metadata.\n\n        Expected schema\
+            \ for ML predictions:\n        {\n            \"category_auto\": \"string - auto-detected product category\",\n\
+            \            \"seasonality\": \"string - seasonal pattern (e.g., 'summer', 'winter',\n                       \
+            \    'spring', 'fall', 'all_year')\",\n            \"price_sensitivity\": \"string - price sensitivity level\n\
+            \                                 ('high', 'medium', 'low')\",\n            \"demand_pattern\": \"string - demand\
+            \ pattern classification\n                              ('steady', 'volatile', 'trending_up', 'trending_down',\n\
+            \                              'seasonal', 'sporadic')\",\n            \"reorder_prediction\": \"float - predicted\
+            \ days until reorder needed\",\n            \"predictions\": {\n                \"demand\": {\n              \
+            \      \"next_7_days\": \"int - predicted demand for next week\",\n                    \"next_30_days\": \"int\
+            \ - predicted demand for next month\",\n                    \"confidence\": \"float - confidence score (0.0-1.0)\"\
+            \n                },\n                \"reorder\": {\n                    \"days_until_stockout\": \"int - predicted\
+            \ days until stockout\",\n                    \"recommended_quantity\": \"int - AI-recommended reorder quantity\"\
+            ,\n                    \"confidence\": \"float - confidence score (0.0-1.0)\"\n                }\n           \
+            \ },\n            \"seasonality_data\": {\n                \"pattern\": \"string - detected seasonal pattern\"\
+            ,\n                \"peak_months\": [\"list of int - peak demand months (1-12)\"],\n                \"multipliers\"\
+            : {\n                    \"month_name\": \"float - seasonal demand multiplier\"\n                }\n         \
+            \   },\n            \"metadata\": {\n                \"last_updated\": \"string - ISO 8601 timestamp of last ML\
+            \ update\",\n                \"model_version\": \"string - ML model version used\",\n                \"accuracy_score\"\
+            : \"float - model accuracy score (0.0-1.0)\"\n            }\n        }\n\n        Note: This field is populated\
+            \ by ML services and should not be manually\n        edited in most cases. The schema may evolve as new ML models\
+            \ are deployed.\n        Empty dict {} is valid and indicates no ML analysis has been performed yet.\n        "
+        is_active:
+          type: boolean
+          description: Active/available for sale
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - category_name
+      - created_at
+      - id
+      - name
+      - price_with_tax
+      - sku
+      - supplier_name
+      - updated_at
+    ProductCostHistory:
+      type: object
+      description: 'Product cost history serializer for read operations.
+
+
+        Returns cost history entries with product details.
+
+        Tracks cost changes for COGS calculations and inventory valuation.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        product:
+          type: string
+          format: uuid
+          description: Product
+        product_sku:
+          type: string
+          readOnly: true
+        product_name:
+          type: string
+          readOnly: true
+        cost:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Cost value
+        valid_from:
+          type: string
+          format: date-time
+          description: Start of validity period
+        valid_to:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: End of validity period (null for current cost)
+        source_doc:
+          type:
+          - string
+          - 'null'
+          description: Source document reference (PO, invoice, etc.)
+      required:
+      - id
+      - product
+      - product_name
+      - product_sku
+      - valid_from
+    ProductCreateRequest:
+      type: object
+      description: 'Product serializer for create/update operations.
+
+
+        Validates SKU uniqueness within tenant and handles barcode encryption.'
+      properties:
+        sku:
+          type: string
+          minLength: 1
+          description: Stock Keeping Unit (unique per tenant)
+          maxLength: 50
+        barcode:
+          type:
+          - string
+          - 'null'
+          description: Product barcode (will be encrypted)
+        name:
+          type: string
+          minLength: 1
+          description: Product display name
+          maxLength: 255
+        description:
+          type:
+          - string
+          - 'null'
+          description: Product description
+        category:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Product category
+        supplier:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Default supplier
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Default selling price
+        cost_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Last known cost price
+        tax_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          description: VAT rate percentage (default 21% for Argentina)
+        min_stock:
+          type:
+          - string
+          - 'null'
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,4})?$
+          description: Minimum stock level for reorder alerts
+        max_stock:
+          type:
+          - string
+          - 'null'
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,4})?$
+          description: Maximum stock level
+        custom_data:
+          description: Tenant-defined custom fields. Validated against TenantFieldDefinition.
+        ml_tags:
+          description: "\n        ML-generated categorization and predictive analytics metadata.\n\n        Expected schema\
+            \ for ML predictions:\n        {\n            \"category_auto\": \"string - auto-detected product category\",\n\
+            \            \"seasonality\": \"string - seasonal pattern (e.g., 'summer', 'winter',\n                       \
+            \    'spring', 'fall', 'all_year')\",\n            \"price_sensitivity\": \"string - price sensitivity level\n\
+            \                                 ('high', 'medium', 'low')\",\n            \"demand_pattern\": \"string - demand\
+            \ pattern classification\n                              ('steady', 'volatile', 'trending_up', 'trending_down',\n\
+            \                              'seasonal', 'sporadic')\",\n            \"reorder_prediction\": \"float - predicted\
+            \ days until reorder needed\",\n            \"predictions\": {\n                \"demand\": {\n              \
+            \      \"next_7_days\": \"int - predicted demand for next week\",\n                    \"next_30_days\": \"int\
+            \ - predicted demand for next month\",\n                    \"confidence\": \"float - confidence score (0.0-1.0)\"\
+            \n                },\n                \"reorder\": {\n                    \"days_until_stockout\": \"int - predicted\
+            \ days until stockout\",\n                    \"recommended_quantity\": \"int - AI-recommended reorder quantity\"\
+            ,\n                    \"confidence\": \"float - confidence score (0.0-1.0)\"\n                }\n           \
+            \ },\n            \"seasonality_data\": {\n                \"pattern\": \"string - detected seasonal pattern\"\
+            ,\n                \"peak_months\": [\"list of int - peak demand months (1-12)\"],\n                \"multipliers\"\
+            : {\n                    \"month_name\": \"float - seasonal demand multiplier\"\n                }\n         \
+            \   },\n            \"metadata\": {\n                \"last_updated\": \"string - ISO 8601 timestamp of last ML\
+            \ update\",\n                \"model_version\": \"string - ML model version used\",\n                \"accuracy_score\"\
+            : \"float - model accuracy score (0.0-1.0)\"\n            }\n        }\n\n        Note: This field is populated\
+            \ by ML services and should not be manually\n        edited in most cases. The schema may evolve as new ML models\
+            \ are deployed.\n        Empty dict {} is valid and indicates no ML analysis has been performed yet.\n        "
+        is_active:
+          type: boolean
+          description: Active/available for sale
+      required:
+      - name
+      - sku
+    ProductDetail:
+      type: object
+      description: 'Product serializer with stock information.
+
+
+        Extends ProductSerializer with branch stock levels.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        sku:
+          type: string
+          description: Stock Keeping Unit (unique per tenant)
+          maxLength: 50
+        barcode:
+          type:
+          - string
+          - 'null'
+          description: Product barcode (encrypted)
+        name:
+          type: string
+          description: Product display name
+          maxLength: 255
+        description:
+          type:
+          - string
+          - 'null'
+          description: Product description
+        category:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Product category
+        category_name:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        supplier:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Default supplier
+        supplier_name:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Default selling price
+        cost_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Last known cost price
+        tax_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          description: VAT rate percentage (default 21% for Argentina)
+        price_with_tax:
+          type: string
+          readOnly: true
+        min_stock:
+          type:
+          - string
+          - 'null'
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,4})?$
+          description: Minimum stock level for reorder alerts
+        max_stock:
+          type:
+          - string
+          - 'null'
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,4})?$
+          description: Maximum stock level
+        custom_data:
+          description: Tenant-defined custom fields. Validated against TenantFieldDefinition.
+        ml_tags:
+          description: "\n        ML-generated categorization and predictive analytics metadata.\n\n        Expected schema\
+            \ for ML predictions:\n        {\n            \"category_auto\": \"string - auto-detected product category\",\n\
+            \            \"seasonality\": \"string - seasonal pattern (e.g., 'summer', 'winter',\n                       \
+            \    'spring', 'fall', 'all_year')\",\n            \"price_sensitivity\": \"string - price sensitivity level\n\
+            \                                 ('high', 'medium', 'low')\",\n            \"demand_pattern\": \"string - demand\
+            \ pattern classification\n                              ('steady', 'volatile', 'trending_up', 'trending_down',\n\
+            \                              'seasonal', 'sporadic')\",\n            \"reorder_prediction\": \"float - predicted\
+            \ days until reorder needed\",\n            \"predictions\": {\n                \"demand\": {\n              \
+            \      \"next_7_days\": \"int - predicted demand for next week\",\n                    \"next_30_days\": \"int\
+            \ - predicted demand for next month\",\n                    \"confidence\": \"float - confidence score (0.0-1.0)\"\
+            \n                },\n                \"reorder\": {\n                    \"days_until_stockout\": \"int - predicted\
+            \ days until stockout\",\n                    \"recommended_quantity\": \"int - AI-recommended reorder quantity\"\
+            ,\n                    \"confidence\": \"float - confidence score (0.0-1.0)\"\n                }\n           \
+            \ },\n            \"seasonality_data\": {\n                \"pattern\": \"string - detected seasonal pattern\"\
+            ,\n                \"peak_months\": [\"list of int - peak demand months (1-12)\"],\n                \"multipliers\"\
+            : {\n                    \"month_name\": \"float - seasonal demand multiplier\"\n                }\n         \
+            \   },\n            \"metadata\": {\n                \"last_updated\": \"string - ISO 8601 timestamp of last ML\
+            \ update\",\n                \"model_version\": \"string - ML model version used\",\n                \"accuracy_score\"\
+            : \"float - model accuracy score (0.0-1.0)\"\n            }\n        }\n\n        Note: This field is populated\
+            \ by ML services and should not be manually\n        edited in most cases. The schema may evolve as new ML models\
+            \ are deployed.\n        Empty dict {} is valid and indicates no ML analysis has been performed yet.\n        "
+        is_active:
+          type: boolean
+          description: Active/available for sale
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        branch_stocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/BranchStock'
+          readOnly: true
+      required:
+      - branch_stocks
+      - category_name
+      - created_at
+      - id
+      - name
+      - price_with_tax
+      - sku
+      - supplier_name
+      - updated_at
+    ProductPriceHistory:
+      type: object
+      description: 'Product price history serializer for read operations.
+
+
+        Returns price history entries with product and price list details.
+
+        Tracks price changes over time with audit trail.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        product:
+          type: string
+          format: uuid
+          description: Product
+        product_sku:
+          type: string
+          readOnly: true
+        product_name:
+          type: string
+          readOnly: true
+        price_list:
+          type: string
+          format: uuid
+          description: Price list
+        price_list_name:
+          type: string
+          readOnly: true
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Price value
+        valid_from:
+          type: string
+          format: date-time
+          description: Start of validity period
+        valid_to:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: End of validity period (null for current price)
+        change_reason:
+          type:
+          - string
+          - 'null'
+          description: Reason for price change
+        changed_by_user:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: User who made the change
+        changed_by_name:
+          type: string
+          readOnly: true
+      required:
+      - changed_by_name
+      - id
+      - price_list
+      - price_list_name
+      - product
+      - product_name
+      - product_sku
+      - valid_from
+    RateLimitError:
+      type: object
+      description: 'RFC 7807 rate limit error with retry information.
+
+
+        Extended ProblemDetail for 429 Too Many Requests responses
+
+        that include retry timing information.'
+      properties:
+        type:
+          type: string
+          format: uri
+          default: about:blank
+          description: URI reference identifying the problem type category
+        title:
+          type: string
+          description: Short, human-readable error summary
+          maxLength: 100
+        status:
+          type: integer
+          maximum: 599
+          minimum: 400
+          description: HTTP status code (400-599)
+        detail:
+          type: string
+          description: Human-readable explanation of this specific error
+          maxLength: 500
+        trace_id:
+          type: string
+          format: uuid
+          description: UUID v4 for log correlation
+        instance:
+          type: string
+          format: uri
+          description: URI of the specific resource that caused the error
+        retry_after:
+          type: integer
+          description: Seconds until the next request attempt is allowed
+      required:
+      - detail
+      - retry_after
+      - status
+      - title
+      - trace_id
+    StockMovement:
+      type: object
+      description: 'Stock movement serializer for read operations.
+
+
+        Returns movement details with product and branch info.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        product:
+          type: string
+          format: uuid
+          description: Product being moved
+        product_sku:
+          type: string
+          readOnly: true
+        product_name:
+          type: string
+          readOnly: true
+        branch:
+          type: string
+          format: uuid
+          description: Branch where movement occurred
+        branch_name:
+          type: string
+          readOnly: true
+        type:
+          enum:
+          - SALE
+          - PURCHASE
+          - ADJ
+          - TRANS_IN
+          - TRANS_OUT
+          type: string
+          x-spec-enum-id: 129912e1d6329677
+          description: 'Type of stock movement (PostgreSQL ENUM)
+
+
+            * `SALE` - Sale
+
+            * `PURCHASE` - Purchase
+
+            * `ADJ` - Adjustment
+
+            * `TRANS_IN` - Transfer In
+
+            * `TRANS_OUT` - Transfer Out'
+        quantity_delta:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,4})?$
+          description: Quantity moved (positive=in, negative=out)
+        cost_snapshot:
+          type:
+          - string
+          - 'null'
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,4})?$
+          description: Cost per unit at time of movement
+        total_value:
+          type: string
+          readOnly: true
+        reference_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: External reference (SaleID, PurchaseID, etc.)
+        notes:
+          type:
+          - string
+          - 'null'
+          description: Movement notes
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - branch
+      - branch_name
+      - created_at
+      - id
+      - product
+      - product_name
+      - product_sku
+      - quantity_delta
+      - total_value
+      - type
+    StockMovementCreateRequest:
+      type: object
+      description: 'Stock movement serializer for create operations.
+
+
+        Validates product and branch belong to same tenant.'
+      properties:
+        product:
+          type: string
+          format: uuid
+          description: Product being moved
+        branch:
+          type: string
+          format: uuid
+          description: Branch where movement occurred
+        type:
+          enum:
+          - SALE
+          - PURCHASE
+          - ADJ
+          - TRANS_IN
+          - TRANS_OUT
+          type: string
+          x-spec-enum-id: 129912e1d6329677
+          description: 'Type of stock movement (PostgreSQL ENUM)
+
+
+            * `SALE` - Sale
+
+            * `PURCHASE` - Purchase
+
+            * `ADJ` - Adjustment
+
+            * `TRANS_IN` - Transfer In
+
+            * `TRANS_OUT` - Transfer Out'
+        quantity_delta:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,4})?$
+          description: Quantity moved (positive=in, negative=out)
+        cost_snapshot:
+          type:
+          - string
+          - 'null'
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,4})?$
+          description: Cost per unit at time of movement
+        reference_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: External reference (SaleID, PurchaseID, etc.)
+        notes:
+          type:
+          - string
+          - 'null'
+          description: Movement notes
+      required:
+      - branch
+      - product
+      - quantity_delta
+      - type
+    ValidationError:
+      allOf:
+      - $ref: '#/components/schemas/ProblemDetail'
+      - type: object
+        properties:
+          errors:
+            type: array
+            items:
+              $ref: '#/components/schemas/FieldError'
+            description: Field-level validation error details
+            example:
+            - field: email
+              message: Enter a valid email address.
+              code: invalid
+            - field: username
+              message: This field is required.
+              code: required
+      description: Validation error response with field-level details

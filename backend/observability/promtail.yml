@@ -1,0 +1,151 @@
+# Promtail Configuration for GRAVITEA ERP
+# Per 004-observability-metrics spec FR-016 through FR-020
+#
+# Log shipping agent configuration for sending logs to Loki.
+# Parses JSON logs from GRAVITEA backend.
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+  log_level: info
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+    tenant_id: gravitea
+    batchwait: 1s
+    batchsize: 1048576
+    timeout: 10s
+    backoff_config:
+      min_period: 500ms
+      max_period: 5m
+      max_retries: 10
+
+scrape_configs:
+  # Docker logs from GRAVITEA backend
+  - job_name: docker-gravitea
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+        filters:
+          - name: label
+            values: ["com.gravitea.service=backend"]
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container'
+      - source_labels: ['__meta_docker_container_log_stream']
+        target_label: 'stream'
+      - source_labels: ['__meta_docker_container_label_com_gravitea_environment']
+        target_label: 'environment'
+    pipeline_stages:
+      # Parse JSON logs
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            logger: logger
+            message: message
+            trace_id: trace_id
+            tenant_id: tenant_id
+            branch_id: branch_id
+            user_id: user_id
+            request_path: request_path
+            request_method: request_method
+            status_code: status_code
+            duration_ms: duration_ms
+      # Set timestamp from log
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+      # Add labels for filtering
+      - labels:
+          level:
+          logger:
+          tenant_id:
+          trace_id:
+      # Output stage for log line
+      - output:
+          source: message
+
+  # System logs from backend container
+  - job_name: system-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: gravitea-system
+          __path__: /var/log/*.log
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\S+\s+\S+)\s+(?P<level>\w+)\s+(?P<message>.*)$'
+      - timestamp:
+          source: timestamp
+          format: "2006-01-02 15:04:05"
+      - labels:
+          level:
+
+  # Django application logs (file-based alternative)
+  - job_name: django-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: gravitea-django
+          environment: development
+          __path__: /app/logs/*.json
+    pipeline_stages:
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            logger: logger
+            message: message
+            trace_id: trace_id
+            tenant_id: tenant_id
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+      - labels:
+          level:
+          logger:
+          tenant_id:
+          trace_id:
+
+  # Gunicorn/uWSGI access logs
+  - job_name: access-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: gravitea-access
+          __path__: /app/logs/access*.log
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<client_ip>\S+) - - \[(?P<timestamp>[^\]]+)\] "(?P<method>\S+) (?P<path>\S+) (?P<protocol>\S+)" (?P<status>\d+) (?P<size>\d+) "(?P<referrer>[^"]*)" "(?P<user_agent>[^"]*)"'
+      - timestamp:
+          source: timestamp
+          format: "02/Jan/2006:15:04:05 -0700"
+      - labels:
+          method:
+          status:
+      - metrics:
+          http_request_total:
+            type: Counter
+            description: "HTTP requests total"
+            config:
+              match_all: true
+              action: inc
+
+# Limit resources
+target_config:
+  sync_period: 10s
+
+# Enable structured metadata extraction
+# Useful for high-cardinality labels that shouldn't be indexed
+# but can be filtered in queries
+# structured_metadata:
+#   - source: trace_id
+#   - source: user_id

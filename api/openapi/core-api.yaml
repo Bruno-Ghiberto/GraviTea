@@ -1,0 +1,397 @@
+openapi: 3.1.0
+info:
+  title: Gravitea Core Configuration API
+  version: 1.0.0
+  description: 'Core configuration endpoints for field definitions and module configuration (customization engine).
+
+
+    ## Authentication
+
+    All endpoints require JWT Bearer authentication (unless noted otherwise).
+
+
+    ## Multi-Tenant
+
+    Resources are automatically filtered by tenant_id from JWT claims.'
+  contact:
+    name: Gravitea Development Team
+    email: dev@gravitea.com
+  license:
+    name: Proprietary
+servers:
+- url: http://localhost:8000/api/v1
+  description: Development
+- url: https://api.gravitea.app/api/v1
+  description: Production
+security:
+- bearerAuth: []
+paths:
+  /api/v1/field-definitions/:
+    get:
+      operationId: field_definitions_list
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: El valor del cursor de paginación.
+        schema:
+          type: string
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      tags:
+      - field-definitions
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFieldDefinitionList'
+          description: ''
+  /api/v1/field-definitions/{id}/:
+    get:
+      operationId: field_definitions_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - field-definitions
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FieldDefinition'
+          description: ''
+  /api/v1/module-config/:
+    get:
+      operationId: module_config_list
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: El valor del cursor de paginación.
+        schema:
+          type: string
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      tags:
+      - module-config
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedModuleConfigList'
+          description: ''
+  /api/v1/module-config/{id}/:
+    get:
+      operationId: module_config_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - module-config
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModuleConfig'
+          description: ''
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/token/ endpoint. Include tenant_id in token payload.
+  schemas:
+    FieldDefinition:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        field_key:
+          type: string
+          readOnly: true
+          description: Snake_case identifier (unique per tenant+entity_type)
+        label:
+          type: string
+          readOnly: true
+          description: Human-readable display name
+        entity_type:
+          enum:
+          - product
+          - customer
+          - supplier
+          - sale_order
+          - purchase_order
+          type: string
+          x-spec-enum-id: f13285bec909f68f
+          readOnly: true
+          description: 'Which entity this field applies to
+
+
+            * `product` - Product
+
+            * `customer` - Customer
+
+            * `supplier` - Supplier
+
+            * `sale_order` - Sale Order
+
+            * `purchase_order` - Purchase Order'
+        field_type:
+          enum:
+          - text
+          - integer
+          - decimal
+          - boolean
+          - date
+          - select
+          type: string
+          x-spec-enum-id: bf58760fcf5b7bdb
+          readOnly: true
+          description: 'Data type for validation and rendering
+
+
+            * `text` - Text
+
+            * `integer` - Integer
+
+            * `decimal` - Decimal
+
+            * `boolean` - Boolean
+
+            * `date` - Date
+
+            * `select` - Select'
+        section:
+          type: string
+          readOnly: true
+          description: UI grouping label
+        position:
+          type: integer
+          readOnly: true
+          description: Sort order within section
+        required:
+          type: boolean
+          readOnly: true
+          description: Whether the field is mandatory on create/update
+        default_value:
+          oneOf:
+          - {}
+          - type: 'null'
+          readOnly: true
+          description: Default value (type matches field_type). Applied on create only when key absent.
+        choices:
+          oneOf:
+          - {}
+          - type: 'null'
+          readOnly: true
+          description: 'List of allowed values for select type. Example: ["acero","aluminio"]'
+      required:
+      - choices
+      - default_value
+      - entity_type
+      - field_key
+      - field_type
+      - id
+      - label
+      - position
+      - required
+      - section
+    ModuleConfig:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        module:
+          enum:
+          - inventario
+          - ventas
+          - facturacion
+          - sync
+          type: string
+          x-spec-enum-id: 2eb3e1ff8925b51c
+          readOnly: true
+          description: 'Module identifier
+
+
+            * `inventario` - Inventario
+
+            * `ventas` - Ventas
+
+            * `facturacion` - Facturación
+
+            * `sync` - Sync'
+        enabled:
+          type: boolean
+          readOnly: true
+          description: Whether the module is active for this tenant
+        settings:
+          readOnly: true
+          description: Module-specific settings (future extensibility)
+      required:
+      - enabled
+      - id
+      - module
+      - settings
+    PaginatedFieldDefinitionList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldDefinition'
+    PaginatedModuleConfigList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModuleConfig'
+    ProblemDetail:
+      type: object
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - trace_id
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI identifying the error type category
+          example: https://api.gravitea.com/errors/not-found
+        title:
+          type: string
+          description: Human-readable error title
+          example: Not Found
+        status:
+          type: integer
+          description: HTTP status code
+          example: 404
+        detail:
+          type: string
+          description: Detailed explanation of the error
+          example: The requested resource was not found
+        trace_id:
+          type: string
+          format: uuid
+          description: Unique request identifier for log correlation
+          example: 550e8400-e29b-41d4-a716-446655440000
+      description: RFC 7807 Problem Details for HTTP APIs
+    RateLimitError:
+      type: object
+      description: 'RFC 7807 rate limit error with retry information.
+
+
+        Extended ProblemDetail for 429 Too Many Requests responses
+
+        that include retry timing information.'
+      properties:
+        type:
+          type: string
+          format: uri
+          default: about:blank
+          description: URI reference identifying the problem type category
+        title:
+          type: string
+          description: Short, human-readable error summary
+          maxLength: 100
+        status:
+          type: integer
+          maximum: 599
+          minimum: 400
+          description: HTTP status code (400-599)
+        detail:
+          type: string
+          description: Human-readable explanation of this specific error
+          maxLength: 500
+        trace_id:
+          type: string
+          format: uuid
+          description: UUID v4 for log correlation
+        instance:
+          type: string
+          format: uri
+          description: URI of the specific resource that caused the error
+        retry_after:
+          type: integer
+          description: Seconds until the next request attempt is allowed
+      required:
+      - detail
+      - retry_after
+      - status
+      - title
+      - trace_id
+    ValidationError:
+      allOf:
+      - $ref: '#/components/schemas/ProblemDetail'
+      - type: object
+        properties:
+          errors:
+            type: array
+            items:
+              $ref: '#/components/schemas/FieldError'
+            description: Field-level validation error details
+            example:
+            - field: email
+              message: Enter a valid email address.
+              code: invalid
+            - field: username
+              message: This field is required.
+              code: required
+      description: Validation error response with field-level details

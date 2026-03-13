@@ -1,0 +1,233 @@
+# Manual Branch Protection para Repos Privados con Cuenta Free
+# Este workflow simula Branch Protection Rules cuando no están disponibles
+
+name: Manual Branch Protection
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+  pull_request_review:
+    types: [submitted]
+
+# Permisos explícitos para el GITHUB_TOKEN
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  check-merge-permissions:
+    name: Verificar Permisos de Merge
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+
+      - name: Verificar autor del PR
+        id: check-author
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const targetBranch = pr.base.ref;
+            const author = pr.user.login;
+
+            // Usuarios autorizados para merge a main/develop
+            const authorizedForProtected = ['Bruno-Ghiberto'];
+
+            // Mapeo de usuarios a sus ramas
+            const branchOwners = {
+              'feature/inventory-backend': ['Bruno-Ghiberto'],
+              'feature/inventory-frontend': ['frontend-username', 'Bruno-Ghiberto'],
+              'feature/inventory-database': ['database-username', 'Bruno-Ghiberto']
+            };
+
+            console.log(`PR de ${author} hacia ${targetBranch}`);
+
+            // Verificar si es una rama protegida
+            if (['main', 'develop'].includes(targetBranch)) {
+              if (!authorizedForProtected.includes(author)) {
+                core.setFailed(`❌ Solo ${authorizedForProtected.join(', ')} pueden hacer merge a ${targetBranch}`);
+
+                // Agregar comentario al PR
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body: `### ❌ Merge Bloqueado\n\nSolo los siguientes usuarios pueden hacer merge a **${targetBranch}**:\n- ${authorizedForProtected.join('\n- ')}\n\nPor favor, solicita revisión de uno de ellos.`
+                });
+
+                return;
+              }
+            }
+
+            console.log('✅ Usuario autorizado para esta rama');
+
+      - name: Verificar CODEOWNERS
+        id: check-codeowners
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+
+            // Obtener archivos modificados
+            const files = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number
+            });
+
+            const modifiedPaths = files.data.map(f => f.filename);
+            console.log('Archivos modificados:', modifiedPaths);
+
+            // Verificar CODEOWNERS
+            const requiresBrunoReview = modifiedPaths.some(path =>
+              path.startsWith('backend/') ||
+              path.startsWith('.github/') ||
+              path === 'package.json' ||
+              path.endsWith('.sh')
+            );
+
+            if (requiresBrunoReview) {
+              // Verificar si Bruno ha aprobado
+              const reviews = await github.rest.pulls.listReviews({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number
+              });
+
+              const brunoApproved = reviews.data.some(r =>
+                r.user.login === 'Bruno-Ghiberto' &&
+                r.state === 'APPROVED'
+              );
+
+              if (!brunoApproved) {
+                core.setFailed('❌ Este PR modifica archivos que requieren revisión de @Bruno-Ghiberto');
+
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body: `### ⚠️ Revisión Requerida\n\nEste PR modifica archivos protegidos que requieren revisión de **@Bruno-Ghiberto**:\n\n${modifiedPaths.filter(p => p.startsWith('backend/') || p.startsWith('.github/')).map(p => `- \`${p}\``).join('\n')}\n\nPor favor, espera su aprobación antes de hacer merge.`
+                });
+              }
+            }
+
+      - name: Validar commits
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+
+            // Obtener commits del PR
+            const commits = await github.rest.pulls.listCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number
+            });
+
+            // Verificar formato de commits (Conventional Commits)
+            const invalidCommits = commits.data.filter(c => {
+              const message = c.commit.message;
+              const pattern = /^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .+/;
+              return !pattern.test(message);
+            });
+
+            if (invalidCommits.length > 0) {
+              console.log('⚠️ Algunos commits no siguen Conventional Commits:');
+              invalidCommits.forEach(c =>
+                console.log(`  - ${c.sha.substring(0, 7)}: ${c.commit.message.split('\n')[0]}`)
+              );
+
+              // Solo warning, no bloquear
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: `### ⚠️ Formato de Commits\n\nAlgunos commits no siguen el formato [Conventional Commits](https://www.conventionalcommits.org/):\n\n${invalidCommits.map(c => `- \`${c.sha.substring(0, 7)}\`: ${c.commit.message.split('\n')[0]}`).join('\n')}\n\nSe recomienda usar el formato: \`tipo(alcance): descripción\``
+              });
+            }
+
+  run-tests:
+    name: Ejecutar Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          elif [ -f package.json ]; then
+            npm install
+          fi
+
+      - name: Ejecutar linter
+        run: |
+          if [ -f package.json ] && grep -q "\"lint\"" package.json; then
+            npm run lint || true
+          fi
+
+      - name: Ejecutar tests
+        run: |
+          if [ -f package.json ] && grep -q "\"test\"" package.json; then
+            npm test || true
+          fi
+
+  label-pr:
+    name: Etiquetar PR
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Agregar etiquetas automáticas
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const labels = [];
+
+            // Determinar etiquetas basadas en la rama
+            if (pr.head.ref.includes('backend')) labels.push('backend');
+            if (pr.head.ref.includes('frontend')) labels.push('frontend');
+            if (pr.head.ref.includes('database')) labels.push('database');
+            if (pr.base.ref === 'main') labels.push('production');
+            if (pr.base.ref === 'develop') labels.push('development');
+
+            // Determinar tamaño del PR
+            const files = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number
+            });
+
+            const changes = files.data.reduce((acc, file) => acc + file.changes, 0);
+
+            if (changes < 10) labels.push('size/XS');
+            else if (changes < 50) labels.push('size/S');
+            else if (changes < 200) labels.push('size/M');
+            else if (changes < 500) labels.push('size/L');
+            else labels.push('size/XL');
+
+            // Aplicar etiquetas
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: labels
+              });
+            }

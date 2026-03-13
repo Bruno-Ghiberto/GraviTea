@@ -1,0 +1,136 @@
+openapi: 3.0.3
+info:
+  title: Tenant Field Definitions API
+  version: "1.0"
+  description: |
+    Read-only endpoint for retrieving tenant-scoped custom field definitions.
+    Used by frontend to dynamically render custom fields on entity forms.
+
+paths:
+  /api/v1/field-definitions/:
+    get:
+      operationId: listFieldDefinitions
+      summary: List active field definitions for current tenant
+      description: |
+        Returns all active field definitions scoped to the authenticated user's tenant.
+        Optionally filtered by entity_type. Results ordered by section, position, field_key.
+      tags:
+        - Customization
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: entity_type
+          in: query
+          required: false
+          description: Filter by entity type
+          schema:
+            type: string
+            enum: [product, customer, supplier, sale_order]
+      responses:
+        "200":
+          description: List of active field definitions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FieldDefinition"
+              example:
+                - id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                  field_key: "peso_kg"
+                  label: "Peso (kg)"
+                  entity_type: "product"
+                  field_type: "decimal"
+                  section: "dimensiones"
+                  position: 0
+                  required: false
+                  default_value: null
+                  choices: null
+                - id: "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+                  field_key: "material"
+                  label: "Material"
+                  entity_type: "product"
+                  field_type: "select"
+                  section: "caracteristicas"
+                  position: 0
+                  required: false
+                  default_value: null
+                  choices: ["acero", "aluminio", "plastico", "madera", "vidrio", "cobre", "bronce"]
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                detail: "Authentication credentials were not provided."
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    FieldDefinition:
+      type: object
+      required:
+        - id
+        - field_key
+        - label
+        - entity_type
+        - field_type
+        - section
+        - position
+        - required
+      properties:
+        id:
+          type: string
+          format: uuid
+        field_key:
+          type: string
+          pattern: "^[a-z][a-z0-9_]{0,49}$"
+          maxLength: 50
+          description: Snake_case identifier, unique per tenant+entity_type
+        label:
+          type: string
+          maxLength: 100
+          description: Human-readable display name
+        entity_type:
+          type: string
+          enum: [product, customer, supplier, sale_order]
+        field_type:
+          type: string
+          enum: [text, integer, decimal, boolean, date, select]
+        section:
+          type: string
+          maxLength: 100
+          description: UI grouping label
+        position:
+          type: integer
+          minimum: 0
+          description: Sort order within section
+        required:
+          type: boolean
+          description: Whether the field is mandatory
+        default_value:
+          description: Default value matching field_type. Included for frontend pre-population.
+          oneOf:
+            - type: string
+            - type: integer
+            - type: number
+            - type: boolean
+            - type: "null"
+        choices:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Allowed values for select field_type
+
+    Error:
+      type: object
+      properties:
+        detail:
+          type: string

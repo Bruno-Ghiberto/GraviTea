@@ -1,0 +1,12 @@
+{
+    "name": "gravitea-erp",
+    "private": true,
+    "packageManager": "pnpm@10.20.0",
+    "scripts": {
+      "dev:web": "pnpm -C frontend dev",
+      "build:web": "pnpm -C frontend build",
+      "lint:web": "pnpm -C frontend lint",
+      "typecheck:web": "pnpm -C frontend typecheck"
+    }
+  }
+  

@@ -1,0 +1,2379 @@
+openapi: 3.1.0
+info:
+  title: Gravitea Sales (Ventas) API
+  version: 1.0.0
+  description: 'Sales order management, customer management, order items, and order lifecycle (confirm, authorize, invoice).
+
+
+    ## Authentication
+
+    All endpoints require JWT Bearer authentication (unless noted otherwise).
+
+
+    ## Multi-Tenant
+
+    Resources are automatically filtered by tenant_id from JWT claims.'
+  contact:
+    name: Gravitea Development Team
+    email: dev@gravitea.com
+  license:
+    name: Proprietary
+servers:
+- url: http://localhost:8000/api/v1
+  description: Development
+- url: https://api.gravitea.app/api/v1
+  description: Production
+security:
+- bearerAuth: []
+paths:
+  /api/v1/ventas/customers/:
+    get:
+      operationId: ventas_customers_list
+      description: "\n    List customers with cursor pagination and optional filtering.\n\n    **Filters:**\n    - search:\
+        \ Search by razon_social or cuit (SearchFilter)\n    - is_active: Filter by active status\n    - condicion_iva: Filter\
+        \ by IVA condition code\n    "
+      summary: List customers
+      parameters:
+      - in: query
+        name: condicion_iva
+        schema:
+          type: integer
+        description: Filter by IVA condition code (1=RI, 4=Exento, 5=CF, 6=Monotributo)
+      - in: query
+        name: cursor
+        schema:
+          type: string
+        description: Pagination cursor
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+        description: Filter by active status
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Search by razon_social or cuit
+      tags:
+      - ventas-customers
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaginatedCustomerListList'
+          description: ''
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    post:
+      operationId: ventas_customers_create
+      description: "\n    Register a new customer with fiscal identification.\n\n    **Constraints:**\n    - CUIT must be\
+        \ exactly 11 digits with valid Modulo-11 check digit.\n    - CUIT must be unique per tenant.\n    - condicion_iva\
+        \ determines invoice type resolution (A/B/C).\n    "
+      summary: Create customer
+      tags:
+      - ventas-customers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+            examples:
+              ResponsableInscripto:
+                value:
+                  cuit: '20345678901'
+                  doc_tipo: 80
+                  condicion_iva: 1
+                  razon_social: ACME S.A.
+                  domicilio: Av. Corrientes 1234, CABA
+                  email: contacto@acme.com.ar
+                  telefono: 011-4567-8901
+                summary: Responsable Inscripto
+              ConsumidorFinal:
+                value:
+                  cuit: '20000000009'
+                  doc_tipo: 99
+                  condicion_iva: 5
+                  razon_social: Consumidor Final
+                summary: Consumidor Final
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/ventas/customers/{id}/:
+    get:
+      operationId: ventas_customers_retrieve
+      description: Retrieve customer details including fiscal identification and contact info.
+      summary: Get customer details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - ventas-customers
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: ''
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    put:
+      operationId: ventas_customers_update
+      description: Update customer data. CUIT uniqueness per tenant is enforced.
+      summary: Update customer
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - ventas-customers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    patch:
+      operationId: ventas_customers_partial_update
+      description: Partially update customer fields.
+      summary: Partial update customer
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - ventas-customers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomerRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomerRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomerRequest'
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    delete:
+      operationId: ventas_customers_destroy
+      description: Soft-deactivate customer by setting is_active=False.
+      summary: Deactivate customer
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - ventas-customers
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/ventas/orders/:
+    get:
+      operationId: ventas_orders_list
+      description: "\n    List sale orders with cursor pagination and optional filtering.\n\n    **Filters:**\n    - status:\
+        \ Filter by order status (DRAFT, CONFIRMED, INVOICED)\n    - customer: Filter by customer UUID\n    - date_from: Filter\
+        \ by sale_date >= date\n    - date_to: Filter by sale_date <= date\n    "
+      summary: List sale orders
+      parameters:
+      - in: query
+        name: cursor
+        schema:
+          type: string
+        description: Pagination cursor
+      - in: query
+        name: customer
+        schema:
+          type: string
+          format: uuid
+        description: Filter by customer UUID
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date
+        description: Sale date >= this date (YYYY-MM-DD)
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date
+        description: Sale date <= this date (YYYY-MM-DD)
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - CONFIRMED
+          - DRAFT
+          - INVOICED
+        description: Filter by order status
+      tags:
+      - ventas-orders
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaginatedSaleOrderListList'
+          description: ''
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    post:
+      operationId: ventas_orders_create
+      description: "\n    Create a new sale order in DRAFT status.\n\n    **Constraints:**\n    - Customer must belong to\
+        \ the same tenant.\n    - Branch must belong to the same tenant.\n    - Order starts in DRAFT status with zero totals.\n\
+        \    - Add items via the nested items endpoint to populate totals.\n    "
+      summary: Create sale order
+      tags:
+      - ventas-orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaleOrderRequest'
+            examples:
+              NewDraftOrder:
+                value:
+                  customer: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                  branch: b2c3d4e5-f6a7-8901-bcde-f12345678901
+                summary: New Draft Order
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SaleOrderRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SaleOrderRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaleOrder'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/ventas/orders/{id}/:
+    get:
+      operationId: ventas_orders_retrieve
+      description: "\n    Retrieve sale order with nested items list.\n\n    Returns the full order detail including all line\
+        \ items with\n    product info, quantities, prices, and calculated totals.\n    "
+      summary: Get sale order details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - ventas-orders
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaleOrderDetail'
+          description: ''
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    put:
+      operationId: ventas_orders_update
+      description: "\n    Update a sale order. Only DRAFT orders can be modified.\n\n    **Lifecycle rules:**\n    - DRAFT:\
+        \ Fully editable.\n    - CONFIRMED: Returns 409 Conflict.\n    - INVOICED: Returns 409 Conflict (immutable).\n    "
+      summary: Update sale order
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - ventas-orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaleOrderRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SaleOrderRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SaleOrderRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaleOrder'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/conflict
+                title: Conflict
+                status: 409
+                detail: The request conflicts with the current state of the resource
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    patch:
+      operationId: ventas_orders_partial_update
+      description: Partially update a DRAFT sale order. Non-DRAFT orders return 409.
+      summary: Partial update sale order
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - ventas-orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSaleOrderRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSaleOrderRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSaleOrderRequest'
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaleOrder'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/conflict
+                title: Conflict
+                status: 409
+                detail: The request conflicts with the current state of the resource
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    delete:
+      operationId: ventas_orders_destroy
+      description: "\n    Delete a sale order. Only DRAFT orders can be deleted.\n\n    **Lifecycle rules:**\n    - DRAFT:\
+        \ Permanently deleted with all items.\n    - CONFIRMED/INVOICED: Returns 409 Conflict.\n    "
+      summary: Delete sale order
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - ventas-orders
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/conflict
+                title: Conflict
+                status: 409
+                detail: The request conflicts with the current state of the resource
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/ventas/orders/{id}/authorize/:
+    post:
+      operationId: ventas_orders_authorize_create
+      description: "\n    Authorize a CONFIRMED sale order: submit to ARCA and commit stock.\n\n    **Lifecycle transition:**\
+        \ CONFIRMED → INVOICED\n\n    **Side effects:**\n    - Comprobante is submitted to ARCA via WSFEv1 FECAESolicitar.\n\
+        \    - On success: CAE is assigned, order transitions to INVOICED.\n    - On failure: ARCA rejection details are returned.\n\
+        \n    **Possible errors:**\n    - 409 authorize_failed: ARCA rejected the invoice (details in arca_errors).\n    -\
+        \ 504 arca_timeout: ARCA service did not respond in time.\n    "
+      summary: Authorize sale order (ARCA)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - ventas-orders
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Order authorized with CAE details
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/conflict
+                title: Conflict
+                status: 409
+                detail: The request conflicts with the current state of the resource
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '504':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VentasError'
+          description: ''
+  /api/v1/ventas/orders/{id}/confirm/:
+    post:
+      operationId: ventas_orders_confirm_create
+      description: "\n    Confirm a DRAFT sale order: reserve stock and create a Comprobante DRAFT.\n\n    **Lifecycle transition:**\
+        \ DRAFT → CONFIRMED\n\n    **Side effects:**\n    - Stock is reserved via StockMovement (SALE type).\n    - A Comprobante\
+        \ (invoice draft) is created and linked to the order.\n    - confirmed_at and confirmed_by are set.\n\n    **Possible\
+        \ errors:**\n    - 409 insufficient_stock: Not enough stock for one or more items.\n    - 409 confirm_failed: Order\
+        \ is not in DRAFT status or other business rule violation.\n    "
+      summary: Confirm sale order
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - ventas-orders
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Order confirmed with comprobante details
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/conflict
+                title: Conflict
+                status: 409
+                detail: The request conflicts with the current state of the resource
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/ventas/orders/{id}/invoice/:
+    get:
+      operationId: ventas_orders_invoice_retrieve
+      description: "\n    Retrieve the linked comprobante (invoice) for an INVOICED order.\n\n    Returns comprobante details\
+        \ including CAE, amounts, and dates.\n    Returns 404 if no invoice is linked (order not yet authorized).\n    "
+      summary: Get linked invoice
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - ventas-orders
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComprobanteLink'
+          description: Linked comprobante details
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/ventas/orders/{order_pk}/items/:
+    get:
+      operationId: ventas_orders_items_list
+      description: List all line items for a specific sale order.
+      summary: List sale order items
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: El valor del cursor de paginación.
+        schema:
+          type: string
+      - in: path
+        name: order_pk
+        schema:
+          type: string
+          format: uuid
+        description: Parent sale order UUID
+        required: true
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      tags:
+      - ventas-order-items
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSaleOrderItemList'
+          description: ''
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    post:
+      operationId: ventas_orders_items_create
+      description: "\n    Add a line item to a sale order. Only DRAFT orders accept new items.\n\n    **Auto-calculated fields:**\n\
+        \    - subtotal = quantity * unit_price\n    - iva_amount = subtotal * (tax_rate / 100)\n\n    After adding, parent\
+        \ order totals are recalculated automatically.\n    "
+      summary: Add item to sale order
+      parameters:
+      - in: path
+        name: order_pk
+        schema:
+          type: string
+          format: uuid
+        description: Parent sale order UUID
+        required: true
+      tags:
+      - ventas-order-items
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaleOrderItemRequest'
+            examples:
+              AddProductItem:
+                value:
+                  product: c3d4e5f6-a7b8-9012-cdef-123456789012
+                  quantity: '5.0000'
+                  unit_price: '150.000'
+                  tax_rate: '21.00'
+                summary: Add product item
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SaleOrderItemRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SaleOrderItemRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaleOrderItem'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/conflict
+                title: Conflict
+                status: 409
+                detail: The request conflicts with the current state of the resource
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+  /api/v1/ventas/orders/{order_pk}/items/{id}/:
+    get:
+      operationId: ventas_orders_items_retrieve
+      description: Retrieve a specific line item with product info and calculated amounts.
+      summary: Get sale order item details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: order_pk
+        schema:
+          type: string
+          format: uuid
+        description: Parent sale order UUID
+        required: true
+      tags:
+      - ventas-order-items
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaleOrderItem'
+          description: ''
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    patch:
+      operationId: ventas_orders_items_partial_update
+      description: Partially update a line item on a DRAFT order.
+      summary: Partial update sale order item
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: order_pk
+        schema:
+          type: string
+          format: uuid
+        description: Parent sale order UUID
+        required: true
+      tags:
+      - ventas-order-items
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSaleOrderItemRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSaleOrderItemRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSaleOrderItemRequest'
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaleOrderItem'
+          description: ''
+        '400':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: https://api.gravitea.com/errors/validation-error
+                title: Validation Error
+                status: 400
+                detail: One or more fields contain invalid values
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+                errors:
+                - field: email
+                  message: Enter a valid email address.
+                  code: invalid
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/conflict
+                title: Conflict
+                status: 409
+                detail: The request conflicts with the current state of the resource
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+    delete:
+      operationId: ventas_orders_items_destroy
+      description: "\n    Remove a line item from a sale order. Only DRAFT orders allow item removal.\n\n    After removing,\
+        \ parent order totals are recalculated automatically.\n    "
+      summary: Remove item from sale order
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: order_pk
+        schema:
+          type: string
+          format: uuid
+        description: Parent sale order UUID
+        required: true
+      tags:
+      - ventas-order-items
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: The requested resource was not found
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '401':
+          description: Authentication Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/authentication-required
+                title: Authentication Required
+                status: 401
+                detail: Authentication credentials were not provided or are invalid
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              example:
+                type: https://api.gravitea.com/errors/conflict
+                title: Conflict
+                status: 409
+                detail: The request conflicts with the current state of the resource
+                trace_id: 550e8400-e29b-41d4-a716-446655440000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/token/ endpoint. Include tenant_id in token payload.
+  schemas:
+    ComprobanteLink:
+      type: object
+      properties:
+        comprobante_id:
+          type: string
+          format: uuid
+        cbte_tipo:
+          type: integer
+        cbte_nro:
+          type: integer
+        status:
+          type: string
+        cae:
+          type:
+          - string
+          - 'null'
+        cae_fch_vto:
+          type:
+          - string
+          - 'null'
+        imp_total:
+          type: string
+        imp_neto:
+          type: string
+        imp_iva:
+          type: string
+        cbte_fch:
+          type: string
+      required:
+      - cae
+      - cae_fch_vto
+      - cbte_fch
+      - cbte_nro
+      - cbte_tipo
+      - comprobante_id
+      - imp_iva
+      - imp_neto
+      - imp_total
+      - status
+    Customer:
+      type: object
+      description: 'Customer serializer for CRUD operations.
+
+
+        Validates CUIT with Modulo-11. Provides condicion_iva_display
+
+        as read-only computed field.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        cuit:
+          type: string
+          description: Tax ID (11 digits, Modulo-11 validated)
+          maxLength: 11
+        doc_tipo:
+          enum:
+          - 80
+          - 86
+          - 87
+          - 89
+          - 90
+          - 91
+          - 92
+          - 93
+          - 95
+          - 96
+          - 94
+          - 99
+          - 0
+          type: integer
+          x-spec-enum-id: 9c68951ebcb09fce
+          description: 'Document type code (80=CUIT, 96=DNI, 99=CF)
+
+
+            * `80` - CUIT
+
+            * `86` - CUIL
+
+            * `87` - CDI
+
+            * `89` - Libreta de Enrolamiento
+
+            * `90` - Libreta Cívica
+
+            * `91` - CI Extranjera
+
+            * `92` - En trámite
+
+            * `93` - Acta de Nacimiento
+
+            * `95` - CI Buenos Aires
+
+            * `96` - DNI
+
+            * `94` - Pasaporte
+
+            * `99` - Doc. (Otro) / Sin identificar
+
+            * `0` - CI Policía Federal'
+          minimum: 0
+          maximum: 32767
+        condicion_iva:
+          enum:
+          - 1
+          - 4
+          - 5
+          - 6
+          - 7
+          - 8
+          - 9
+          - 10
+          - 13
+          type: integer
+          x-spec-enum-id: 10af7b39e6e0a5cc
+          description: 'IVA condition — determines invoice type (A/B/C)
+
+
+            * `1` - IVA Responsable Inscripto
+
+            * `4` - IVA Sujeto Exento
+
+            * `5` - Consumidor Final
+
+            * `6` - Responsable Monotributo
+
+            * `7` - Sujeto No Categorizado
+
+            * `8` - Proveedor del Exterior
+
+            * `9` - Cliente del Exterior
+
+            * `10` - IVA Liberado – Ley Nº 19.640
+
+            * `13` - Monotributista Social'
+          minimum: 0
+          maximum: 32767
+        condicion_iva_display:
+          type: string
+          readOnly: true
+        razon_social:
+          type: string
+          description: Legal business name or full name
+          maxLength: 255
+        domicilio:
+          type: string
+          description: Fiscal address
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        telefono:
+          type: string
+          maxLength: 50
+        custom_data:
+          description: Tenant-defined custom fields. Validated against TenantFieldDefinition.
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - condicion_iva
+      - condicion_iva_display
+      - created_at
+      - cuit
+      - id
+      - razon_social
+      - updated_at
+    CustomerRequest:
+      type: object
+      description: 'Customer serializer for CRUD operations.
+
+
+        Validates CUIT with Modulo-11. Provides condicion_iva_display
+
+        as read-only computed field.'
+      properties:
+        cuit:
+          type: string
+          minLength: 1
+          description: Tax ID (11 digits, Modulo-11 validated)
+          maxLength: 11
+        doc_tipo:
+          enum:
+          - 80
+          - 86
+          - 87
+          - 89
+          - 90
+          - 91
+          - 92
+          - 93
+          - 95
+          - 96
+          - 94
+          - 99
+          - 0
+          type: integer
+          x-spec-enum-id: 9c68951ebcb09fce
+          description: 'Document type code (80=CUIT, 96=DNI, 99=CF)
+
+
+            * `80` - CUIT
+
+            * `86` - CUIL
+
+            * `87` - CDI
+
+            * `89` - Libreta de Enrolamiento
+
+            * `90` - Libreta Cívica
+
+            * `91` - CI Extranjera
+
+            * `92` - En trámite
+
+            * `93` - Acta de Nacimiento
+
+            * `95` - CI Buenos Aires
+
+            * `96` - DNI
+
+            * `94` - Pasaporte
+
+            * `99` - Doc. (Otro) / Sin identificar
+
+            * `0` - CI Policía Federal'
+          minimum: 0
+          maximum: 32767
+        condicion_iva:
+          enum:
+          - 1
+          - 4
+          - 5
+          - 6
+          - 7
+          - 8
+          - 9
+          - 10
+          - 13
+          type: integer
+          x-spec-enum-id: 10af7b39e6e0a5cc
+          description: 'IVA condition — determines invoice type (A/B/C)
+
+
+            * `1` - IVA Responsable Inscripto
+
+            * `4` - IVA Sujeto Exento
+
+            * `5` - Consumidor Final
+
+            * `6` - Responsable Monotributo
+
+            * `7` - Sujeto No Categorizado
+
+            * `8` - Proveedor del Exterior
+
+            * `9` - Cliente del Exterior
+
+            * `10` - IVA Liberado – Ley Nº 19.640
+
+            * `13` - Monotributista Social'
+          minimum: 0
+          maximum: 32767
+        razon_social:
+          type: string
+          minLength: 1
+          description: Legal business name or full name
+          maxLength: 255
+        domicilio:
+          type: string
+          description: Fiscal address
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        telefono:
+          type: string
+          maxLength: 50
+        custom_data:
+          description: Tenant-defined custom fields. Validated against TenantFieldDefinition.
+        is_active:
+          type: boolean
+      required:
+      - condicion_iva
+      - cuit
+      - razon_social
+    FieldError:
+      type: object
+      required:
+      - field
+      - message
+      - code
+      properties:
+        field:
+          type: string
+          description: Field name that caused the error
+          example: email
+        message:
+          type: string
+          description: Human-readable error message
+          example: Enter a valid email address.
+        code:
+          type: string
+          description: Machine-readable error code
+          example: invalid
+      description: Field-level validation error details
+    PaginatedCustomerList:
+      type: object
+      properties:
+        next:
+          type:
+          - string
+          - 'null'
+          format: uri
+        previous:
+          type:
+          - string
+          - 'null'
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Customer'
+      required:
+      - next
+      - previous
+      - results
+    PaginatedPaginatedCustomerListList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaginatedCustomerList'
+    PaginatedPaginatedSaleOrderListList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaginatedSaleOrderList'
+    PaginatedSaleOrderItemList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SaleOrderItem'
+    PaginatedSaleOrderList:
+      type: object
+      properties:
+        next:
+          type:
+          - string
+          - 'null'
+          format: uri
+        previous:
+          type:
+          - string
+          - 'null'
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SaleOrder'
+      required:
+      - next
+      - previous
+      - results
+    PatchedCustomerRequest:
+      type: object
+      description: 'Customer serializer for CRUD operations.
+
+
+        Validates CUIT with Modulo-11. Provides condicion_iva_display
+
+        as read-only computed field.'
+      properties:
+        cuit:
+          type: string
+          minLength: 1
+          description: Tax ID (11 digits, Modulo-11 validated)
+          maxLength: 11
+        doc_tipo:
+          enum:
+          - 80
+          - 86
+          - 87
+          - 89
+          - 90
+          - 91
+          - 92
+          - 93
+          - 95
+          - 96
+          - 94
+          - 99
+          - 0
+          type: integer
+          x-spec-enum-id: 9c68951ebcb09fce
+          description: 'Document type code (80=CUIT, 96=DNI, 99=CF)
+
+
+            * `80` - CUIT
+
+            * `86` - CUIL
+
+            * `87` - CDI
+
+            * `89` - Libreta de Enrolamiento
+
+            * `90` - Libreta Cívica
+
+            * `91` - CI Extranjera
+
+            * `92` - En trámite
+
+            * `93` - Acta de Nacimiento
+
+            * `95` - CI Buenos Aires
+
+            * `96` - DNI
+
+            * `94` - Pasaporte
+
+            * `99` - Doc. (Otro) / Sin identificar
+
+            * `0` - CI Policía Federal'
+          minimum: 0
+          maximum: 32767
+        condicion_iva:
+          enum:
+          - 1
+          - 4
+          - 5
+          - 6
+          - 7
+          - 8
+          - 9
+          - 10
+          - 13
+          type: integer
+          x-spec-enum-id: 10af7b39e6e0a5cc
+          description: 'IVA condition — determines invoice type (A/B/C)
+
+
+            * `1` - IVA Responsable Inscripto
+
+            * `4` - IVA Sujeto Exento
+
+            * `5` - Consumidor Final
+
+            * `6` - Responsable Monotributo
+
+            * `7` - Sujeto No Categorizado
+
+            * `8` - Proveedor del Exterior
+
+            * `9` - Cliente del Exterior
+
+            * `10` - IVA Liberado – Ley Nº 19.640
+
+            * `13` - Monotributista Social'
+          minimum: 0
+          maximum: 32767
+        razon_social:
+          type: string
+          minLength: 1
+          description: Legal business name or full name
+          maxLength: 255
+        domicilio:
+          type: string
+          description: Fiscal address
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        telefono:
+          type: string
+          maxLength: 50
+        custom_data:
+          description: Tenant-defined custom fields. Validated against TenantFieldDefinition.
+        is_active:
+          type: boolean
+    PatchedSaleOrderItemRequest:
+      type: object
+      description: 'SaleOrderItem serializer with auto-calculated fields.
+
+
+        Create accepts product_id (UUID), quantity, unit_price.
+
+        subtotal and iva_amount are read-only (auto-calculated by model).'
+      properties:
+        product:
+          type: string
+          format: uuid
+          description: Product being sold
+        quantity:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,4})?$
+          description: Quantity sold (matches StockMovement precision)
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Price per unit at time of sale (snapshot)
+        tax_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          description: IVA rate percentage (inherited from Product.tax_rate)
+    PatchedSaleOrderRequest:
+      type: object
+      description: 'SaleOrder serializer for list/create/update.
+
+
+        Create accepts customer_id (UUID), branch_id (UUID).
+
+        Status, totals, confirmed_by are read-only.
+
+        Includes comprobante_id from reverse OneToOne accessor.'
+      properties:
+        customer:
+          type: string
+          format: uuid
+          description: Customer for this sale
+        branch:
+          type: string
+          format: uuid
+          description: Branch where sale originates (determines stock source)
+        custom_data:
+          description: Tenant-defined custom fields. Validated against TenantFieldDefinition.
+    ProblemDetail:
+      type: object
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - trace_id
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI identifying the error type category
+          example: https://api.gravitea.com/errors/not-found
+        title:
+          type: string
+          description: Human-readable error title
+          example: Not Found
+        status:
+          type: integer
+          description: HTTP status code
+          example: 404
+        detail:
+          type: string
+          description: Detailed explanation of the error
+          example: The requested resource was not found
+        trace_id:
+          type: string
+          format: uuid
+          description: Unique request identifier for log correlation
+          example: 550e8400-e29b-41d4-a716-446655440000
+      description: RFC 7807 Problem Details for HTTP APIs
+    RateLimitError:
+      type: object
+      description: 'RFC 7807 rate limit error with retry information.
+
+
+        Extended ProblemDetail for 429 Too Many Requests responses
+
+        that include retry timing information.'
+      properties:
+        type:
+          type: string
+          format: uri
+          default: about:blank
+          description: URI reference identifying the problem type category
+        title:
+          type: string
+          description: Short, human-readable error summary
+          maxLength: 100
+        status:
+          type: integer
+          maximum: 599
+          minimum: 400
+          description: HTTP status code (400-599)
+        detail:
+          type: string
+          description: Human-readable explanation of this specific error
+          maxLength: 500
+        trace_id:
+          type: string
+          format: uuid
+          description: UUID v4 for log correlation
+        instance:
+          type: string
+          format: uri
+          description: URI of the specific resource that caused the error
+        retry_after:
+          type: integer
+          description: Seconds until the next request attempt is allowed
+      required:
+      - detail
+      - retry_after
+      - status
+      - title
+      - trace_id
+    SaleOrder:
+      type: object
+      description: 'SaleOrder serializer for list/create/update.
+
+
+        Create accepts customer_id (UUID), branch_id (UUID).
+
+        Status, totals, confirmed_by are read-only.
+
+        Includes comprobante_id from reverse OneToOne accessor.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        customer:
+          type: string
+          format: uuid
+          description: Customer for this sale
+        customer_name:
+          type: string
+          readOnly: true
+        branch:
+          type: string
+          format: uuid
+          description: Branch where sale originates (determines stock source)
+        branch_name:
+          type: string
+          readOnly: true
+        status:
+          enum:
+          - DRAFT
+          - CONFIRMED
+          - INVOICED
+          type: string
+          description: '* `DRAFT` - Borrador
+
+            * `CONFIRMED` - Confirmado
+
+            * `INVOICED` - Facturado'
+          x-spec-enum-id: dd3ada636e2cde4b
+          readOnly: true
+        status_display:
+          type: string
+          readOnly: true
+        subtotal:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          readOnly: true
+          description: Sum of item subtotals (before tax)
+        total_iva:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          readOnly: true
+          description: Total IVA amount
+        total_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          readOnly: true
+          description: Final total (subtotal + IVA)
+        sale_date:
+          type: string
+          format: date-time
+          readOnly: true
+        confirmed_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          readOnly: true
+        invoiced_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          readOnly: true
+        confirmed_by:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          readOnly: true
+          description: Set by SaleService.confirm_sale() from request.user
+        comprobante_id:
+          type:
+          - string
+          - 'null'
+          description: Return linked comprobante ID via reverse OneToOne, or null.
+          readOnly: true
+        custom_data:
+          description: Tenant-defined custom fields. Validated against TenantFieldDefinition.
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - branch
+      - branch_name
+      - comprobante_id
+      - confirmed_at
+      - confirmed_by
+      - created_at
+      - customer
+      - customer_name
+      - id
+      - invoiced_at
+      - sale_date
+      - status
+      - status_display
+      - subtotal
+      - total_amount
+      - total_iva
+      - updated_at
+    SaleOrderDetail:
+      type: object
+      description: 'Extended SaleOrder serializer with nested items list.
+
+
+        Used for retrieve action to show full order details.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        customer:
+          type: string
+          format: uuid
+          description: Customer for this sale
+        customer_name:
+          type: string
+          readOnly: true
+        branch:
+          type: string
+          format: uuid
+          description: Branch where sale originates (determines stock source)
+        branch_name:
+          type: string
+          readOnly: true
+        status:
+          enum:
+          - DRAFT
+          - CONFIRMED
+          - INVOICED
+          type: string
+          description: '* `DRAFT` - Borrador
+
+            * `CONFIRMED` - Confirmado
+
+            * `INVOICED` - Facturado'
+          x-spec-enum-id: dd3ada636e2cde4b
+          readOnly: true
+        status_display:
+          type: string
+          readOnly: true
+        subtotal:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          readOnly: true
+          description: Sum of item subtotals (before tax)
+        total_iva:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          readOnly: true
+          description: Total IVA amount
+        total_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          readOnly: true
+          description: Final total (subtotal + IVA)
+        sale_date:
+          type: string
+          format: date-time
+          readOnly: true
+        confirmed_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          readOnly: true
+        invoiced_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          readOnly: true
+        confirmed_by:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          readOnly: true
+          description: Set by SaleService.confirm_sale() from request.user
+        comprobante_id:
+          type:
+          - string
+          - 'null'
+          description: Return linked comprobante ID via reverse OneToOne, or null.
+          readOnly: true
+        custom_data:
+          description: Tenant-defined custom fields. Validated against TenantFieldDefinition.
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SaleOrderItem'
+          readOnly: true
+      required:
+      - branch
+      - branch_name
+      - comprobante_id
+      - confirmed_at
+      - confirmed_by
+      - created_at
+      - customer
+      - customer_name
+      - id
+      - invoiced_at
+      - items
+      - sale_date
+      - status
+      - status_display
+      - subtotal
+      - total_amount
+      - total_iva
+      - updated_at
+    SaleOrderItem:
+      type: object
+      description: 'SaleOrderItem serializer with auto-calculated fields.
+
+
+        Create accepts product_id (UUID), quantity, unit_price.
+
+        subtotal and iva_amount are read-only (auto-calculated by model).'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        product:
+          type: string
+          format: uuid
+          description: Product being sold
+        product_name:
+          type: string
+          readOnly: true
+        product_sku:
+          type: string
+          readOnly: true
+        quantity:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,4})?$
+          description: Quantity sold (matches StockMovement precision)
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Price per unit at time of sale (snapshot)
+        subtotal:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          readOnly: true
+          description: quantity * unit_price (auto-calculated)
+        tax_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          description: IVA rate percentage (inherited from Product.tax_rate)
+        iva_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          readOnly: true
+          description: 'IVA amount: subtotal * (tax_rate / 100)'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - iva_amount
+      - product
+      - product_name
+      - product_sku
+      - quantity
+      - subtotal
+    SaleOrderItemRequest:
+      type: object
+      description: 'SaleOrderItem serializer with auto-calculated fields.
+
+
+        Create accepts product_id (UUID), quantity, unit_price.
+
+        subtotal and iva_amount are read-only (auto-calculated by model).'
+      properties:
+        product:
+          type: string
+          format: uuid
+          description: Product being sold
+        quantity:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,4})?$
+          description: Quantity sold (matches StockMovement precision)
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Price per unit at time of sale (snapshot)
+        tax_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          description: IVA rate percentage (inherited from Product.tax_rate)
+      required:
+      - product
+      - quantity
+    SaleOrderRequest:
+      type: object
+      description: 'SaleOrder serializer for list/create/update.
+
+
+        Create accepts customer_id (UUID), branch_id (UUID).
+
+        Status, totals, confirmed_by are read-only.
+
+        Includes comprobante_id from reverse OneToOne accessor.'
+      properties:
+        customer:
+          type: string
+          format: uuid
+          description: Customer for this sale
+        branch:
+          type: string
+          format: uuid
+          description: Branch where sale originates (determines stock source)
+        custom_data:
+          description: Tenant-defined custom fields. Validated against TenantFieldDefinition.
+      required:
+      - branch
+      - customer
+    ValidationError:
+      allOf:
+      - $ref: '#/components/schemas/ProblemDetail'
+      - type: object
+        properties:
+          errors:
+            type: array
+            items:
+              $ref: '#/components/schemas/FieldError'
+            description: Field-level validation error details
+            example:
+            - field: email
+              message: Enter a valid email address.
+              code: invalid
+            - field: username
+              message: This field is required.
+              code: required
+      description: Validation error response with field-level details
+    VentasError:
+      type: object
+      description: RFC 7807 Problem Details for HTTP APIs error response (ventas-specific).
+      properties:
+        type:
+          type: string
+          default: about:blank
+          description: URI reference identifying the problem type
+        title:
+          type: string
+          description: Short, human-readable summary
+        status:
+          type: integer
+          description: HTTP status code
+        detail:
+          type: string
+          description: Human-readable explanation
+        instance:
+          type: string
+          description: URI reference identifying specific occurrence
+      required:
+      - status
+      - title

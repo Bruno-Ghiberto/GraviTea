@@ -1,0 +1,224 @@
+# SLO-Based Alert Rules for GRAVITEA ERP
+# Per 004-observability-metrics spec FR-021 through FR-025
+#
+# These rules are compatible with Prometheus Alertmanager.
+# Load into Prometheus via the rule_files configuration.
+#
+# SLO Thresholds:
+#   - Error Rate: < 1% (99% availability)
+#   - Latency P99: < 500ms
+#   - Sync Lag: < 60 seconds
+
+groups:
+  - name: gravitea_slo_alerts
+    interval: 30s
+    rules:
+      # T051: High Error Rate Alert
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status_code=~"5.."}[5m])) by (tenant_id)
+            /
+            sum(rate(http_requests_total[5m])) by (tenant_id)
+          ) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          slo: availability
+          team: platform
+        annotations:
+          summary: "High error rate detected for tenant {{ $labels.tenant_id }}"
+          description: |
+            Error rate is {{ $value | humanizePercentage }} (threshold: 1%).
+            This indicates potential service degradation affecting tenant {{ $labels.tenant_id }}.
+          runbook_url: "https://docs.gravitea.com/runbooks/high-error-rate"
+          dashboard_url: "https://grafana.gravitea.com/d/system-overview?var-tenant={{ $labels.tenant_id }}"
+
+      # T051: Aggregated Error Rate (all tenants)
+      - alert: HighErrorRateGlobal
+        expr: |
+          (
+            sum(rate(http_requests_total{status_code=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total[5m]))
+          ) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          slo: availability
+          team: platform
+        annotations:
+          summary: "Global high error rate detected"
+          description: |
+            Global error rate is {{ $value | humanizePercentage }} (threshold: 1%).
+            This affects the entire platform and requires immediate attention.
+          runbook_url: "https://docs.gravitea.com/runbooks/high-error-rate"
+
+      # T052: High Latency P99 Alert
+      - alert: HighLatencyP99
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, tenant_id)
+          ) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          slo: latency
+          team: platform
+        annotations:
+          summary: "High P99 latency detected for tenant {{ $labels.tenant_id }}"
+          description: |
+            P99 latency is {{ printf "%.2f" $value }}s (threshold: 500ms).
+            Users may experience degraded performance.
+          runbook_url: "https://docs.gravitea.com/runbooks/high-latency"
+          dashboard_url: "https://grafana.gravitea.com/d/red-metrics?var-tenant={{ $labels.tenant_id }}"
+
+      # T052: Critical Latency (P99 > 2s)
+      - alert: CriticalLatencyP99
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, tenant_id)
+          ) > 2
+        for: 2m
+        labels:
+          severity: critical
+          slo: latency
+          team: platform
+        annotations:
+          summary: "Critical P99 latency for tenant {{ $labels.tenant_id }}"
+          description: |
+            P99 latency is {{ printf "%.2f" $value }}s (critical threshold: 2s).
+            Service is severely degraded.
+          runbook_url: "https://docs.gravitea.com/runbooks/critical-latency"
+
+      # T053: Sync Queue Lag Alert
+      - alert: SyncQueueLagHigh
+        expr: |
+          sync_processing_lag_seconds > 60
+        for: 5m
+        labels:
+          severity: warning
+          slo: sync
+          team: backend
+        annotations:
+          summary: "Sync queue lag high for tenant {{ $labels.tenant_id }}"
+          description: |
+            Sync processing lag is {{ printf "%.0f" $value }}s (threshold: 60s).
+            Offline devices may not receive updates in a timely manner.
+          runbook_url: "https://docs.gravitea.com/runbooks/sync-lag"
+
+      # T053: Critical Sync Lag (> 5 minutes)
+      - alert: SyncQueueLagCritical
+        expr: |
+          sync_processing_lag_seconds > 300
+        for: 2m
+        labels:
+          severity: critical
+          slo: sync
+          team: backend
+        annotations:
+          summary: "Critical sync queue lag for tenant {{ $labels.tenant_id }}"
+          description: |
+            Sync processing lag is {{ printf "%.0f" $value }}s (threshold: 5 minutes).
+            Offline operations are significantly delayed.
+          runbook_url: "https://docs.gravitea.com/runbooks/critical-sync-lag"
+
+      # T053: Sync Queue Depth Alert
+      - alert: SyncQueueDepthHigh
+        expr: |
+          sync_queue_depth > 1000
+        for: 10m
+        labels:
+          severity: warning
+          slo: sync
+          team: backend
+        annotations:
+          summary: "Sync queue depth high for tenant {{ $labels.tenant_id }}"
+          description: |
+            Sync queue has {{ printf "%.0f" $value }} pending operations.
+            Queue may be building up faster than processing.
+          runbook_url: "https://docs.gravitea.com/runbooks/sync-queue-depth"
+
+      # T054: Health Check Failure Alert
+      - alert: HealthCheckFailure
+        expr: |
+          up{job="gravitea-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          slo: availability
+          team: platform
+        annotations:
+          summary: "Backend health check failing"
+          description: |
+            The Gravitea backend health check has been failing for more than 1 minute.
+            Service may be down or unreachable.
+          runbook_url: "https://docs.gravitea.com/runbooks/health-check-failure"
+
+      # T054: Readiness Probe Failure
+      - alert: ReadinessProbeFailure
+        expr: |
+          probe_success{job="gravitea-readiness"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          slo: availability
+          team: platform
+        annotations:
+          summary: "Backend readiness probe failing"
+          description: |
+            The backend is not ready to serve traffic.
+            Dependencies may be unavailable.
+          runbook_url: "https://docs.gravitea.com/runbooks/readiness-failure"
+
+      # Database Connection Pool Alert
+      - alert: DatabaseConnectionPoolExhausted
+        expr: |
+          pg_stat_activity_count{state="active"} / pg_stat_activity_count >= 0.9
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "Database connection pool near exhaustion"
+          description: |
+            Database connection pool is at {{ $value | humanizePercentage }} capacity.
+            May cause connection timeouts.
+          runbook_url: "https://docs.gravitea.com/runbooks/db-connection-pool"
+
+  - name: gravitea_business_alerts
+    interval: 60s
+    rules:
+      # Auth Failure Spike
+      - alert: AuthFailureSpike
+        expr: |
+          sum(rate(auth_failures_total[5m])) by (tenant_id)
+          /
+          sum(rate(auth_attempts_total[5m])) by (tenant_id)
+          > 0.3
+        for: 5m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "High authentication failure rate for tenant {{ $labels.tenant_id }}"
+          description: |
+            Auth failure rate is {{ $value | humanizePercentage }} (threshold: 30%).
+            May indicate credential stuffing or misconfiguration.
+          runbook_url: "https://docs.gravitea.com/runbooks/auth-failure-spike"
+
+      # No Orders for Extended Period (during business hours)
+      - alert: NoOrdersReceived
+        expr: |
+          sum(increase(orders_total{status="completed"}[30m])) by (tenant_id) == 0
+          and hour() >= 8 and hour() <= 22
+        for: 30m
+        labels:
+          severity: info
+          team: business
+        annotations:
+          summary: "No orders received for tenant {{ $labels.tenant_id }}"
+          description: |
+            No completed orders in the last 30 minutes during business hours.
+            May indicate POS connectivity issues.
+          runbook_url: "https://docs.gravitea.com/runbooks/no-orders"

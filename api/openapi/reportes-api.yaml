@@ -1,0 +1,919 @@
+openapi: 3.1.0
+info:
+  title: Gravitea Reports API
+  version: 1.0.0
+  description: 'Report definitions, export jobs, and saved reports for data export and analytics.
+
+
+    ## Authentication
+
+    All endpoints require JWT Bearer authentication (unless noted otherwise).
+
+
+    ## Multi-Tenant
+
+    Resources are automatically filtered by tenant_id from JWT claims.'
+  contact:
+    name: Gravitea Development Team
+    email: dev@gravitea.com
+  license:
+    name: Proprietary
+servers:
+- url: http://localhost:8000/api/v1
+  description: Development
+- url: https://api.gravitea.app/api/v1
+  description: Production
+security:
+- bearerAuth: []
+paths:
+  /api/v1/reportes/definitions/:
+    get:
+      operationId: reportes_definitions_list
+      description: "ReportDefinition CRUD viewset.\n\nEndpoints:\n    GET    /api/v1/reportes/definitions/        - List definitions\n\
+        \    POST   /api/v1/reportes/definitions/        - Create definition\n    GET    /api/v1/reportes/definitions/{id}/\
+        \    - Get definition detail\n    PUT    /api/v1/reportes/definitions/{id}/    - Full update\n    PATCH  /api/v1/reportes/definitions/{id}/\
+        \    - Partial update\n    DELETE /api/v1/reportes/definitions/{id}/    - Delete definition"
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: El valor del cursor de paginación.
+        schema:
+          type: string
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      tags:
+      - reportes
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReportDefinitionList'
+          description: ''
+    post:
+      operationId: reportes_definitions_create
+      description: "ReportDefinition CRUD viewset.\n\nEndpoints:\n    GET    /api/v1/reportes/definitions/        - List definitions\n\
+        \    POST   /api/v1/reportes/definitions/        - Create definition\n    GET    /api/v1/reportes/definitions/{id}/\
+        \    - Get definition detail\n    PUT    /api/v1/reportes/definitions/{id}/    - Full update\n    PATCH  /api/v1/reportes/definitions/{id}/\
+        \    - Partial update\n    DELETE /api/v1/reportes/definitions/{id}/    - Delete definition"
+      tags:
+      - reportes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportDefinitionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReportDefinitionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReportDefinitionRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportDefinition'
+          description: ''
+  /api/v1/reportes/definitions/{id}/:
+    get:
+      operationId: reportes_definitions_retrieve
+      description: "ReportDefinition CRUD viewset.\n\nEndpoints:\n    GET    /api/v1/reportes/definitions/        - List definitions\n\
+        \    POST   /api/v1/reportes/definitions/        - Create definition\n    GET    /api/v1/reportes/definitions/{id}/\
+        \    - Get definition detail\n    PUT    /api/v1/reportes/definitions/{id}/    - Full update\n    PATCH  /api/v1/reportes/definitions/{id}/\
+        \    - Partial update\n    DELETE /api/v1/reportes/definitions/{id}/    - Delete definition"
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - reportes
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportDefinition'
+          description: ''
+    put:
+      operationId: reportes_definitions_update
+      description: "ReportDefinition CRUD viewset.\n\nEndpoints:\n    GET    /api/v1/reportes/definitions/        - List definitions\n\
+        \    POST   /api/v1/reportes/definitions/        - Create definition\n    GET    /api/v1/reportes/definitions/{id}/\
+        \    - Get definition detail\n    PUT    /api/v1/reportes/definitions/{id}/    - Full update\n    PATCH  /api/v1/reportes/definitions/{id}/\
+        \    - Partial update\n    DELETE /api/v1/reportes/definitions/{id}/    - Delete definition"
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - reportes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportDefinitionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReportDefinitionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReportDefinitionRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportDefinition'
+          description: ''
+    patch:
+      operationId: reportes_definitions_partial_update
+      description: "ReportDefinition CRUD viewset.\n\nEndpoints:\n    GET    /api/v1/reportes/definitions/        - List definitions\n\
+        \    POST   /api/v1/reportes/definitions/        - Create definition\n    GET    /api/v1/reportes/definitions/{id}/\
+        \    - Get definition detail\n    PUT    /api/v1/reportes/definitions/{id}/    - Full update\n    PATCH  /api/v1/reportes/definitions/{id}/\
+        \    - Partial update\n    DELETE /api/v1/reportes/definitions/{id}/    - Delete definition"
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - reportes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedReportDefinitionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedReportDefinitionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedReportDefinitionRequest'
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportDefinition'
+          description: ''
+    delete:
+      operationId: reportes_definitions_destroy
+      description: "ReportDefinition CRUD viewset.\n\nEndpoints:\n    GET    /api/v1/reportes/definitions/        - List definitions\n\
+        \    POST   /api/v1/reportes/definitions/        - Create definition\n    GET    /api/v1/reportes/definitions/{id}/\
+        \    - Get definition detail\n    PUT    /api/v1/reportes/definitions/{id}/    - Full update\n    PATCH  /api/v1/reportes/definitions/{id}/\
+        \    - Partial update\n    DELETE /api/v1/reportes/definitions/{id}/    - Delete definition"
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - reportes
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/reportes/export-jobs/:
+    get:
+      operationId: reportes_export_jobs_list
+      description: "ExportJob viewset.\n\nEndpoints:\n    GET    /api/v1/reportes/export-jobs/        - List export jobs\n\
+        \    POST   /api/v1/reportes/export-jobs/        - Create export job\n    GET    /api/v1/reportes/export-jobs/{id}/\
+        \    - Get export job detail"
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: El valor del cursor de paginación.
+        schema:
+          type: string
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      tags:
+      - reportes
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedExportJobList'
+          description: ''
+    post:
+      operationId: reportes_export_jobs_create
+      description: "ExportJob viewset.\n\nEndpoints:\n    GET    /api/v1/reportes/export-jobs/        - List export jobs\n\
+        \    POST   /api/v1/reportes/export-jobs/        - Create export job\n    GET    /api/v1/reportes/export-jobs/{id}/\
+        \    - Get export job detail"
+      tags:
+      - reportes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportJobRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExportJobRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExportJobRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportJob'
+          description: ''
+  /api/v1/reportes/export-jobs/{id}/:
+    get:
+      operationId: reportes_export_jobs_retrieve
+      description: "ExportJob viewset.\n\nEndpoints:\n    GET    /api/v1/reportes/export-jobs/        - List export jobs\n\
+        \    POST   /api/v1/reportes/export-jobs/        - Create export job\n    GET    /api/v1/reportes/export-jobs/{id}/\
+        \    - Get export job detail"
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - reportes
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportJob'
+          description: ''
+  /api/v1/reportes/saved-reports/:
+    get:
+      operationId: reportes_saved_reports_list
+      description: "SavedReport viewset.\n\nEndpoints:\n    GET    /api/v1/reportes/saved-reports/        - List saved reports\n\
+        \    POST   /api/v1/reportes/saved-reports/        - Create saved report\n    GET    /api/v1/reportes/saved-reports/{id}/\
+        \    - Get saved report detail\n    DELETE /api/v1/reportes/saved-reports/{id}/    - Delete saved report"
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: El valor del cursor de paginación.
+        schema:
+          type: string
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      tags:
+      - reportes
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSavedReportList'
+          description: ''
+    post:
+      operationId: reportes_saved_reports_create
+      description: "SavedReport viewset.\n\nEndpoints:\n    GET    /api/v1/reportes/saved-reports/        - List saved reports\n\
+        \    POST   /api/v1/reportes/saved-reports/        - Create saved report\n    GET    /api/v1/reportes/saved-reports/{id}/\
+        \    - Get saved report detail\n    DELETE /api/v1/reportes/saved-reports/{id}/    - Delete saved report"
+      tags:
+      - reportes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavedReportRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SavedReportRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SavedReportRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedReport'
+          description: ''
+  /api/v1/reportes/saved-reports/{id}/:
+    get:
+      operationId: reportes_saved_reports_retrieve
+      description: "SavedReport viewset.\n\nEndpoints:\n    GET    /api/v1/reportes/saved-reports/        - List saved reports\n\
+        \    POST   /api/v1/reportes/saved-reports/        - Create saved report\n    GET    /api/v1/reportes/saved-reports/{id}/\
+        \    - Get saved report detail\n    DELETE /api/v1/reportes/saved-reports/{id}/    - Delete saved report"
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - reportes
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedReport'
+          description: ''
+    delete:
+      operationId: reportes_saved_reports_destroy
+      description: "SavedReport viewset.\n\nEndpoints:\n    GET    /api/v1/reportes/saved-reports/        - List saved reports\n\
+        \    POST   /api/v1/reportes/saved-reports/        - Create saved report\n    GET    /api/v1/reportes/saved-reports/{id}/\
+        \    - Get saved report detail\n    DELETE /api/v1/reportes/saved-reports/{id}/    - Delete saved report"
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - reportes
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/token/ endpoint. Include tenant_id in token payload.
+  schemas:
+    ExportJob:
+      type: object
+      description: 'Serializer for ExportJob CRUD operations.
+
+
+        saved_report_id is a writable UUID field.
+
+        status defaults to PENDING on create.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        saved_report_id:
+          type: string
+          format: uuid
+        export_format:
+          enum:
+          - PDF
+          - EXCEL
+          - CSV
+          type: string
+          x-spec-enum-id: 4fa2d87990a7eb89
+          description: 'Output format for this export job
+
+
+            * `PDF` - PDF
+
+            * `EXCEL` - Excel
+
+            * `CSV` - CSV'
+        status:
+          enum:
+          - PENDING
+          - PROCESSING
+          - COMPLETED
+          - FAILED
+          type: string
+          x-spec-enum-id: 240207fbe27bfa30
+          readOnly: true
+          description: 'Current status: PENDING, PROCESSING, COMPLETED, or FAILED
+
+
+            * `PENDING` - Pendiente
+
+            * `PROCESSING` - Procesando
+
+            * `COMPLETED` - Completado
+
+            * `FAILED` - Fallido'
+        file_path:
+          type:
+          - string
+          - 'null'
+          description: Path to the generated export file
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        completed_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Timestamp when the export finished (success or failure)
+      required:
+      - created_at
+      - export_format
+      - id
+      - saved_report_id
+      - status
+    ExportJobRequest:
+      type: object
+      description: 'Serializer for ExportJob CRUD operations.
+
+
+        saved_report_id is a writable UUID field.
+
+        status defaults to PENDING on create.'
+      properties:
+        saved_report_id:
+          type: string
+          format: uuid
+        export_format:
+          enum:
+          - PDF
+          - EXCEL
+          - CSV
+          type: string
+          x-spec-enum-id: 4fa2d87990a7eb89
+          description: 'Output format for this export job
+
+
+            * `PDF` - PDF
+
+            * `EXCEL` - Excel
+
+            * `CSV` - CSV'
+        file_path:
+          type:
+          - string
+          - 'null'
+          description: Path to the generated export file
+        completed_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Timestamp when the export finished (success or failure)
+      required:
+      - export_format
+      - saved_report_id
+    PaginatedExportJobList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExportJob'
+    PaginatedReportDefinitionList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportDefinition'
+    PaginatedSavedReportList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SavedReport'
+    PatchedReportDefinitionRequest:
+      type: object
+      description: 'Serializer for ReportDefinition CRUD operations.
+
+
+        Tenant is injected from request context on create.'
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Human-readable name for the report definition
+          maxLength: 200
+        report_type:
+          enum:
+          - sales
+          - stock
+          - purchases
+          - fiscal
+          - accounting_export
+          type: string
+          x-spec-enum-id: b33f99c9cdd1a23a
+          description: 'Type of report: sales, stock, purchases, fiscal, accounting_export
+
+
+            * `sales` - Ventas
+
+            * `stock` - Stock
+
+            * `purchases` - Compras
+
+            * `fiscal` - Fiscal
+
+            * `accounting_export` - Exportación Contable'
+        parameters:
+          description: Report-specific configuration parameters
+        filters:
+          description: Filter criteria applied during report generation
+        output_format:
+          enum:
+          - PDF
+          - EXCEL
+          - CSV
+          type: string
+          x-spec-enum-id: 4fa2d87990a7eb89
+          description: 'Output format: PDF, EXCEL, or CSV
+
+
+            * `PDF` - PDF
+
+            * `EXCEL` - Excel
+
+            * `CSV` - CSV'
+        is_active:
+          type: boolean
+          description: Whether this report definition is available for use
+    ProblemDetail:
+      type: object
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - trace_id
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI identifying the error type category
+          example: https://api.gravitea.com/errors/not-found
+        title:
+          type: string
+          description: Human-readable error title
+          example: Not Found
+        status:
+          type: integer
+          description: HTTP status code
+          example: 404
+        detail:
+          type: string
+          description: Detailed explanation of the error
+          example: The requested resource was not found
+        trace_id:
+          type: string
+          format: uuid
+          description: Unique request identifier for log correlation
+          example: 550e8400-e29b-41d4-a716-446655440000
+      description: RFC 7807 Problem Details for HTTP APIs
+    RateLimitError:
+      type: object
+      description: 'RFC 7807 rate limit error with retry information.
+
+
+        Extended ProblemDetail for 429 Too Many Requests responses
+
+        that include retry timing information.'
+      properties:
+        type:
+          type: string
+          format: uri
+          default: about:blank
+          description: URI reference identifying the problem type category
+        title:
+          type: string
+          description: Short, human-readable error summary
+          maxLength: 100
+        status:
+          type: integer
+          maximum: 599
+          minimum: 400
+          description: HTTP status code (400-599)
+        detail:
+          type: string
+          description: Human-readable explanation of this specific error
+          maxLength: 500
+        trace_id:
+          type: string
+          format: uuid
+          description: UUID v4 for log correlation
+        instance:
+          type: string
+          format: uri
+          description: URI of the specific resource that caused the error
+        retry_after:
+          type: integer
+          description: Seconds until the next request attempt is allowed
+      required:
+      - detail
+      - retry_after
+      - status
+      - title
+      - trace_id
+    ReportDefinition:
+      type: object
+      description: 'Serializer for ReportDefinition CRUD operations.
+
+
+        Tenant is injected from request context on create.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          description: Human-readable name for the report definition
+          maxLength: 200
+        report_type:
+          enum:
+          - sales
+          - stock
+          - purchases
+          - fiscal
+          - accounting_export
+          type: string
+          x-spec-enum-id: b33f99c9cdd1a23a
+          description: 'Type of report: sales, stock, purchases, fiscal, accounting_export
+
+
+            * `sales` - Ventas
+
+            * `stock` - Stock
+
+            * `purchases` - Compras
+
+            * `fiscal` - Fiscal
+
+            * `accounting_export` - Exportación Contable'
+        parameters:
+          description: Report-specific configuration parameters
+        filters:
+          description: Filter criteria applied during report generation
+        output_format:
+          enum:
+          - PDF
+          - EXCEL
+          - CSV
+          type: string
+          x-spec-enum-id: 4fa2d87990a7eb89
+          description: 'Output format: PDF, EXCEL, or CSV
+
+
+            * `PDF` - PDF
+
+            * `EXCEL` - Excel
+
+            * `CSV` - CSV'
+        is_active:
+          type: boolean
+          description: Whether this report definition is available for use
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - report_type
+      - updated_at
+    ReportDefinitionRequest:
+      type: object
+      description: 'Serializer for ReportDefinition CRUD operations.
+
+
+        Tenant is injected from request context on create.'
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Human-readable name for the report definition
+          maxLength: 200
+        report_type:
+          enum:
+          - sales
+          - stock
+          - purchases
+          - fiscal
+          - accounting_export
+          type: string
+          x-spec-enum-id: b33f99c9cdd1a23a
+          description: 'Type of report: sales, stock, purchases, fiscal, accounting_export
+
+
+            * `sales` - Ventas
+
+            * `stock` - Stock
+
+            * `purchases` - Compras
+
+            * `fiscal` - Fiscal
+
+            * `accounting_export` - Exportación Contable'
+        parameters:
+          description: Report-specific configuration parameters
+        filters:
+          description: Filter criteria applied during report generation
+        output_format:
+          enum:
+          - PDF
+          - EXCEL
+          - CSV
+          type: string
+          x-spec-enum-id: 4fa2d87990a7eb89
+          description: 'Output format: PDF, EXCEL, or CSV
+
+
+            * `PDF` - PDF
+
+            * `EXCEL` - Excel
+
+            * `CSV` - CSV'
+        is_active:
+          type: boolean
+          description: Whether this report definition is available for use
+      required:
+      - name
+      - report_type
+    SavedReport:
+      type: object
+      description: 'Serializer for SavedReport CRUD operations.
+
+
+        report_definition_id is a writable UUID field.
+
+        generated_at is set automatically (auto_now_add).'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        report_definition_id:
+          type: string
+          format: uuid
+        generated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Timestamp when this report execution was initiated
+        result_metadata:
+          description: 'Execution metadata: row count, execution time, etc.'
+        file_reference:
+          type:
+          - string
+          - 'null'
+          description: Path or blob storage key for the generated report file
+        status:
+          enum:
+          - PENDING
+          - COMPLETED
+          - FAILED
+          type: string
+          x-spec-enum-id: 2859342f56ca5559
+          description: 'Current status: PENDING, COMPLETED, or FAILED
+
+
+            * `PENDING` - Pendiente
+
+            * `COMPLETED` - Completado
+
+            * `FAILED` - Fallido'
+      required:
+      - generated_at
+      - id
+      - report_definition_id
+    SavedReportRequest:
+      type: object
+      description: 'Serializer for SavedReport CRUD operations.
+
+
+        report_definition_id is a writable UUID field.
+
+        generated_at is set automatically (auto_now_add).'
+      properties:
+        report_definition_id:
+          type: string
+          format: uuid
+        result_metadata:
+          description: 'Execution metadata: row count, execution time, etc.'
+        file_reference:
+          type:
+          - string
+          - 'null'
+          description: Path or blob storage key for the generated report file
+        status:
+          enum:
+          - PENDING
+          - COMPLETED
+          - FAILED
+          type: string
+          x-spec-enum-id: 2859342f56ca5559
+          description: 'Current status: PENDING, COMPLETED, or FAILED
+
+
+            * `PENDING` - Pendiente
+
+            * `COMPLETED` - Completado
+
+            * `FAILED` - Fallido'
+      required:
+      - report_definition_id
+    ValidationError:
+      allOf:
+      - $ref: '#/components/schemas/ProblemDetail'
+      - type: object
+        properties:
+          errors:
+            type: array
+            items:
+              $ref: '#/components/schemas/FieldError'
+            description: Field-level validation error details
+            example:
+            - field: email
+              message: Enter a valid email address.
+              code: invalid
+            - field: username
+              message: This field is required.
+              code: required
+      description: Validation error response with field-level details

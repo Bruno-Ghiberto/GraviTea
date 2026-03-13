@@ -1,0 +1,1192 @@
+openapi: 3.1.0
+info:
+  title: Gravitea Procurement (Compras) API
+  version: 1.0.0
+  description: 'Procurement management including purchase orders, goods receipts, and supplier management.
+
+
+    ## Authentication
+
+    All endpoints require JWT Bearer authentication (unless noted otherwise).
+
+
+    ## Multi-Tenant
+
+    Resources are automatically filtered by tenant_id from JWT claims.'
+  contact:
+    name: Gravitea Development Team
+    email: dev@gravitea.com
+  license:
+    name: Proprietary
+servers:
+- url: http://localhost:8000/api/v1
+  description: Development
+- url: https://api.gravitea.app/api/v1
+  description: Production
+security:
+- bearerAuth: []
+paths:
+  /api/v1/compras/goods-receipts/:
+    get:
+      operationId: compras_goods_receipts_list
+      description: "Goods Receipt read-only viewset (standalone list + detail).\n\nEndpoints:\n    GET /api/v1/compras/goods-receipts/\
+        \       - List all receipts\n    GET /api/v1/compras/goods-receipts/{id}/   - Get receipt detail\n\nCreation is handled\
+        \ via PurchaseOrderViewSet.receive action.\nNo update or delete — GoodsReceipt is immutable."
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: El valor del cursor de paginación.
+        schema:
+          type: string
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      tags:
+      - compras
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedGoodsReceiptList'
+          description: ''
+  /api/v1/compras/goods-receipts/{id}/:
+    get:
+      operationId: compras_goods_receipts_retrieve
+      description: "Goods Receipt read-only viewset (standalone list + detail).\n\nEndpoints:\n    GET /api/v1/compras/goods-receipts/\
+        \       - List all receipts\n    GET /api/v1/compras/goods-receipts/{id}/   - Get receipt detail\n\nCreation is handled\
+        \ via PurchaseOrderViewSet.receive action.\nNo update or delete — GoodsReceipt is immutable."
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - compras
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoodsReceipt'
+          description: ''
+  /api/v1/compras/purchase-orders/:
+    get:
+      operationId: compras_purchase_orders_list
+      description: "PurchaseOrder management with state machine actions.\n\nEndpoints:\n    GET    /api/v1/compras/purchase-orders/\
+        \                - List POs\n    POST   /api/v1/compras/purchase-orders/                - Create PO (DRAFT)\n    GET\
+        \    /api/v1/compras/purchase-orders/{id}/           - Get PO detail\n    PATCH  /api/v1/compras/purchase-orders/{id}/\
+        \           - Update PO (mutable fields by state)\n    DELETE /api/v1/compras/purchase-orders/{id}/           - Delete\
+        \ DRAFT PO only\n    POST   /api/v1/compras/purchase-orders/{id}/confirm/   - DRAFT → CONFIRMED\n    POST   /api/v1/compras/purchase-orders/{id}/cancel/\
+        \    - → CANCELLED"
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: El valor del cursor de paginación.
+        schema:
+          type: string
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      tags:
+      - compras
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPurchaseOrderList'
+          description: ''
+    post:
+      operationId: compras_purchase_orders_create
+      description: "PurchaseOrder management with state machine actions.\n\nEndpoints:\n    GET    /api/v1/compras/purchase-orders/\
+        \                - List POs\n    POST   /api/v1/compras/purchase-orders/                - Create PO (DRAFT)\n    GET\
+        \    /api/v1/compras/purchase-orders/{id}/           - Get PO detail\n    PATCH  /api/v1/compras/purchase-orders/{id}/\
+        \           - Update PO (mutable fields by state)\n    DELETE /api/v1/compras/purchase-orders/{id}/           - Delete\
+        \ DRAFT PO only\n    POST   /api/v1/compras/purchase-orders/{id}/confirm/   - DRAFT → CONFIRMED\n    POST   /api/v1/compras/purchase-orders/{id}/cancel/\
+        \    - → CANCELLED"
+      tags:
+      - compras
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseOrderRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PurchaseOrderRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PurchaseOrderRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseOrder'
+          description: ''
+  /api/v1/compras/purchase-orders/{id}/:
+    get:
+      operationId: compras_purchase_orders_retrieve
+      description: "PurchaseOrder management with state machine actions.\n\nEndpoints:\n    GET    /api/v1/compras/purchase-orders/\
+        \                - List POs\n    POST   /api/v1/compras/purchase-orders/                - Create PO (DRAFT)\n    GET\
+        \    /api/v1/compras/purchase-orders/{id}/           - Get PO detail\n    PATCH  /api/v1/compras/purchase-orders/{id}/\
+        \           - Update PO (mutable fields by state)\n    DELETE /api/v1/compras/purchase-orders/{id}/           - Delete\
+        \ DRAFT PO only\n    POST   /api/v1/compras/purchase-orders/{id}/confirm/   - DRAFT → CONFIRMED\n    POST   /api/v1/compras/purchase-orders/{id}/cancel/\
+        \    - → CANCELLED"
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - compras
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseOrder'
+          description: ''
+    put:
+      operationId: compras_purchase_orders_update
+      description: "PurchaseOrder management with state machine actions.\n\nEndpoints:\n    GET    /api/v1/compras/purchase-orders/\
+        \                - List POs\n    POST   /api/v1/compras/purchase-orders/                - Create PO (DRAFT)\n    GET\
+        \    /api/v1/compras/purchase-orders/{id}/           - Get PO detail\n    PATCH  /api/v1/compras/purchase-orders/{id}/\
+        \           - Update PO (mutable fields by state)\n    DELETE /api/v1/compras/purchase-orders/{id}/           - Delete\
+        \ DRAFT PO only\n    POST   /api/v1/compras/purchase-orders/{id}/confirm/   - DRAFT → CONFIRMED\n    POST   /api/v1/compras/purchase-orders/{id}/cancel/\
+        \    - → CANCELLED"
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - compras
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseOrderRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PurchaseOrderRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PurchaseOrderRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseOrder'
+          description: ''
+    patch:
+      operationId: compras_purchase_orders_partial_update
+      description: "PurchaseOrder management with state machine actions.\n\nEndpoints:\n    GET    /api/v1/compras/purchase-orders/\
+        \                - List POs\n    POST   /api/v1/compras/purchase-orders/                - Create PO (DRAFT)\n    GET\
+        \    /api/v1/compras/purchase-orders/{id}/           - Get PO detail\n    PATCH  /api/v1/compras/purchase-orders/{id}/\
+        \           - Update PO (mutable fields by state)\n    DELETE /api/v1/compras/purchase-orders/{id}/           - Delete\
+        \ DRAFT PO only\n    POST   /api/v1/compras/purchase-orders/{id}/confirm/   - DRAFT → CONFIRMED\n    POST   /api/v1/compras/purchase-orders/{id}/cancel/\
+        \    - → CANCELLED"
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - compras
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPurchaseOrderRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPurchaseOrderRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPurchaseOrderRequest'
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseOrder'
+          description: ''
+    delete:
+      operationId: compras_purchase_orders_destroy
+      description: "PurchaseOrder management with state machine actions.\n\nEndpoints:\n    GET    /api/v1/compras/purchase-orders/\
+        \                - List POs\n    POST   /api/v1/compras/purchase-orders/                - Create PO (DRAFT)\n    GET\
+        \    /api/v1/compras/purchase-orders/{id}/           - Get PO detail\n    PATCH  /api/v1/compras/purchase-orders/{id}/\
+        \           - Update PO (mutable fields by state)\n    DELETE /api/v1/compras/purchase-orders/{id}/           - Delete\
+        \ DRAFT PO only\n    POST   /api/v1/compras/purchase-orders/{id}/confirm/   - DRAFT → CONFIRMED\n    POST   /api/v1/compras/purchase-orders/{id}/cancel/\
+        \    - → CANCELLED"
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - compras
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/compras/purchase-orders/{id}/cancel/:
+    post:
+      operationId: compras_purchase_orders_cancel_create
+      description: Transition PO to CANCELLED from DRAFT/CONFIRMED/PARTIAL_RECEIVED.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - compras
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseOrderRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PurchaseOrderRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PurchaseOrderRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseOrder'
+          description: ''
+  /api/v1/compras/purchase-orders/{id}/confirm/:
+    post:
+      operationId: compras_purchase_orders_confirm_create
+      description: Transition PO from DRAFT to CONFIRMED.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - compras
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseOrderRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PurchaseOrderRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PurchaseOrderRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseOrder'
+          description: ''
+  /api/v1/compras/purchase-orders/{id}/receive/:
+    post:
+      operationId: compras_purchase_orders_receive_create
+      description: 'Create a goods receipt against this PO.
+
+
+        POST /api/v1/compras/purchase-orders/{id}/receive/
+
+        Body: {receipt_number, branch, lines: [{purchase_order_item_id, quantity_received}], notes?}'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - compras
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseOrderRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PurchaseOrderRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PurchaseOrderRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseOrder'
+          description: ''
+  /api/v1/compras/suppliers/:
+    get:
+      operationId: compras_suppliers_list
+      description: "Supplier management viewset.\n\nEndpoints:\n    GET    /api/v1/compras/suppliers/             - List suppliers\n\
+        \    POST   /api/v1/compras/suppliers/             - Create supplier\n    GET    /api/v1/compras/suppliers/{id}/ \
+        \       - Get supplier details\n    PATCH  /api/v1/compras/suppliers/{id}/        - Update supplier\n    DELETE /api/v1/compras/suppliers/{id}/\
+        \        - Soft delete (set is_active=False)\n    GET    /api/v1/compras/suppliers/search/?q={query} - Search by tax_id\
+        \ or email"
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: El valor del cursor de paginación.
+        schema:
+          type: string
+      - name: page_size
+        required: false
+        in: query
+        description: Número de resultados a devolver por página.
+        schema:
+          type: integer
+      tags:
+      - compras
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSupplierList'
+          description: ''
+    post:
+      operationId: compras_suppliers_create
+      description: "Supplier management viewset.\n\nEndpoints:\n    GET    /api/v1/compras/suppliers/             - List suppliers\n\
+        \    POST   /api/v1/compras/suppliers/             - Create supplier\n    GET    /api/v1/compras/suppliers/{id}/ \
+        \       - Get supplier details\n    PATCH  /api/v1/compras/suppliers/{id}/        - Update supplier\n    DELETE /api/v1/compras/suppliers/{id}/\
+        \        - Soft delete (set is_active=False)\n    GET    /api/v1/compras/suppliers/search/?q={query} - Search by tax_id\
+        \ or email"
+      tags:
+      - compras
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupplierCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SupplierCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SupplierCreateRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierCreate'
+          description: ''
+  /api/v1/compras/suppliers/search/:
+    get:
+      operationId: compras_suppliers_search_retrieve
+      description: 'Search suppliers by tax_id or email using blind indexes.
+
+
+        Query param: ?q=search_term
+
+
+        Uses blind index for privacy-preserving search.'
+      tags:
+      - compras
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supplier'
+          description: ''
+  /api/v1/compras/suppliers/{id}/:
+    get:
+      operationId: compras_suppliers_retrieve
+      description: "Supplier management viewset.\n\nEndpoints:\n    GET    /api/v1/compras/suppliers/             - List suppliers\n\
+        \    POST   /api/v1/compras/suppliers/             - Create supplier\n    GET    /api/v1/compras/suppliers/{id}/ \
+        \       - Get supplier details\n    PATCH  /api/v1/compras/suppliers/{id}/        - Update supplier\n    DELETE /api/v1/compras/suppliers/{id}/\
+        \        - Soft delete (set is_active=False)\n    GET    /api/v1/compras/suppliers/search/?q={query} - Search by tax_id\
+        \ or email"
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - compras
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supplier'
+          description: ''
+    put:
+      operationId: compras_suppliers_update
+      description: "Supplier management viewset.\n\nEndpoints:\n    GET    /api/v1/compras/suppliers/             - List suppliers\n\
+        \    POST   /api/v1/compras/suppliers/             - Create supplier\n    GET    /api/v1/compras/suppliers/{id}/ \
+        \       - Get supplier details\n    PATCH  /api/v1/compras/suppliers/{id}/        - Update supplier\n    DELETE /api/v1/compras/suppliers/{id}/\
+        \        - Soft delete (set is_active=False)\n    GET    /api/v1/compras/suppliers/search/?q={query} - Search by tax_id\
+        \ or email"
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - compras
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupplierCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SupplierCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SupplierCreateRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierCreate'
+          description: ''
+    patch:
+      operationId: compras_suppliers_partial_update
+      description: "Supplier management viewset.\n\nEndpoints:\n    GET    /api/v1/compras/suppliers/             - List suppliers\n\
+        \    POST   /api/v1/compras/suppliers/             - Create supplier\n    GET    /api/v1/compras/suppliers/{id}/ \
+        \       - Get supplier details\n    PATCH  /api/v1/compras/suppliers/{id}/        - Update supplier\n    DELETE /api/v1/compras/suppliers/{id}/\
+        \        - Soft delete (set is_active=False)\n    GET    /api/v1/compras/suppliers/search/?q={query} - Search by tax_id\
+        \ or email"
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - compras
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSupplierCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSupplierCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSupplierCreateRequest'
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierCreate'
+          description: ''
+    delete:
+      operationId: compras_suppliers_destroy
+      description: "Supplier management viewset.\n\nEndpoints:\n    GET    /api/v1/compras/suppliers/             - List suppliers\n\
+        \    POST   /api/v1/compras/suppliers/             - Create supplier\n    GET    /api/v1/compras/suppliers/{id}/ \
+        \       - Get supplier details\n    PATCH  /api/v1/compras/suppliers/{id}/        - Update supplier\n    DELETE /api/v1/compras/suppliers/{id}/\
+        \        - Soft delete (set is_active=False)\n    GET    /api/v1/compras/suppliers/search/?q={query} - Search by tax_id\
+        \ or email"
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - compras
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/token/ endpoint. Include tenant_id in token payload.
+  schemas:
+    GoodsReceipt:
+      type: object
+      description: GoodsReceipt read serializer with nested lines.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        purchase_order:
+          type: string
+          format: uuid
+          readOnly: true
+        receipt_number:
+          type: string
+          readOnly: true
+          description: Unique receipt number per tenant
+        receipt_date:
+          type: string
+          format: date
+          readOnly: true
+          description: Date goods arrived
+        received_by:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          readOnly: true
+          description: User who received the goods
+        notes:
+          type:
+          - string
+          - 'null'
+          readOnly: true
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/GoodsReceiptLine'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - lines
+      - notes
+      - purchase_order
+      - receipt_date
+      - receipt_number
+      - received_by
+    GoodsReceiptLine:
+      type: object
+      description: GoodsReceiptLine serializer — nested inside GoodsReceiptSerializer.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        purchase_order_item:
+          type: string
+          format: uuid
+        product:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Denormalized from PO item for easy access
+        quantity_received:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Quantity received (> 0)
+      required:
+      - id
+      - product
+      - purchase_order_item
+    PaginatedGoodsReceiptList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/GoodsReceipt'
+    PaginatedPurchaseOrderList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchaseOrder'
+    PaginatedSupplierList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Supplier'
+    PatchedPurchaseOrderRequest:
+      type: object
+      description: 'PurchaseOrder serializer with nested writable items and custom fields.
+
+
+        On create: items are created inline, custom_data validated.
+
+        On update: items are replaced (delete existing + create new) for DRAFT POs.'
+      properties:
+        supplier:
+          type: string
+          format: uuid
+          description: Cannot delete supplier with open POs
+        order_number:
+          type: string
+          minLength: 1
+          description: Unique order number per tenant
+          maxLength: 32
+        order_date:
+          type: string
+          format: date
+          description: Date PO was created
+        expected_delivery_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Optional estimated arrival
+        notes:
+          type:
+          - string
+          - 'null'
+        custom_data:
+          description: Tenant-defined custom fields. Validated against TenantFieldDefinition.
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchaseOrderItemRequest'
+    PatchedSupplierCreateRequest:
+      type: object
+      description: 'Supplier serializer for create/update operations.
+
+
+        Handles encryption of PII fields.'
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Supplier name
+          maxLength: 255
+        tax_id:
+          type:
+          - string
+          - 'null'
+        email:
+          type:
+          - string
+          - 'null'
+          format: email
+        contact_info:
+          type:
+          - string
+          - 'null'
+        address:
+          type:
+          - string
+          - 'null'
+        lead_time_days:
+          type:
+          - integer
+          - 'null'
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Expected delivery lead time in days
+        custom_data:
+          description: Tenant-defined custom fields. Validated against TenantFieldDefinition.
+        is_active:
+          type: boolean
+          description: Active/available flag
+    ProblemDetail:
+      type: object
+      required:
+      - type
+      - title
+      - status
+      - detail
+      - trace_id
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI identifying the error type category
+          example: https://api.gravitea.com/errors/not-found
+        title:
+          type: string
+          description: Human-readable error title
+          example: Not Found
+        status:
+          type: integer
+          description: HTTP status code
+          example: 404
+        detail:
+          type: string
+          description: Detailed explanation of the error
+          example: The requested resource was not found
+        trace_id:
+          type: string
+          format: uuid
+          description: Unique request identifier for log correlation
+          example: 550e8400-e29b-41d4-a716-446655440000
+      description: RFC 7807 Problem Details for HTTP APIs
+    PurchaseOrder:
+      type: object
+      description: 'PurchaseOrder serializer with nested writable items and custom fields.
+
+
+        On create: items are created inline, custom_data validated.
+
+        On update: items are replaced (delete existing + create new) for DRAFT POs.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        supplier:
+          type: string
+          format: uuid
+          description: Cannot delete supplier with open POs
+        order_number:
+          type: string
+          description: Unique order number per tenant
+          maxLength: 32
+        status:
+          type: string
+          readOnly: true
+        order_date:
+          type: string
+          format: date
+          description: Date PO was created
+        expected_delivery_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Optional estimated arrival
+        notes:
+          type:
+          - string
+          - 'null'
+        custom_data:
+          description: Tenant-defined custom fields. Validated against TenantFieldDefinition.
+        total_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchaseOrderItem'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - items
+      - order_date
+      - order_number
+      - status
+      - supplier
+      - total_amount
+      - updated_at
+    PurchaseOrderItem:
+      type: object
+      description: Line item serializer — nested inside PurchaseOrderSerializer.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        product:
+          type: string
+          format: uuid
+          description: Cannot delete product on open PO
+        quantity:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Ordered quantity (> 0)
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Price per unit (>= 0)
+        line_total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          readOnly: true
+        received_quantity:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          readOnly: true
+      required:
+      - id
+      - line_total
+      - product
+      - received_quantity
+    PurchaseOrderItemRequest:
+      type: object
+      description: Line item serializer — nested inside PurchaseOrderSerializer.
+      properties:
+        product:
+          type: string
+          format: uuid
+          description: Cannot delete product on open PO
+        quantity:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Ordered quantity (> 0)
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          description: Price per unit (>= 0)
+      required:
+      - product
+    PurchaseOrderRequest:
+      type: object
+      description: 'PurchaseOrder serializer with nested writable items and custom fields.
+
+
+        On create: items are created inline, custom_data validated.
+
+        On update: items are replaced (delete existing + create new) for DRAFT POs.'
+      properties:
+        supplier:
+          type: string
+          format: uuid
+          description: Cannot delete supplier with open POs
+        order_number:
+          type: string
+          minLength: 1
+          description: Unique order number per tenant
+          maxLength: 32
+        order_date:
+          type: string
+          format: date
+          description: Date PO was created
+        expected_delivery_date:
+          type:
+          - string
+          - 'null'
+          format: date
+          description: Optional estimated arrival
+        notes:
+          type:
+          - string
+          - 'null'
+        custom_data:
+          description: Tenant-defined custom fields. Validated against TenantFieldDefinition.
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchaseOrderItemRequest'
+      required:
+      - items
+      - order_date
+      - order_number
+      - supplier
+    RateLimitError:
+      type: object
+      description: 'RFC 7807 rate limit error with retry information.
+
+
+        Extended ProblemDetail for 429 Too Many Requests responses
+
+        that include retry timing information.'
+      properties:
+        type:
+          type: string
+          format: uri
+          default: about:blank
+          description: URI reference identifying the problem type category
+        title:
+          type: string
+          description: Short, human-readable error summary
+          maxLength: 100
+        status:
+          type: integer
+          maximum: 599
+          minimum: 400
+          description: HTTP status code (400-599)
+        detail:
+          type: string
+          description: Human-readable explanation of this specific error
+          maxLength: 500
+        trace_id:
+          type: string
+          format: uuid
+          description: UUID v4 for log correlation
+        instance:
+          type: string
+          format: uri
+          description: URI of the specific resource that caused the error
+        retry_after:
+          type: integer
+          description: Seconds until the next request attempt is allowed
+      required:
+      - detail
+      - retry_after
+      - status
+      - title
+      - trace_id
+    Supplier:
+      type: object
+      description: 'Supplier serializer for read operations.
+
+
+        Returns supplier details with decrypted PII fields.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          description: Supplier name
+          maxLength: 255
+        tax_id:
+          type: string
+          readOnly: true
+        email:
+          type: string
+          readOnly: true
+        contact_info:
+          type: string
+          readOnly: true
+        address:
+          type: string
+          readOnly: true
+        lead_time_days:
+          type:
+          - integer
+          - 'null'
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Expected delivery lead time in days
+        current_balance:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,3})?$
+          readOnly: true
+          description: Current account balance (payables)
+        custom_data:
+          description: Tenant-defined custom fields. Validated against TenantFieldDefinition.
+        is_active:
+          type: boolean
+          description: Active/available flag
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - address
+      - contact_info
+      - created_at
+      - current_balance
+      - email
+      - id
+      - name
+      - tax_id
+    SupplierCreate:
+      type: object
+      description: 'Supplier serializer for create/update operations.
+
+
+        Handles encryption of PII fields.'
+      properties:
+        name:
+          type: string
+          description: Supplier name
+          maxLength: 255
+        tax_id:
+          type:
+          - string
+          - 'null'
+        email:
+          type:
+          - string
+          - 'null'
+          format: email
+        contact_info:
+          type:
+          - string
+          - 'null'
+        address:
+          type:
+          - string
+          - 'null'
+        lead_time_days:
+          type:
+          - integer
+          - 'null'
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Expected delivery lead time in days
+        custom_data:
+          description: Tenant-defined custom fields. Validated against TenantFieldDefinition.
+        is_active:
+          type: boolean
+          description: Active/available flag
+      required:
+      - name
+    SupplierCreateRequest:
+      type: object
+      description: 'Supplier serializer for create/update operations.
+
+
+        Handles encryption of PII fields.'
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Supplier name
+          maxLength: 255
+        tax_id:
+          type:
+          - string
+          - 'null'
+        email:
+          type:
+          - string
+          - 'null'
+          format: email
+        contact_info:
+          type:
+          - string
+          - 'null'
+        address:
+          type:
+          - string
+          - 'null'
+        lead_time_days:
+          type:
+          - integer
+          - 'null'
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Expected delivery lead time in days
+        custom_data:
+          description: Tenant-defined custom fields. Validated against TenantFieldDefinition.
+        is_active:
+          type: boolean
+          description: Active/available flag
+      required:
+      - name
+    ValidationError:
+      allOf:
+      - $ref: '#/components/schemas/ProblemDetail'
+      - type: object
+        properties:
+          errors:
+            type: array
+            items:
+              $ref: '#/components/schemas/FieldError'
+            description: Field-level validation error details
+            example:
+            - field: email
+              message: Enter a valid email address.
+              code: invalid
+            - field: username
+              message: This field is required.
+              code: required
+      description: Validation error response with field-level details
