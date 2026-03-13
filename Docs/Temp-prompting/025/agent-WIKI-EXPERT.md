@@ -175,7 +175,7 @@ This feature involves:
 - **Validation**: 6 field types (text, integer, decimal, boolean, date, select) with specific Python type semantics
 - **Key patterns**: `serde_json::Value` enum (Bool distinct from Number), `Regex` format-only date, explicit single-quote string construction for select errors
 - **Key crates**: `serde 1.0`, `serde_json 1.0`, `regex 1.10`, `pyo3 0.28` (all already in Cargo.toml)
-- **NOT involved**: ARCA/AFIP, chrono (dates are format-only), once_cell/DashMap (no caching), rust_decimal
+- **NOT involved**: ARCA, chrono (dates are format-only), once_cell/DashMap (no caching), rust_decimal
 
 ---
 

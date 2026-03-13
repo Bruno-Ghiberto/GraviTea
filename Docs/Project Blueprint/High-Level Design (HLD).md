@@ -200,7 +200,7 @@ graph LR
     subgraph "Data Layer"
         DB[("PostgreSQL 18.1<br/>Multi-tenant RLS")]
         REDIS[("Redis 7<br/>Cache + Celery")]
-        ARCA["ARCA/AFIP WebServices"]
+        ARCA["ARCA WebServices"]
     end
 
     FE --> DJ
@@ -418,7 +418,7 @@ graph LR
     end
 
     subgraph "Fiscal Integrations (Implemented)"
-        ARCA["ARCA/AFIP (WSAA + WSFEv1) ✅"]
+        ARCA["ARCA (WSAA + WSFEv1) ✅"]
     end
 
     subgraph "Fiscal Integrations (Planned)"
@@ -452,7 +452,7 @@ graph LR
 
 **Integration criteria**:
 - Preference for HTTP/REST APIs (or gRPC in the future) with well-versioned contracts.
-- ARCA/AFIP integration is implemented via direct WSAA (authentication) + WSFEv1 (invoicing) SOAP calls in `apps/facturacion/arca/`.
+- ARCA integration is implemented via direct WSAA (authentication) + WSFEv1 (invoicing) SOAP calls in `apps/facturacion/arca/`.
 - Any "retry and resilience" logic towards external services is handled in asynchronous workers (Celery + Redis).
 
 ## 6. NFRs and Quality Attributes (Architecture View)

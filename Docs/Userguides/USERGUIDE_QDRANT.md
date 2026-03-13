@@ -2,7 +2,7 @@
 
 **Target Audience**: GRAVITEA development team working on ARCA electronic invoicing integration
 **Last Updated**: 2026-02-09
-**Project Context**: Multi-tenant ERP with ARCA/AFIP electronic invoicing requirements
+**Project Context**: Multi-tenant ERP with ARCA electronic invoicing requirements
 
 ---
 

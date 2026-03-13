@@ -42,7 +42,7 @@ La API expone servicios para los siguientes módulos **implementados**:
 - **AUTH** — JWT RS256, usuarios, roles, sucursales
 - **INVENTARIO** — Productos, categorías, proveedores, listas de precios, stock
 - **VENTAS** — Clientes, órdenes de venta, ítems
-- **FACTURACION** — ARCA/AFIP: comprobantes, CAE/CAEA, puntos de venta, credenciales
+- **FACTURACION** — ARCA: comprobantes, CAE/CAEA, puntos de venta, credenciales
 - **SYNC** — Sincronización offline-first: sesiones, push, pull
 - **CUSTOMIZATION** — Definiciones de campos y configuración de módulos
 - **COMPRAS** — Órdenes de compra, proveedores (parcial — workflow de órdenes pendiente)

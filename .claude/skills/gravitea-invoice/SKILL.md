@@ -4,7 +4,7 @@ description: >
   Electronic invoicing patterns for GRAVITEA-ERP using Argentina's ARCA (ex-AFIP) system.
   Covers WSAA authentication, WSFEv1 invoice issuance, CAE lifecycle, TRA generation,
   comprobante types (A/B/C/M), fiscal QR codes, and multi-tenant certificate management.
-  Trigger: When editing apps/facturacion/, working with ARCA/AFIP integration, CAE generation,
+  Trigger: When editing apps/facturacion/, working with ARCA integration, CAE generation,
   invoice PDF rendering, or fiscal QR codes.
 license: MIT
 metadata:

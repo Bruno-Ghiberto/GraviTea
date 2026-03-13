@@ -78,7 +78,7 @@ Research the Argentine SME landscape and identify industry sectors where:
 
 1. **Businesses are numerous enough** to sustain a SaaS business (ideally >2,000 establishments in the target segment)
 2. **Current software is weak** — the sector is dominated by desktop legacy software, Excel/WhatsApp workflows, or expensive enterprise tools with no affordable mid-market alternative
-3. **Regulatory requirements create switching costs** — ARCA/AFIP, SENASA, ANMAT, RUCA, or other government agencies mandate electronic documents, traceability, or reporting that create a compliance moat
+3. **Regulatory requirements create switching costs** — ARCA, SENASA, ANMAT, RUCA, or other government agencies mandate electronic documents, traceability, or reporting that create a compliance moat
 4. **Our existing modules map naturally** — the sector needs inventory + sales + invoicing + some form of offline/field operation (i.e., our platform covers a significant chunk of the business need)
 5. **Willingness to pay** — the sector can afford $100-2,000 USD/month for management software
 
@@ -119,7 +119,7 @@ Based on 1.1 and 1.2, produce a ranked table of 10-15 candidate niches. For each
 - Sector name (in Spanish as used in Argentina)
 - Estimated number of businesses
 - Current software status (legacy/mixed/modern)
-- Key regulatory body beyond ARCA/AFIP (if any)
+- Key regulatory body beyond ARCA (if any)
 - Platform reuse estimate (high/medium/low)
 - One-line rationale for inclusion
 
@@ -141,7 +141,7 @@ For each candidate that survived the Phase 1 filter, research the following dime
 
 ### 2.2 — Regulatory Environment
 
-1. What ARCA/AFIP electronic documents are mandatory for this sector beyond standard invoicing (Facturas A/B/C)? List specific document types, web services, and regulatory resolutions.
+1. What ARCA electronic documents are mandatory for this sector beyond standard invoicing (Facturas A/B/C)? List specific document types, web services, and regulatory resolutions.
 2. What sector-specific agencies regulate this industry? (SENASA, ANMAT, RUCA, INAES, ENACOM, provincial agencies, etc.) What electronic systems do they mandate?
 3. How frequently do these regulations change? Is the compliance burden increasing or stable?
 4. What penalties exist for non-compliance with electronic document requirements?
@@ -215,9 +215,9 @@ Score each candidate niche 1-5 on each dimension. Include brief justification fo
 For each candidate niche:
 - The 1-2 mandatory compliance features that are non-negotiable (without which the software cannot be sold)
 - The regulatory body responsible and how frequently they change requirements
-- Whether our existing ARCA/AFIP integration covers the main compliance need or new agency integrations are required
+- Whether our existing ARCA integration covers the main compliance need or new agency integrations are required
 
-> **Our existing ARCA/AFIP coverage**: Facturas A/B/C/M (WSFEv1), CAE online, CAEA offline batching, fiscal QR codes, WSAA certificate authentication, CUIT validation, IVA breakdown calculation/validation. Any niche requiring *only* standard ARCA invoicing has zero incremental regulatory work.
+> **Our existing ARCA coverage**: Facturas A/B/C/M (WSFEv1), CAE online, CAEA offline batching, fiscal QR codes, WSAA certificate authentication, CUIT validation, IVA breakdown calculation/validation. Any niche requiring *only* standard ARCA invoicing has zero incremental regulatory work.
 
 ### 3.3 — Competitive Landscape Summary
 
@@ -258,7 +258,7 @@ Also provide your **#2 and #3 alternatives** with a brief explanation of why the
 
 ## RESEARCH GUIDELINES
 
-- **Prioritize Argentine sources**: INDEC, AFIP/ARCA, SENASA, Bolsa de Cereales de Buenos Aires, Ministerio de Economía, Ministerio de Producción. Use `.gob.ar` domains preferentially.
+- **Prioritize Argentine sources**: INDEC, ARCA, SENASA, Bolsa de Cereales de Buenos Aires, Ministerio de Economía, Ministerio de Producción. Use `.gob.ar` domains preferentially.
 - **Date filter**: Prioritize sources from 2023 onwards. Argentina's regulatory landscape changes rapidly. The current date is **March 2026**.
 - **Flag uncertainty**: If data is estimated or extrapolated, say so explicitly. Distinguish between hard data and informed estimates.
 - **Currency**: When citing revenue/pricing, provide both ARS and USD equivalent at the time of the source.

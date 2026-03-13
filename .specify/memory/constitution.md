@@ -55,7 +55,7 @@ Production must never run with `DEBUG = True`, and `SECRET_KEY` requires rigorou
 
 **Rationale**: Authentication is the gateway to all system access. Modern threats require state-of-the-art password hashing, token-based authentication, and multi-layer tenant isolation validation.
 
-### VI. Fiscal Compliance Integration (ARCA/AFIP)
+### VI. Fiscal Compliance Integration (ARCA)
 The `facturacion` module implements robust integration with ARCA Web Services (WSAA/WSFEv1) for electronic invoicing (CAE/CAEA). Communication uses SOAP over HTTPS. The system handles the complete WSAA flow: TRA generation, X.509 certificate signing to create CMS, Base64 encoding, and `LoginCMS` invocation for Token/Sign receipt. Fiscal secrets reference Secret Manager, and ARCA responses persist in Comprobante `arca_response` (JSONB).
 
 **Rationale**: Legal compliance is mandatory for Argentine retail operations. Fiscal integration failures can result in business closure.

@@ -43,7 +43,7 @@ El alcance de esta SRS se centra en el **MVP definido en `Product Vision & Scope
 - **Sucursal / Branch**: punto de venta físico asociado a un tenant. `afip_pos_number` 1-99999.
 - **TenantBoundModel**: clase abstracta Django que aísla datos por tenant (TenantBoundManager + RLS + validación IDOR).
 - **POS**: Point of Sale (Punto de Venta). Backend implementado; cliente de escritorio Electron planificado.
-- **ARCA/AFIP**: organismos fiscales para facturación electrónica en Argentina.
+- **ARCA**: organismos fiscales para facturación electrónica en Argentina.
 - **CAE**: Código de Autorización Electrónico (modalidad online).
 - **CAEA**: Código de Autorización Electrónico Anticipado (modalidad offline).
 - **RLS**: Row Level Security (seguridad a nivel de fila en PostgreSQL 18.1).
@@ -183,7 +183,7 @@ El sistema es **multi-tenant** (un solo despliegue para muchos clientes) y **off
 **Restricciones del entorno de producción planificado**:
 - La app de escritorio para sucursales **debe ser Electron** (Node + Chromium + SQLite cifrado).
 - El deployment en producción debe ser **Google Cloud Run + Cloud SQL**.
-- Cumplimiento con requisitos fiscales de **ARCA/AFIP** (implementado para Argentina; adaptable a LATAM).
+- Cumplimiento con requisitos fiscales de **ARCA** (implementado para Argentina; adaptable a LATAM).
 
 **Aclaración dual-entorno**:
 - El entorno de desarrollo actual utiliza **Next.js 16** como frontend web.
@@ -333,7 +333,7 @@ El sistema es **multi-tenant** (un solo despliegue para muchos clientes) y **off
 
 ### 4.2 Interfaces de Software
 
-- **ARCA/AFIP** ✅ Implementado:
+- **ARCA** ✅ Implementado:
   - WSAA (autenticación) + WSFEv1 (facturación electrónica) — integración SOAP directa.
   - Manejo de homologación (`is_production=False`) vs producción (`is_production=True`).
 
@@ -403,6 +403,6 @@ El sistema es **multi-tenant** (un solo despliegue para muchos clientes) y **off
 ## 7. Otros Requisitos
 
 - **Localización**: soporte inicial para español (es-AR/es-LATAM). API y documentación en inglés.
-- **Regulatorios**: cumplimiento con normativa fiscal vigente ARCA/AFIP (implementado para Argentina; adaptable a LATAM mediante configuración).
+- **Regulatorios**: cumplimiento con normativa fiscal vigente ARCA (implementado para Argentina; adaptable a LATAM mediante configuración).
 - **Extensibilidad**: el diseño permite la futura incorporación de módulos (E-commerce B2B, App móvil para dueños) sin reescribir el core — gracias al sistema de TenantFieldDefinition y TenantModuleConfig.
 - **Objetivo MVP**: Originalmente 1 de mayo de 2026. Actualmente en revisión debido a la fase de investigación de pivot a Vertical SaaS (ver ADR-016). Pendientes antes del lanzamiento: Módulo REPORTES, cliente Electron POS, despliegue GCP, CI/CD.

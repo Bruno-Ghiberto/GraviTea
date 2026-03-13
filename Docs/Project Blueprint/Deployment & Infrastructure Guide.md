@@ -488,7 +488,7 @@ The following items must be completed before the first production deployment:
 - [ ] `python manage.py migrate` executed successfully
 - [ ] `python manage.py collectstatic` executed (static assets to Cloud Storage)
 - [ ] Health check endpoints responding (`/health/live`, `/health/ready`)
-- [ ] ARCA production credentials obtained from AFIP/ARCA and configured per tenant
+- [ ] ARCA production credentials obtained from ARCA and configured per tenant
 
 **Rust Acceleration**:
 - [ ] Rust wheel (`gravitea_rust`) builds successfully in Docker multi-stage (rust-builder stage)

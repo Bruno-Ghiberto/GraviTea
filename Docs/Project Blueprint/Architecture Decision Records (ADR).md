@@ -240,7 +240,7 @@ Token configuration:
 
 ### Context
 
-Fiscal compliance in Argentina (ARCA/AFIP regulations) requires that electronic invoices, once authorized, cannot be modified or deleted. Stock movements represent financial transactions that must maintain a complete, unalterable audit trail. Allowing updates to historical records creates compliance risk and audit trail gaps.
+Fiscal compliance in Argentina (ARCA regulations) requires that electronic invoices, once authorized, cannot be modified or deleted. Stock movements represent financial transactions that must maintain a complete, unalterable audit trail. Allowing updates to historical records creates compliance risk and audit trail gaps.
 
 ### Decision
 

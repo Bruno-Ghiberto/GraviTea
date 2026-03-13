@@ -9,7 +9,7 @@
 
 ## RESUMEN EJECUTIVO
 
-Argentina posee uno de los ecosistemas agroindustriales más complejos y regulados del mundo. El cruce entre informalidad operativa histórica, inflación crónica, y una ola de regulaciones obligatorias (SENASA 1175/2024, ARCA/AFIP, trazabilidad fitosanitaria) crea una **ventana de oportunidad única** para un ERP vertical SaaS especializado.
+Argentina posee uno de los ecosistemas agroindustriales más complejos y regulados del mundo. El cruce entre informalidad operativa histórica, inflación crónica, y una ola de regulaciones obligatorias (SENASA 1175/2024, ARCA, trazabilidad fitosanitaria) crea una **ventana de oportunidad única** para un ERP vertical SaaS especializado.
 
 **Veredicto:** Las **agronomías** (distribuidores de insumos agropecuarios) son el nicho óptimo para el primer lanzamiento de Gravitea, con una combinación de urgencia regulatoria, densidad de mercado local, vacío competitivo en SaaS nativo argentino, y el 70% del stack tecnológico ya construido.
 
@@ -155,7 +155,7 @@ SOM Año 1 (Serviceable Obtainable Market):
 #### Perfil del Negocio
 
 - Facturación: muy alta (millones de USD por campaña)
-- Operaciones: CARTA DE PORTE electrónica (AFIP/ARCA), contratos de futuros, bolsas de cereales (Rosario, Buenos Aires)
+- Operaciones: CARTA DE PORTE electrónica (ARCA), contratos de futuros, bolsas de cereales (Rosario, Buenos Aires)
 - Regulación: ONCCA (ex), MINAGRI, Secretaría de Agricultura
 - Complejidad: máxima — operan instrumentos financieros complejos
 

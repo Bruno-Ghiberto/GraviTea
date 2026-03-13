@@ -35,7 +35,7 @@ Este documento traduce la visión de Gravitea ERP en requisitos funcionales deta
 |:--------|:-----------|
 | **Tenant** | La organización cliente (Comercio/Empresa). UUID como PK. |
 | **Sync Worker** | Servicio en segundo plano (Electron — planificado) que orquesta la replicación de datos. |
-| **CAE** | Código de Autorización Electrónico (ARCA/AFIP). |
+| **CAE** | Código de Autorización Electrónico (ARCA). |
 | **CAEA** | Código de Autorización Electrónico Anticipado (modalidad offline de ARCA). |
 | **Payload** | Estructura de datos JSON transmitida entre cliente y servidor. |
 | **Optimistic UI** | Patrón donde la interfaz asume éxito antes de la confirmación del servidor. |
@@ -228,7 +228,7 @@ El sistema utiliza un modelo de "Ledger" (Libro Mayor) para el inventario. Los m
 **Criticidad: P0 — ✅ Implementado (feature 001)**
 
 #### ARCA-01: Integración Directa WSAA + WSFEv1
-El sistema implementa integración directa con los webservices de ARCA/AFIP.
+El sistema implementa integración directa con los webservices de ARCA.
 
 ```mermaid
 sequenceDiagram

@@ -10,7 +10,7 @@ Argentina's enterprise software market hit **USD 2.7 billion in 2024** and is gr
 
 The cloud-native players — Colppy (7,000+ companies), Xubio (50,000+ across LATAM, backed by Visma since 2023), and Contabilium (7,000+ companies) — compete fiercely on accounting, ARCA electronic invoicing, and e-commerce integrations. Their pricing ranges from free tiers to **ARS 253,900/month** (Xubio Pro). But none offer production/manufacturing modules, industry-specific compliance workflows, or vertical-tailored UX. Meanwhile, Odoo (159 Argentine partners) and SAP Business One serve mid-market but require expensive implementation partners.
 
-The critical ARCA/AFIP compliance requirements — electronic invoicing (CAE authorization), Libro IVA Digital, SIRE retenciones, provincial IIBB percepciones across 24 jurisdictions, and the new RG 5616/2024 exchange rate rules — create a **natural moat against international SaaS**. No foreign ERP handles monotributo categories, ajuste por inflación contable, Factura de Crédito Electrónica MiPyME, or Mercado Pago integration out of the box. This is GraviTea's structural advantage.
+The critical ARCA compliance requirements — electronic invoicing (CAE authorization), Libro IVA Digital, SIRE retenciones, provincial IIBB percepciones across 24 jurisdictions, and the new RG 5616/2024 exchange rate rules — create a **natural moat against international SaaS**. No foreign ERP handles monotributo categories, ajuste por inflación contable, Factura de Crédito Electrónica MiPyME, or Mercado Pago integration out of the box. This is GraviTea's structural advantage.
 
 ## Sixteen verticals evaluated reveal five genuinely promising opportunities
 

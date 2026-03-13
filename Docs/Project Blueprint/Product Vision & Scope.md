@@ -124,7 +124,7 @@ mindmap
 ### 4.2 Design Guiding Principles
 1.  **Pragmatic Offline-First**: It's not an "offline mode", it's the base architecture. The system assumes the network is hostile. Synchronization is a secondary, non-blocking process.
 2.  **Transactional Integrity (Ledger)**: We adopt strict accounting practices. There are no `UPDATE stock` operations, only `INSERT movement`. This guarantees forensic traceability for any discrepancy.
-3.  **Encapsulated Complexity**: The cashier doesn't need to know what a CAE or a WebService is. The system abstracts tax bureaucracy (ARCA/AFIP) into a simple user experience: "Green = Approved".
+3.  **Encapsulated Complexity**: The cashier doesn't need to know what a CAE or a WebService is. The system abstracts tax bureaucracy (ARCA) into a simple user experience: "Green = Approved".
 4.  **Enterprise Security for SMBs**: We bring corporate standards (Row Level Security, Encryption at Rest, Audit) to a mass-market segment.
 
 ## 5. Target Segment and Personas

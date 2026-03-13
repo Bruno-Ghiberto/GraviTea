@@ -44,7 +44,7 @@
 | `gravitea-encryption` | AES-256-GCM, encrypted fields, blind index search | Working with PII, encrypted fields |
 | [`gravitea-testing`](skills/gravitea-testing/SKILL.md) | Pytest patterns, fixtures, markers, cache isolation | Writing tests |
 | `gravitea-docker` | Docker Compose, health checks, graceful shutdown | Editing Docker configs |
-| [`gravitea-invoice`](skills/gravitea-invoice/SKILL.md) | ARCA electronic invoicing, WSAA auth, WSFEv1, CAE lifecycle, fiscal QR | Editing `apps/facturacion/`, ARCA/AFIP integration |
+| [`gravitea-invoice`](skills/gravitea-invoice/SKILL.md) | ARCA electronic invoicing, WSAA auth, WSFEv1, CAE lifecycle, fiscal QR | Editing `apps/facturacion/`, ARCA integration |
 
 ### Framework Skills
 
