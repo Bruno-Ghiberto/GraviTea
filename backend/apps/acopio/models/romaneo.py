@@ -139,6 +139,22 @@ class Romaneo(TenantBoundModel):
         max_digits=17, decimal_places=3, null=True, blank=True
     )
 
+    # ── Group 8: Storage (spec-12) ──────────────────────────────
+    storage_unit = models.ForeignKey(
+        "gravitea_acopio.StorageUnit",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="romaneos",
+    )
+    grain_lot = models.ForeignKey(
+        "gravitea_acopio.GrainLot",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="romaneos",
+    )
+
     # ── Managers ───────────────────────────────────────────────
     objects = TenantBoundManager()
     all_objects = AllObjectsManager()
@@ -198,7 +214,10 @@ class Romaneo(TenantBoundModel):
 
             # CONFORME: only tare capture and status->CERRADO allowed
             if existing.status == RomaneoStatus.CONFORME:
-                allowed_fields = {"tara_kg", "peso_neto_bruto_kg", "ts_tara", "status"}
+                allowed_fields = {
+                    "tara_kg", "peso_neto_bruto_kg", "ts_tara", "status",
+                    "storage_unit_id", "grain_lot_id",  # spec-12: deposit service sets these at CONFORME
+                }
                 for field in self._meta.get_fields():
                     if not hasattr(field, "attname"):
                         continue

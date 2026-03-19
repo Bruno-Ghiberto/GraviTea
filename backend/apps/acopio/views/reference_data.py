@@ -1,7 +1,9 @@
 """ViewSets for acopio reference data endpoints."""
 
-from rest_framework import viewsets
+from rest_framework import serializers, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from apps.acopio.models import CampanaConfig, GrainType, MermaTable, ToleranceTable
 from apps.acopio.pagination import ReferenceDataPagination
@@ -57,6 +59,50 @@ class CampanaConfigViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(tenant_id=self.request.user.tenant_id)
+
+    # -- Wave 4: campaign close action (T045) ------------------------------
+
+    @action(detail=True, methods=["post"], url_path="close")
+    def close(self, request, pk=None):
+        """POST /campaigns/{id}/close/ — close a campaign year."""
+        campaign = self.get_object()
+
+        # Permission check: supervisor or admin only
+        if not request.user.has_permission("settings.admin"):
+            return Response(
+                {"detail": "Only supervisors or admins can close a campaign."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # Target campaign is required
+        target_campaign_id = request.data.get("target_campaign_id")
+        if not target_campaign_id:
+            return Response(
+                {"detail": "target_campaign_id is required for carry-forward."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        from apps.acopio.services.storage import close_campaign
+
+        try:
+            result = close_campaign(
+                tenant_id=request.user.tenant_id,
+                campaign_id=campaign.pk,
+                target_campaign_id=target_campaign_id,
+                supervisor_id=request.user.pk,
+            )
+        except PermissionError as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        except ValueError as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        return Response(result)
 
 
 class ToleranceTableViewSet(viewsets.ReadOnlyModelViewSet):

@@ -4,11 +4,14 @@ from django.contrib import admin
 
 from .models import (
     CampanaConfig,
+    GrainLot,
+    GrainMovement,
     GrainType,
     MermaCalculation,
     MermaTable,
     QualityAnalysis,
     Romaneo,
+    StorageUnit,
     ToleranceTable,
 )
 
@@ -70,3 +73,30 @@ class MermaCalculationAdmin(admin.ModelAdmin):
         "peso_final_kg", "total_merma_kg", "total_factor_pct",
         "calculated_at", "calculated_by",
     ]
+
+
+@admin.register(StorageUnit)
+class StorageUnitAdmin(admin.ModelAdmin):
+    list_display = ["name", "unit_type", "branch", "capacity_tonnes", "current_grain_type", "is_active"]
+    list_filter = ["unit_type", "is_active"]
+    search_fields = ["name"]
+
+
+@admin.register(GrainLot)
+class GrainLotAdmin(admin.ModelAdmin):
+    list_display = ["lot_code", "grain_type", "campaign", "grado", "storage_unit", "total_kg", "is_own_grain"]
+    list_filter = ["grain_type", "campaign", "is_own_grain"]
+    search_fields = ["lot_code"]
+
+
+@admin.register(GrainMovement)
+class GrainMovementAdmin(admin.ModelAdmin):
+    list_display = ["id", "grain_lot", "movement_type", "quantity_kg", "movement_at"]
+    list_filter = ["movement_type"]
+    readonly_fields = [f.name for f in GrainMovement._meta.get_fields() if hasattr(f, "name")]
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

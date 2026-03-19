@@ -51,7 +51,10 @@ class RomaneoViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return (
             Romaneo.objects
-            .select_related("grain_type", "campaign", "branch")
+            .select_related(
+                "grain_type", "campaign", "branch",
+                "storage_unit", "grain_lot",
+            )
             .all()
         )
 
@@ -265,6 +268,27 @@ class RomaneoViewSet(viewsets.ModelViewSet):
         romaneo.peso_neto_conforme_kg = merma_result["peso_final_kg"]
         romaneo.status = Romaneo.RomaneoStatus.CONFORME
         romaneo.save()
+
+        # -- Spec-12: Deposit from romaneo --
+        if not romaneo.storage_unit:
+            return Response(
+                {
+                    "type": "missing_storage_unit",
+                    "detail": (
+                        "storage_unit must be set on romaneo before confirming. "
+                        "Use PATCH /romaneos/{id}/ to assign a storage unit first."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        from apps.acopio.services.storage import create_deposit_from_romaneo
+
+        create_deposit_from_romaneo(
+            romaneo=romaneo,
+            storage_unit=romaneo.storage_unit,
+            is_own_grain=False,  # spec-12 default; own-grain deferred to spec-13
+        )
 
         return Response(RomaneoDetailSerializer(romaneo).data)
 

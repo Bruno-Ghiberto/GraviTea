@@ -91,6 +91,8 @@ class RomaneoSerializer(serializers.ModelSerializer):
             "grado_asignado",
             "bonificacion_rebaja_pct",
             "peso_neto_conforme_kg",
+            "storage_unit",
+            "grain_lot",
         ]
         read_only_fields = [
             "id",
@@ -101,6 +103,7 @@ class RomaneoSerializer(serializers.ModelSerializer):
             "grado_asignado",
             "bonificacion_rebaja_pct",
             "peso_neto_conforme_kg",
+            "grain_lot",
         ]
 
 
@@ -113,6 +116,12 @@ class RomaneoDetailSerializer(serializers.ModelSerializer):
 
     quality_analysis = QualityAnalysisSerializer(read_only=True)
     merma_calculation = MermaCalculationSerializer(read_only=True)
+    storage_unit_name = serializers.CharField(
+        source="storage_unit.name", read_only=True, default=None
+    )
+    grain_lot_code = serializers.CharField(
+        source="grain_lot.lot_code", read_only=True, default=None
+    )
 
     class Meta:
         model = Romaneo
@@ -148,6 +157,10 @@ class RomaneoDetailSerializer(serializers.ModelSerializer):
             "bonificacion_rebaja_pct",
             "tolerance_table_version",
             "peso_neto_conforme_kg",
+            "storage_unit",
+            "storage_unit_name",
+            "grain_lot",
+            "grain_lot_code",
             "quality_analysis",
             "merma_calculation",
         ]

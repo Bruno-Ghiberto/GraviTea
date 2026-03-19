@@ -14,6 +14,20 @@ from apps.acopio.serializers.romaneo import (
     RomaneoSerializer,
     TaraSerializer,
 )
+from apps.acopio.serializers.storage import (
+    CellSuggestionItemSerializer,
+    CellSuggestionRequestSerializer,
+    GrainLotSerializer,
+    GrainMovementSerializer,
+    ReconciliationMeasurementSerializer,
+    ReconciliationRequestSerializer,
+    StockReportCampaignSerializer,
+    StockReportGrainTypeSerializer,
+    StockReportSerializer,
+    StockReportUnitSerializer,
+    StorageUnitSerializer,
+    TransferRequestSerializer,
+)
 
 __all__ = [
     "GrainTypeSerializer",
@@ -28,4 +42,16 @@ __all__ = [
     "TaraSerializer",
     "AnalizarSerializer",
     "ConfirmarSerializer",
+    "StorageUnitSerializer",
+    "GrainLotSerializer",
+    "GrainMovementSerializer",
+    "CellSuggestionRequestSerializer",
+    "CellSuggestionItemSerializer",
+    "TransferRequestSerializer",
+    "StockReportSerializer",
+    "StockReportUnitSerializer",
+    "StockReportGrainTypeSerializer",
+    "StockReportCampaignSerializer",
+    "ReconciliationRequestSerializer",
+    "ReconciliationMeasurementSerializer",
 ]

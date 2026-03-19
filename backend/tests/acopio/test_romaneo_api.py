@@ -201,10 +201,16 @@ class TestStateTransitionAPIs:
         romaneo_analizado,
         merma_table_factory,
         tolerance_table_factory,
+        storage_unit_factory,
     ):
         """ANALIZADO -> CONFORME creates MermaCalculation."""
         merma_table_factory(romaneo_analizado.grain_type)
         tolerance_table_factory(romaneo_analizado.grain_type)
+
+        # Spec-12: storage_unit must be assigned before confirmar
+        unit = storage_unit_factory(branch=romaneo_analizado.branch)
+        romaneo_analizado.storage_unit = unit
+        romaneo_analizado.save(update_fields=["storage_unit_id"])
 
         response = authenticated_client.post(
             f"/api/v1/acopio/romaneos/{romaneo_analizado.pk}/confirmar/",
@@ -221,10 +227,16 @@ class TestStateTransitionAPIs:
         romaneo_analizado,
         merma_table_factory,
         tolerance_table_factory,
+        storage_unit_factory,
     ):
         """Tara capture while CONFORME computes peso_neto_bruto_kg."""
         merma_table_factory(romaneo_analizado.grain_type)
         tolerance_table_factory(romaneo_analizado.grain_type)
+
+        # Spec-12: storage_unit must be assigned before confirmar
+        unit = storage_unit_factory(branch=romaneo_analizado.branch)
+        romaneo_analizado.storage_unit = unit
+        romaneo_analizado.save(update_fields=["storage_unit_id"])
 
         # First confirm to CONFORME
         authenticated_client.post(
@@ -247,10 +259,16 @@ class TestStateTransitionAPIs:
         romaneo_analizado,
         merma_table_factory,
         tolerance_table_factory,
+        storage_unit_factory,
     ):
         """CONFORME -> CERRADO after tara returns 202."""
         merma_table_factory(romaneo_analizado.grain_type)
         tolerance_table_factory(romaneo_analizado.grain_type)
+
+        # Spec-12: storage_unit must be assigned before confirmar
+        unit = storage_unit_factory(branch=romaneo_analizado.branch)
+        romaneo_analizado.storage_unit = unit
+        romaneo_analizado.save(update_fields=["storage_unit_id"])
 
         authenticated_client.post(
             f"/api/v1/acopio/romaneos/{romaneo_analizado.pk}/confirmar/",
@@ -287,10 +305,16 @@ class TestStateTransitionAPIs:
         romaneo_analizado,
         merma_table_factory,
         tolerance_table_factory,
+        storage_unit_factory,
     ):
         """Cerrar without tara_kg returns 400."""
         merma_table_factory(romaneo_analizado.grain_type)
         tolerance_table_factory(romaneo_analizado.grain_type)
+
+        # Spec-12: storage_unit must be assigned before confirmar
+        unit = storage_unit_factory(branch=romaneo_analizado.branch)
+        romaneo_analizado.storage_unit = unit
+        romaneo_analizado.save(update_fields=["storage_unit_id"])
 
         authenticated_client.post(
             f"/api/v1/acopio/romaneos/{romaneo_analizado.pk}/confirmar/",
@@ -372,10 +396,16 @@ class TestQualityAnalysisNestedAPI:
         romaneo_analizado,
         merma_table_factory,
         tolerance_table_factory,
+        storage_unit_factory,
     ):
         """QA update blocked when romaneo is CONFORME."""
         merma_table_factory(romaneo_analizado.grain_type)
         tolerance_table_factory(romaneo_analizado.grain_type)
+
+        # Spec-12: storage_unit must be assigned before confirmar
+        unit = storage_unit_factory(branch=romaneo_analizado.branch)
+        romaneo_analizado.storage_unit = unit
+        romaneo_analizado.save(update_fields=["storage_unit_id"])
 
         # Confirm to CONFORME first
         authenticated_client.post(

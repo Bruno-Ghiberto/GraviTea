@@ -7,6 +7,8 @@ from decimal import Decimal
 import pytest
 from django.utils import timezone
 
+from apps.acopio.models import StorageUnit, GrainLot, GrainMovement
+
 
 @pytest.fixture
 def grain_type_factory(db):
@@ -213,3 +215,146 @@ def tolerance_table_factory(db):
         return ToleranceTable.objects.create(**defaults)
 
     return create_tolerance
+
+
+@pytest.fixture
+def storage_unit_factory(tenant_context, branch, admin_user, db):
+    """Factory for creating StorageUnit instances."""
+    _counter = [0]
+
+    def create(**kwargs):
+        _counter[0] += 1
+        defaults = {
+            "tenant": tenant_context,
+            "branch": branch,
+            "name": f"Silo {_counter[0]}",
+            "unit_type": StorageUnit.UnitType.SILO_VERTICAL,
+            "capacity_tonnes": Decimal("500.000"),
+            "created_by": admin_user,
+        }
+        defaults.update(kwargs)
+        return StorageUnit.objects.create(**defaults)
+
+    return create
+
+
+@pytest.fixture
+def grain_lot_factory(tenant_context, branch, admin_user, db):
+    """Factory for creating GrainLot instances.
+
+    Creates shared GrainType, CampanaConfig, and StorageUnit once per factory
+    to avoid unique constraint violations across multiple calls.
+    """
+    from apps.acopio.models import CampanaConfig, GrainType
+
+    grain = GrainType.objects.create(
+        code="LOTG",
+        arca_codigo=998,
+        name="Lot Test Grain",
+        humedad_base_pct="14.00",
+        hf_secado_pct="13.50",
+        manipuleo_fijo_pct="0.25",
+        volatil_fijo_pct="0.30",
+        grading_system="GRADO",
+        is_active=True,
+    )
+    campaign = CampanaConfig.objects.create(
+        tenant=tenant_context,
+        campaign_code="2024/25",
+        start_date=date(2024, 12, 1),
+        end_date=date(2025, 11, 30),
+        is_active=False,
+    )
+    storage = StorageUnit.objects.create(
+        tenant=tenant_context,
+        branch=branch,
+        name="Silo Lot-Factory",
+        unit_type=StorageUnit.UnitType.SILO_VERTICAL,
+        capacity_tonnes=Decimal("1000.000"),
+        created_by=admin_user,
+    )
+    _counter = [0]
+
+    def create(**kwargs):
+        _counter[0] += 1
+        defaults = {
+            "tenant": tenant_context,
+            "branch": branch,
+            "grain_type": grain,
+            "campaign": campaign,
+            "grado": 1,
+            "storage_unit": storage,
+            "is_own_grain": False,
+            "total_kg": Decimal("0.000"),
+            "created_by": admin_user,
+        }
+        defaults.update(kwargs)
+        return GrainLot.objects.create(**defaults)
+
+    return create
+
+
+@pytest.fixture
+def grain_movement_factory(tenant_context, admin_user, db):
+    """Factory for creating GrainMovement instances."""
+
+    def create(grain_lot, **kwargs):
+        defaults = {
+            "tenant": tenant_context,
+            "grain_lot": grain_lot,
+            "movement_type": GrainMovement.MovementType.DEPOSIT,
+            "quantity_kg": Decimal("10000.000"),
+            "created_by": admin_user,
+        }
+        defaults.update(kwargs)
+        return GrainMovement.objects.create(**defaults)
+
+    return create
+
+
+@pytest.fixture
+def romaneo_conforme(romaneo_factory, storage_unit_factory):
+    """A romaneo advanced to CONFORME status with a storage unit assigned.
+
+    Steps through the full lifecycle: PENDIENTE → EN_PROCESO → PESADO → ANALIZADO → CONFORME.
+    """
+    from apps.acopio.models import QualityAnalysis, Romaneo
+
+    storage = storage_unit_factory()
+    r = romaneo_factory()
+
+    # PENDIENTE → EN_PROCESO
+    r.status = Romaneo.RomaneoStatus.EN_PROCESO
+    r.save()
+
+    # EN_PROCESO → PESADO
+    r.peso_bruto_kg = Decimal("30000.000")
+    r.ts_pesada_bruta = timezone.now()
+    r.status = Romaneo.RomaneoStatus.PESADO
+    r.save()
+
+    # PESADO → ANALIZADO (needs QualityAnalysis)
+    QualityAnalysis.objects.create(
+        romaneo=r,
+        tenant_id=r.tenant_id,
+        humedad_pct=Decimal("15.20"),
+        materias_extranas_pct=Decimal("1.80"),
+        granos_danados_pct=Decimal("2.00"),
+        granos_quebrados_pct=Decimal("3.00"),
+        granos_ardidos_pct=Decimal("0.50"),
+        cuerpos_extranos_pct=Decimal("0.10"),
+        analysis_timestamp=timezone.now(),
+    )
+    r.ts_analisis = timezone.now()
+    r.status = Romaneo.RomaneoStatus.ANALIZADO
+    r.save()
+
+    # ANALIZADO → CONFORME
+    r.grado_asignado = 2
+    r.bonificacion_rebaja_pct = Decimal("0.00")
+    r.peso_neto_conforme_kg = Decimal("28500.000")
+    r.storage_unit = storage
+    r.status = Romaneo.RomaneoStatus.CONFORME
+    r.save()
+
+    return r

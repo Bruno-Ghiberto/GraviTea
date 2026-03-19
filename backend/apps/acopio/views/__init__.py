@@ -8,6 +8,11 @@ from apps.acopio.views.romaneo import (
     QualityAnalysisViewSet,
     RomaneoViewSet,
 )
+from apps.acopio.views.storage import (
+    GrainLotViewSet,
+    GrainMovementViewSet,
+    StorageUnitViewSet,
+)
 
 __all__ = [
     "GrainTypeViewSet",
@@ -16,4 +21,7 @@ __all__ = [
     "MermaTableViewSet",
     "RomaneoViewSet",
     "QualityAnalysisViewSet",
+    "StorageUnitViewSet",
+    "GrainLotViewSet",
+    "GrainMovementViewSet",
 ]
