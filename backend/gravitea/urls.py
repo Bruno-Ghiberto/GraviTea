@@ -52,6 +52,8 @@ urlpatterns = [
                 path("reportes/", include("apps.reportes.urls")),
                 # Acopio (grain elevator reference data)
                 path("acopio/", include("apps.acopio.urls")),
+                # Cuentas (producer accounts)
+                path("cuentas/", include("apps.cuentas.urls")),
                 # Core (customization: field definitions, module config)
                 path("", include("apps.core.urls")),
             ]

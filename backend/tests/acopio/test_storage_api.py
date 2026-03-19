@@ -434,7 +434,9 @@ class TestDepositFlowViaConfirmar:
             format="json",
         )
         assert response.status_code == 400
-        assert "missing_storage_unit" in str(response.data)
+        # Spec-13: confirmar now raises DRFValidationError inside transaction.atomic()
+        # which produces a standardized error response via exception handler
+        assert "storage_unit" in str(response.data)
 
     def test_cross_tenant_confirmar_404(
         self,

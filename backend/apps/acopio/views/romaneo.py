@@ -1,9 +1,11 @@
 """ViewSets for Romaneo and QualityAnalysis endpoints."""
 
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -261,34 +263,34 @@ class RomaneoViewSet(viewsets.ModelViewSet):
         elif grain.grading_system == "TOLERANCE":
             grado = 0  # Oleaginosas always grade 0
 
-        # Update romaneo with results
-        romaneo.grado_asignado = grado
-        romaneo.bonificacion_rebaja_pct = bonificacion_rebaja
-        romaneo.tolerance_table_version = tolerance
-        romaneo.peso_neto_conforme_kg = merma_result["peso_final_kg"]
-        romaneo.status = Romaneo.RomaneoStatus.CONFORME
-        romaneo.save()
+        # Update romaneo with results — all-or-nothing with deposit + account
+        with transaction.atomic():
+            romaneo.grado_asignado = grado
+            romaneo.bonificacion_rebaja_pct = bonificacion_rebaja
+            romaneo.tolerance_table_version = tolerance
+            romaneo.peso_neto_conforme_kg = merma_result["peso_final_kg"]
+            romaneo.status = Romaneo.RomaneoStatus.CONFORME
+            romaneo.save()
 
-        # -- Spec-12: Deposit from romaneo --
-        if not romaneo.storage_unit:
-            return Response(
-                {
-                    "type": "missing_storage_unit",
-                    "detail": (
-                        "storage_unit must be set on romaneo before confirming. "
-                        "Use PATCH /romaneos/{id}/ to assign a storage unit first."
-                    ),
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+            if not romaneo.storage_unit:
+                raise DRFValidationError(
+                    {"storage_unit": "Must be set before confirming."}
+                )
+
+            is_own_grain = False  # MVP default; NOT a Romaneo model field
+
+            from apps.acopio.services.storage import create_deposit_from_romaneo
+
+            create_deposit_from_romaneo(
+                romaneo=romaneo,
+                storage_unit=romaneo.storage_unit,
+                is_own_grain=is_own_grain,
             )
 
-        from apps.acopio.services.storage import create_deposit_from_romaneo
+            if not is_own_grain:
+                from apps.cuentas.services.accounts import create_ceg_deposit
 
-        create_deposit_from_romaneo(
-            romaneo=romaneo,
-            storage_unit=romaneo.storage_unit,
-            is_own_grain=False,  # spec-12 default; own-grain deferred to spec-13
-        )
+                create_ceg_deposit(romaneo, operator=request.user)
 
         return Response(RomaneoDetailSerializer(romaneo).data)
 

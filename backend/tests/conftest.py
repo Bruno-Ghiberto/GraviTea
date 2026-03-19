@@ -861,6 +861,7 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "encryption: marks tests as encryption tests")
     config.addinivalue_line("markers", "tenant_isolation: marks tests as tenant isolation tests")
     config.addinivalue_line("markers", "owasp: marks tests as OWASP compliance tests")
+    config.addinivalue_line("markers", "accounts: marks tests as producer account tests")
 
 
 def pytest_collection_modifyitems(config, items):
