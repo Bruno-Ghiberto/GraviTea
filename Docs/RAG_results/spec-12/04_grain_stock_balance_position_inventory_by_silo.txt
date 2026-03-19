@@ -1,0 +1,101 @@
+=== Qdrant Search Results ===
+Query: grain stock balance position inventory by silo
+Results: 5
+
+--- Result 1 (score: 0.6614, ranked: 1.0500) ---
+Source: 8.1 Grain Types and Quality Parameter Reference Data.md
+Page: 0
+Section: AFIP/ARCA species codes for relevant grains
+Context: Reference data catalog for Argentine grain trade (quality parameters and ARCA species codes) > AFIP/ARCA species codes for relevant grains
+Text:
+These are the "ncespecie" codes used in CTG and F.1116 web services.[^4]
+
+--- Result 2 (score: 0.6113, ranked: 0.3872) ---
+Source: 2.3 Producer Current Accounts (Cuentas Corrientes de Productores).md
+Page: 0
+Section: Transaction Type Summary
+Context: Producer Current Accounts at Argentine Grain Storage Operators: Complete ERP Design Reference > ERP Design Considerations > Transaction Type Summary
+Text:
+| Transaction | Kilos Account Effect | Pesos Account Effect | Document |
+|-------------|---------------------|---------------------|----------|
+| Grain reception | + Net kilos | — | CEG |
+| Sale (total or partial) | − Kilos sold | + Net proceeds | LPG |
+| Retiro/delivery order | − Kilos withdrawn | — (or + if LPG from external buyer) | Cert. Retiro |
+| Transfer to another operator | − Kilos transferred | — | Cert. Transferencia |
+| Cash advance | — | + Advance amount | Factura anticipo |
+| Paritaria, secado, zarandeo, fumigación | (may deduct merma kilos) | − Service charge | CEG or Factura Servicios |
+| Almacenaje | — | − Storage charge | LPG or Factura Servicios |
+| Comisión | — | − Commission amount | LPG |
+| Tax retentions | — | − Retention amounts | LPG + F.2005 |
+| Canje — grain delivery | − Kilos delivered | + LPG amount | LPG |
+| Canje — input receipt | — | − Input invoice amount | Factura compra |
+| Canje — compensation | — | Net offset | Orden de pago/compensación |
+| Price fixing (fijación) | − Kilos fixed | + Fixed price × kilos | LPG |
+
+***
+
+--- Result 3 (score: 0.5964, ranked: 0.3251) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: Grain Certification (CG — RG 3691/2014)
+Context: AFIP/ARCA WSLPG Technical Documentation for Python/Django ERP Integration > 2. Complete SOAP Methods Catalog > Grain Certification (CG — RG 3691/2014)
+Text:
+| SOAP Method | Description |
+|---|---|
+| `cgAutorizar` | Authorize a grain certificate (deposit F1116A, withdrawal/transfer F1116RT, or preexisting) |
+| `cgBuscarCtg` | Search CTGs (Grain Traceability Code) available for certification |
+| `cgBuscarCertConSaldoDisponible` | Search certificates with available balance for liquidation/withdrawal |
+| `cgSolicitarAnulacion` | Request cancellation of a grain certificate |
+| `cgConfirmarAnulacion` | Confirm cancellation of a grain certificate |
+| `cgConsultarXCoe` | Consult a certificate by COE |
+| `cgConsultarXNroOrden` | Consult a certificate by order number |
+| `cgConsultarUltimoNroOrden` | Last registered certificate order number |
+| `cgInformarCalidad` | Report quality details for a certificate |
+
+--- Result 4 (score: 0.5912, ranked: 0.2500) ---
+Source: 2.1 Day-to-Day Operations of an Acopiador.md
+Page: 0
+Section: Paso 1 — Inventario por productor, grano, campaña, calidad y silo
+Context: Flujo Operativo Completo de un Acopiador de Granos en la Pampa Húmeda Argentina — Guía para Diseño de ERP > ESCENARIO 2: Almacenamiento y Monitoreo de Granos > Paso 1 — Inventario por productor, grano, campaña, calidad y silo
+Text:
+## ESCENARIO 2: Almacenamiento y Monitoreo de Granos
+
+
+
+1. El acopiador mantiene una **cuenta corriente de granos** por cada productor, que registra las toneladas netas depositadas (después de deducciones por acondicionamiento), desglosadas por tipo de grano y campaña.[^23]
+2. Dado que los granos pierden su identidad individual al ingresar al silo (se mezclan), el productor deja de ser propietario de la mercadería física y pasa a ser dueño de un **equivalente en calidad y cantidad**.[^23]
+3. El stock físico en planta se gestiona por **silo/celda**, con información de: grano, calidad promedio, campaña, capacidad utilizada, fecha de última carga/descarga.
+4. El acopiador también debe reportar sus existencias en el **Registro Sistémico de Movimientos y Existencias de Granos** de ARCA, declarando existencias por planta, grano y campaña.[^31][^30]
+
+**Datos a capturar en el ERP:**
+- Cuenta corriente de granos por productor: entradas (depósitos), salidas (retiros, transferencias, ventas), saldo en kg por grano y campaña
+- Stock físico por silo: grano, campaña, kg actuales, calidad promedio, fecha de carga, temperatura actual
+- Conciliación: stock contable (suma de cuentas corrientes de productores + stock propio del acopiador) vs. stock físico (cubicaje/aforo)
+
+***
+
+--- Result 5 (score: 0.5944, ranked: 0.2464) ---
+Source: 2.1 Day-to-Day Operations of an Acopiador.md
+Page: 0
+Section: Resumen de Entidades de Datos Clave para el ERP
+Context: Flujo Operativo Completo de un Acopiador de Granos en la Pampa Húmeda Argentina — Guía para Diseño de ERP > Resumen de Entidades de Datos Clave para el ERP
+Text:
+| Entidad | Descripción |
+|---|---|
+| **Productor/Depositante** | CUIT, razón social, datos SISA, cuenta corriente de granos |
+| **Camión/Transporte** | Patentes, transportista, chofer |
+| **Carta de Porte Electrónica** | Número, CTG, origen, destino, datos de partes, estado (emitida, confirmada, cerrada) |
+| **Muestra / Análisis de Calidad** | Parámetros medidos, grado, fecha, perito, contramuestra |
+| **Ticket de Balanza** | Peso bruto, tara, peso neto, fecha/hora, balanza |
+| **Romaneo / Boleta de Recepción** | Resumen de recepción vinculando CPE, análisis, pesadas, deducciones |
+| **Certificación Primaria** | Depósito/Retiro/Transferencia electrónica (ARCA) |
+| **Silo / Celda** | Identificación, grano actual, capacidad, stock, temperatura, estado |
+| **Monitoreo de Silo** | Temperatura, CO₂, insectos, humedad, aireación, fumigación |
+| **Cuenta Corriente de Granos** | Por productor × grano × campaña: entradas, mermas, salidas, saldo |
+| **Liquidación Primaria (LPG)** | Parcial/Final, tipo 01 o 02, precio, factor, deducciones, neto |
+| **Liquidación Secundaria (LSG)** | Venta a comprador final, precio, comisiones |
+| **Contrato de Compraventa** | Comprador, grano, tonelaje, precio (hecho o a fijar), lugar, plazo |
+| **Registro Sistémico ARCA** | Movimientos y existencias declarados periódicamente |
+
+***
+

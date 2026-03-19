@@ -1,0 +1,87 @@
+=== Qdrant Search Results ===
+Query: WSCPE confirmarArriboCPE confirmarDescargaCPE confirmacionDefinitivaCPEAutomotor
+Results: 5
+
+--- Result 1 (score: 0.7079, ranked: 1.3000) ---
+Source: 1.2 AFIP Web Service WSCPE -- Technical Specification.md
+Page: 0
+Section: **Catalog of WSCPE Methods**
+Context: **Technical Specification and Integration Architecture for the ARCA WSCPE Web Service** > **Core Operational Methods and Required Input Parameters** > **Catalog of WSCPE Methods**
+Text:
+| Method Name | Operational Context and Purpose |
+| :---- | :---- |
+| solicitarCPEAutomotor | Generates a new Carta de Porte for truck transport and issues the CTG number. |
+| consultarCPEAutomotor | Retrieves the current state machine status and metadata of a specific, existing CPE. |
+| confirmarArriboCPE | Registers the physical arrival of the transport at the destination facility. |
+| confirmarDescargaCPE | Confirms the unloading of the grain, registers the final weight, and concludes the CTG lifecycle. |
+| anularCPE | Cancels a CPE entirely, provided the transport has not yet physically commenced. |
+| rechazoCPE | Allows the destination facility to reject an arrived CPE due to quality issues or misrouting. |
+| consultarRenspa | Validates the sanitary registration polygon of the origin producer (added in WSCPE v2.0.6).17 |
+
+--- Result 2 (score: 0.6990, ranked: 0.7865) ---
+Source: 8.2 CTG Document Structure and State Machine.md
+Page: 0
+Section: Creation‑phase fields (origin operator)
+Context: Creation‑phase fields (origin operator)
+Text:
+The main creation payload for grains automotor is `autorizarCPEAutomotor.solicitud`, which groups fields into `cabecera`, `origen`, `intervinientes`, `datosCarga`, `destino`, `destinatario`, `transporte` and `observaciones`.[^4][^13]
+
+--- Result 3 (score: 0.6714, ranked: 0.1253) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: Parameter Lookup Methods
+Context: AFIP/ARCA WSLPG Technical Documentation for Python/Django ERP Integration > 2. Complete SOAP Methods Catalog > Parameter Lookup Methods
+Text:
+| SOAP Method | Returns |
+|---|---|
+| `campaniasConsultar` | Available campaigns (e.g., `1314`, `2324`) |
+| `tipoGranoConsultar` | Grain types (codes + descriptions — soja, trigo, maíz, girasol, etc.) |
+| `codigoGradoReferenciaConsultar` | Reference grade codes per grain |
+| `codigoGradoEntregadoXTipoGranoConsultar` | Delivered grade codes and values per grain type |
+| `tipoCertificadoDepositoConsultar` | Deposit certificate types (1: F1116/RT, 5: F1116/A, 332: Electronic) |
+| `tipoDeduccionConsultar` | Deduction types (AL: Almacenaje, CO: Comisión, OD: Otras, etc.) |
+| `tipoRetencionConsultar` | Retention types (RI: IVA, RG: Ganancias, etc.) |
+| `puertoConsultar` | Enabled ports |
+| `tipoActividadConsultar` | Activity types universe |
+| `tipoActividadRepresentadoConsultar` | Activities the emisor/representado is registered for in RUOCA |
+| `provinciasConsultar` | Provinces |
+| `localidadXProvinciaConsultar` | Localities by province |
+| `tipoOperacionXActividadConsultar` | Operation types per activity (01: Compra/Venta, 02: Consignación) |
+
+All parameter lookup methods return an array of `LpgCodigoDescripcionType` with `codigo` and `descripcion` fields.[^7][^2]
+
+***
+
+--- Result 4 (score: 0.6662, ranked: 0.1000) ---
+Source: 1.2 AFIP Web Service WSCPE -- Technical Specification.md
+Page: 0
+Section: **Obras citadas**
+Context: **Technical Specification and Integration Architecture for the ARCA WSCPE Web Service** > **Synthesis of the Architectural Imperative** > **Obras citadas**
+Text:
+1. Carta de Porte Electrónica \- AFIP, fecha de acceso: marzo 13, 2026, [https://www.afip.gob.ar/ws/documentos/manual\_wscpe\_v2-0-4.pdf](https://www.afip.gob.ar/ws/documentos/manual_wscpe_v2-0-4.pdf)  
+2. Carta de Porte Electrónica \- ARCA, fecha de acceso: marzo 13, 2026, [https://www.arca.gob.ar/ws/documentos/manual\_wscpe\_v2-0-5.pdf](https://www.arca.gob.ar/ws/documentos/manual_wscpe_v2-0-5.pdf)  
+3. Catálogo de otros WS de negocio disponibles \- Documentación ..., fecha de acceso: marzo 13, 2026, [https://www.afip.gob.ar/ws/documentacion/catalogo.asp](https://www.afip.gob.ar/ws/documentacion/catalogo.asp)  
+4. Carta de Porte Electrónica \- ARCA, fecha de acceso: marzo 13, 2026, [https://www.afip.gob.ar/actividadesAgropecuarias/documentos/Presentacion-CPE-Casos%20practicos.pdf](https://www.afip.gob.ar/actividadesAgropecuarias/documentos/Presentacion-CPE-Casos%20practicos.pdf)  
+5. https://cpea-ws-qaext.afip.gob.ar/wscpe/services/soap?wsdl, fecha de acceso: marzo 13, 2026, [https://cpea-ws-qaext.afip.gob.ar/wscpe/services/soap?wsdl](https://cpea-ws-qaext.afip.gob.ar/wscpe/services/soap?wsdl)  
+6. WSCPE \- WS Homologación \- Google Groups, fecha de acceso: marzo 13, 2026, [https://groups.google.com/g/pyafipws/c/G\_-uAQbDuyU](https://groups.google.com/g/pyafipws/c/G_-uAQbDuyU)  
+7. https://cpea-ws.afip.gob.ar/wscpe/services/soap?wsdl, fecha de acceso: marzo 13, 2026, [https://cpea-ws.afip.gob.ar/wscpe/services/soap?wsdl](https://cpea-ws.afip.gob.ar/wscpe/services/soap?wsdl)  
+8. WSAA Manual del Desarrollador \- ARCA, fecha de acceso: marzo 13, 2026, [https://www.afip.gob.ar/ws/WSAA/WSAAmanualDev.pdf](https://www.afip.gob.ar/ws/WSAA/WSAAmanualDev.pdf)  
+9. PyAfipWs: Interface de Servicios Web de la AFIP para Windows \- Sistemas Ágiles, fecha de acceso: marzo 13, 2026, [https://www.sistemasagiles.com.ar/trac/wiki/PyAfipWs?format=pdf](https://www.sistemasagiles.com.ar/trac/wiki/PyAfipWs?format=pdf)  
+10.
+
+--- Result 5 (score: 0.6673, ranked: 0.0262) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: Sample Test Values
+Context: 4. Create and authorize a liquidation > 6. Testing Environment (Homologation) > Sample Test Values
+Text:
+Example data provided by AFIP for certificate testing:[^2][^4]
+
+| Field | Value | XML Tag |
+|---|---|---|
+| Carta de Porte | `530306310` | `<nroCartaDePorte>` |
+| CTG | `892` | `<nroCTG>` |
+| Grain code | `23` | `dGrano>` |
+| Campaign | `1314` | `ampania>` |
+| CUIT Depositante | `20111111112` | `uitDepositante>` |
+

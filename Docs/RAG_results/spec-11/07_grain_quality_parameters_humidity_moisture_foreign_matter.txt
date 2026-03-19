@@ -1,0 +1,116 @@
+=== Qdrant Search Results ===
+Query: grain quality parameters humidity moisture foreign matter
+Results: 5
+
+--- Result 1 (score: 0.7025, ranked: 1.3000) ---
+Source: 8.1 Grain Types and Quality Parameter Reference Data.md
+Page: 0
+Section: Core quality parameters (Arroz cáscara)
+Context: Reference data catalog for Argentine grain trade (quality parameters and ARCA species codes) > Paddy rice (Arroz cáscara) – code 21 (and elaborated rice code 35) > Core quality parameters (Arroz cáscara)
+Text:
+| Parameter                               | Base / Standard value                          | Max receivable / tolerance (norm)                   | Notes |
+|-----------------------------------------|-------------------------------------------------|-----------------------------------------------------|-------|
+| Moisture                                | — (no base; only tolerance)                    | 14.0%                                              | Above 14% moisture: merma plus drying costs according to SENASA tables. [^29] |
+| Foreign material (materias extrañas)    | Free (base)                                    | 3.0%                                               | Base of commercialisation states "materias extrañas: libre"; tolerance sets max 3%. [^29][^33] |
+| Head rice yield (rendimiento en granos enteros) | 54–59% depending on type (base)           | 42–45% depending on type                           | Different bases/tolerances for largo ancho, largo fino, mediano, corto. [^29][^33] |
+| Total milled yield (enteros + quebrados) | 68–70% (base)                                | 63–65%                                             | [^29] |
+| Chalky, stained, red kernels, etc.      | Strict limits per defect category at base and tolerance | As per 4.3.x clauses                          | [^29] |
+| Insects / mites                         | Free                                           | Free                                                | [^29]
+
+--- Result 2 (score: 0.7008, ranked: 1.2207) ---
+Source: 8.1 Grain Types and Quality Parameter Reference Data.md
+Page: 0
+Section: Core quality parameters (Cebada forrajera)
+Context: Reference data catalog for Argentine grain trade (quality parameters and ARCA species codes) > Feed barley (Cebada forrajera) – code 11 > Core quality parameters (Cebada forrajera)
+Text:
+| Parameter                               | Base / Standard value                          | Max receivable / tolerance (norm)                   | Notes |
+|-----------------------------------------|-------------------------------------------------|-----------------------------------------------------|-------|
+| Moisture                                | 14.0% (= max; no lower base in summary table) | 14.0%                                              | Above 14%: humidity merma and drying charges. [^18] |
+| Test weight (Peso hectolítrico mínimo)  | 62 kg/hl (Grade 1), 59 kg/hl (Grade 2), 56 kg/hl (Grade 3) | 56 kg/hl (Grade 3)                         | Lower PH discounted per kg/hl shortfall. [^18] |
+| Foreign material                        | 1.0% (Grade 1), 1.5% (Grade 2), 2.0% (Grade 3) | 2.0%                                           | Includes weed seeds, chaff, etc. [^18] |
+| Damaged kernels                         | 1.5% (Grade 1), 2.0% (Grade 2), 3.0% (Grade 3) | 3.0%                                           | Discounts proportional to exceedances. [^18] |
+| Broken/peeled kernels                   | 4.0% (Grade 1), 6.0% (Grade 2), 8.0% (Grade 3) | 8.0%                                           | [^18] |
+| Smut (carbón)                           | 0.10% (Grade 1), 0.20% (Grade 2), 0.30% (Grade 3) | 0.30%                                       | [^18] |
+| Insects / mites                         | Free                                           | Free                                                | [^18]
+
+--- Result 3 (score: 0.6980, ranked: 0.7825) ---
+Source: 2.1 Day-to-Day Operations of an Acopiador.md
+Page: 0
+Section: Parámetros medidos para todos los granos
+Context: Flujo Operativo Completo de un Acopiador de Granos en la Pampa Húmeda Argentina — Guía para Diseño de ERP > ESCENARIO 1: Recepción de Granos (Recepción de Mercadería) > Paso 4 — Análisis de calidad en laboratorio > Parámetros medidos para todos los granos
+Text:
+## Paso 4 — Análisis de calidad en laboratorio
+
+El análisis se realiza en el **laboratorio de la planta** con instrumentos especializados. Los parámetros principales son:[^8]
+
+| Parámetro | Instrumento utilizado | Notas |
+|---|---|---|
+| **Humedad (%)** | Humedímetro electrónico (ej. Tesma Plus 2) con compensación automática de temperatura[^13][^14] | Parámetro crítico; determina necesidad de secada |
+| **Peso hectolítrico (kg/hl)** | Mismo humedímetro Tesma Plus 2 (medición combinada) o balanza Schopper[^13] | Aplica a trigo y maíz; no a soja/girasol |
+| **Materias extrañas / cuerpos extraños (%)** | Zaranda manual o mecánica con mallas calibradas según norma de cada grano[^8] | Incluye tierra, restos vegetales, otras semillas |
+| **Granos dañados (%)** | Inspección visual sobre muestra zarandeada | Incluye dañados por insectos, hongos, calor, brotados, fermentados |
+| **Granos quebrados/partidos (%)** | Zaranda con perforación específica por grano[^15] | Trigo: malla acanalada 1,6×9,5 mm; Maíz: circular 4,76 mm |
+| **Insectos/arácnidos vivos** | Inspección visual | Norma: "libre de insectos y/o arácnidos vivos"[^15] |
+
+--- Result 4 (score: 0.6950, ranked: 0.6414) ---
+Source: 2.1 Day-to-Day Operations of an Acopiador.md
+Page: 0
+Section: Parámetros específicos por grano
+Context: Flujo Operativo Completo de un Acopiador de Granos en la Pampa Húmeda Argentina — Guía para Diseño de ERP > ESCENARIO 1: Recepción de Granos (Recepción de Mercadería) > Paso 4 — Análisis de calidad en laboratorio > Parámetros específicos por grano
+Text:
+| Grano | Parámetros adicionales | Base de humedad |
+|---|---|---|
+| **Trigo pan** | Granos ardidos, panza blanca, granos con carbón, trébol de olor, proteína, aptitud panadera (Glutomatic opcional)[^15] | 14,0% |
+| **Maíz** | Tipo (duro/dentado), color, chamico (Datura ferox), granos con verdín[^15] | 14,5% |
+| **Soja** | Granos verdes, granos negros, chamico[^15] | 13,5% |
+| **Girasol** | Contenido de materia grasa (% s/sustancia seca y limpia), acidez de materia grasa[^15] | 11,0% |
+| **Sorgo** | Presencia de taninos condensados, color, chamico[^15] | 15,0% |
+
+**Datos a capturar en el ERP (registro completo de análisis por camión):**
+- Todos los parámetros medidos con sus valores numéricos
+- Referencia a la norma/estándar aplicado
+- Identificación del laboratorista
+- Fecha/hora del análisis
+- Indicador de si la mercadería es "Condición Cámara", dentro de grado, o "Fuera de estándar"
+
+***
+
+--- Result 5 (score: 0.6817, ranked: 0.1000) ---
+Source: 2.2 Grain Quality Management Standards.md
+Page: 0
+Section: 2. Maiz (Corn) – Norma XII (Res. SAGyP 1075/94)
+Context: Research the official grain quality standards and grading parameters used in Argentine > 2. Maiz (Corn) – Norma XII (Res. SAGyP 1075/94)
+Text:
+| Grado | Peso hectolítrico mínimo (kg/hl) | Tipo % | Color % | Granos picados % | Humedad % | Granos dañados % | Granos quebrados % | Materias extrañas % |
+| :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- |
+| 1 | 75 | 3,00 | 2,00 | 1,00 | 5,00 | 5,00 | 3,00 | 14,5 |
+| 2 | 72 | 5,00 | 3,00 | 1,50 | (not shown – typically ≤14,0 %) | 8,00 | 5,00 | 2,00 |
+| 3 | 69 | 8,00 | 5,00 | 2,00 | (not shown) | — | — | — |
+
+*Note: The humidity column in the PDF refers to the maximum allowed humidity for each grade; the commercial base humidity for maize is **14,0 %** (excess triggers merma de secado).*
+
+**Commercial deductions (rebajas)** – applied when a parameter exceeds its tolerance for the contracted grade:
+
+- **Humedad**: Merma = [(Hᵢ – 14,0) × 100] ÷ (100 – 14,0) %
+- **Granos dañados**: > tolerance: 1,0 % / cada % exceso
+- **Granos quebrados**: > tolerance: 0,5 % / cada % exceso (for Grado 1) – values vary by grade
+- **Materias extrañas**: > tolerance: 1,0 % / cada % exceso (up to a limit, then arbitration)
+- **Olores objetables / Granos amohosados**: 0,5 %–2,0 % según intensidad
+- **Chamico**: 1,3 % de merma de peso y gastos de zarandeo (2 semillas / 100 g)
+
+**Grade‑based bonuses/rebajas** – Grado 1: +1,0 % bonificación; Grado 2: 0; Grado 3: –1,5 % rebaja.
+
+**Official entity** – Cámara Arbitral de Cereales (CAC) – Norma XII (Res. SAGyP 1075/94).
+
+**Merma de almacenamiento** – 0,5 % de materia seca por mes $$
+
+$$ (alternatively 0,075 %/mes según EMAPA $$
+
+$$).
+
+**Factor de conversión** – $F = (100 - H_{\text{actual}})/(100 - 14,0)$.
+**Merma de secado** – same as humidity formula above.
+**Zarandeo** – deductions for excess of Materias extrañas, Granos quebrados, Granos dañados, Chamico, etc., as per the tolerance tables.
+
+***
+

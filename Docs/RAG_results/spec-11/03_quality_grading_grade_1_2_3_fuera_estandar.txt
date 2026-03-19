@@ -1,0 +1,144 @@
+=== Qdrant Search Results ===
+Query: quality grading grade 1 2 3 fuera estandar
+Results: 5
+
+--- Result 1 (score: 0.6226, ranked: 1.0000) ---
+Source: 8.1 Grain Types and Quality Parameter Reference Data.md
+Page: 0
+Section: AFIP/ARCA species codes for relevant grains
+Context: Reference data catalog for Argentine grain trade (quality parameters and ARCA species codes) > AFIP/ARCA species codes for relevant grains
+Text:
+These are the "ncespecie" codes used in CTG and F.1116 web services.[^4]
+
+--- Result 2 (score: 0.5871, ranked: 0.3446) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: Parameter Lookup Methods
+Context: AFIP/ARCA WSLPG Technical Documentation for Python/Django ERP Integration > 2. Complete SOAP Methods Catalog > Parameter Lookup Methods
+Text:
+| SOAP Method | Returns |
+|---|---|
+| `campaniasConsultar` | Available campaigns (e.g., `1314`, `2324`) |
+| `tipoGranoConsultar` | Grain types (codes + descriptions — soja, trigo, maíz, girasol, etc.) |
+| `codigoGradoReferenciaConsultar` | Reference grade codes per grain |
+| `codigoGradoEntregadoXTipoGranoConsultar` | Delivered grade codes and values per grain type |
+| `tipoCertificadoDepositoConsultar` | Deposit certificate types (1: F1116/RT, 5: F1116/A, 332: Electronic) |
+| `tipoDeduccionConsultar` | Deduction types (AL: Almacenaje, CO: Comisión, OD: Otras, etc.) |
+| `tipoRetencionConsultar` | Retention types (RI: IVA, RG: Ganancias, etc.) |
+| `puertoConsultar` | Enabled ports |
+| `tipoActividadConsultar` | Activity types universe |
+| `tipoActividadRepresentadoConsultar` | Activities the emisor/representado is registered for in RUOCA |
+| `provinciasConsultar` | Provinces |
+| `localidadXProvinciaConsultar` | Localities by province |
+| `tipoOperacionXActividadConsultar` | Operation types per activity (01: Compra/Venta, 02: Consignación) |
+
+All parameter lookup methods return an array of `LpgCodigoDescripcionType` with `codigo` and `descripcion` fields.[^7][^2]
+
+***
+
+--- Result 3 (score: 0.5843, ranked: 0.2855) ---
+Source: 2.2 Grain Quality Management Standards.md
+Page: 0
+Section: 2. Maiz (Corn) – Norma XII (Res. SAGyP 1075/94)
+Context: Research the official grain quality standards and grading parameters used in Argentine > 2. Maiz (Corn) – Norma XII (Res. SAGyP 1075/94)
+Text:
+| Grado | Peso hectolítrico mínimo (kg/hl) | Tipo % | Color % | Granos picados % | Humedad % | Granos dañados % | Granos quebrados % | Materias extrañas % |
+| :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- |
+| 1 | 75 | 3,00 | 2,00 | 1,00 | 5,00 | 5,00 | 3,00 | 14,5 |
+| 2 | 72 | 5,00 | 3,00 | 1,50 | (not shown – typically ≤14,0 %) | 8,00 | 5,00 | 2,00 |
+| 3 | 69 | 8,00 | 5,00 | 2,00 | (not shown) | — | — | — |
+
+*Note: The humidity column in the PDF refers to the maximum allowed humidity for each grade; the commercial base humidity for maize is **14,0 %** (excess triggers merma de secado).*
+
+**Commercial deductions (rebajas)** – applied when a parameter exceeds its tolerance for the contracted grade:
+
+- **Humedad**: Merma = [(Hᵢ – 14,0) × 100] ÷ (100 – 14,0) %
+- **Granos dañados**: > tolerance: 1,0 % / cada % exceso
+- **Granos quebrados**: > tolerance: 0,5 % / cada % exceso (for Grado 1) – values vary by grade
+- **Materias extrañas**: > tolerance: 1,0 % / cada % exceso (up to a limit, then arbitration)
+- **Olores objetables / Granos amohosados**: 0,5 %–2,0 % según intensidad
+- **Chamico**: 1,3 % de merma de peso y gastos de zarandeo (2 semillas / 100 g)
+
+**Grade‑based bonuses/rebajas** – Grado 1: +1,0 % bonificación; Grado 2: 0; Grado 3: –1,5 % rebaja.
+
+**Official entity** – Cámara Arbitral de Cereales (CAC) – Norma XII (Res. SAGyP 1075/94).
+
+**Merma de almacenamiento** – 0,5 % de materia seca por mes $$
+
+$$ (alternatively 0,075 %/mes según EMAPA $$
+
+$$).
+
+**Factor de conversión** – $F = (100 - H_{\text{actual}})/(100 - 14,0)$.
+**Merma de secado** – same as humidity formula above.
+**Zarandeo** – deductions for excess of Materias extrañas, Granos quebrados, Granos dañados, Chamico, etc., as per the tolerance tables.
+
+***
+
+--- Result 4 (score: 0.5886, ranked: 0.2771) ---
+Source: 2.2 Grain Quality Management Standards.md
+Page: 0
+Section: 3. Trigo pan (Bread Wheat) – Norma XX (Res. SAGPyA 1262/2004)
+Context: Research the official grain quality standards and grading parameters used in Argentine > 3. Trigo pan (Bread Wheat) – Norma XX (Res. SAGPyA 1262/2004)
+Text:
+| Grado | Peso hectolítrico mínimo (kg/hl) | Proteína % (base 13,5 % H) | Gluten húmedo % | Número de caída (seg) | Vitreosidad % mín. | Humedad % máx. |
+| :-- | :-- | :-- | :-- | :-- | :-- | :-- |
+| 1 | 79 | ≥11,0 → +2,0 % / cada % >11,0 | ≥24,0 | ≥250 | ≥70 | 13,5 |
+| 2 | 76 | 9,0–11,0 → 0 % | 22,0–24,0 | 200–249 | 50–69 | 13,5 |
+| 3 | 73 | <9,0 → –3,0 % / cada % <9,0 | <22,0 | <200 | <50 | 13,5 |
+
+**Other parameters (tolerancias máximas por grado)** –
+
+- Granos picados: Gr 1 0,20 %; Gr 2 0,80 %; Gr 3 1,50 %
+- Trébol de olor (semillas/100 g): Gr 1 0,50 %; Gr 2 1,00 %; Gr 3 1,50 %
+- Humedad: base 13,5 % (excess → merma de secado)
+- Materias extrañas: base 0,5 % / 0,5 % → >0,5 %: 1,5 % / cada % exceso
+- Granos dañados: base 0,5 % / 1,0 % → >0,5–1,0 %: 1,0 % / cada % exceso; >1,0 %: arbitraje
+- Granos con carbón: base 0,1 % / 0,1 % → >0,1 %: 1,0 % / cada % exceso
+- Granos quebrados y/o chuzos: base 0,5 % / 0,5 % → >0,5 %: 1,0 % / cada % exceso
+- Granos ardidos y dañados por calor: base 0,5 % / 0,5 % → >0,5 %: 1,0 % / cada % exceso
+- Olores comercialmente objetables / Punta sombreada por tierra / Revolcado en tierra: 0,5 %–2,0 % según intensidad
+- Punta negra por carbón: 1,0 %–6,0 % según intensidad
+
+**Bonificaciones por grado** – Grado 1: +1,5 %; Grado 2: 0; Grado 3: –1,0 %.
+**Bonificaciones por proteína** – >11,0 %: +2,0 % / cada % >11,0; <10,0 %: –2,0 % / cada % <10,0 (aplicable solo si P.H. ≥75 kg/hl).
+
+**Official entity** – Cámara Arbitral de Cereales (CAC) – Norma XX (Res. SAGPyA 1262/2004).
+
+**Merma de almacenamiento** – 0,5 % de materia seca por mes $$
+
+$$.
+
+**Factor de conversión** – $F = (100 - H_{\text{actual}})/(100 - 13,5)$.
+**Merma de secado** – same humidity formula.
+**Zarandeo** – deductions for excess of Materias extrañas, Granos dañados, Granos quebrados, etc., as per tolerance tables.
+
+***
+
+--- Result 5 (score: 0.5756, ranked: 0.1000) ---
+Source: 2.1 Day-to-Day Operations of an Acopiador.md
+Page: 0
+Section: Paso 5 — Determinación de Grado y Descuentos
+Context: Flujo Operativo Completo de un Acopiador de Granos en la Pampa Húmeda Argentina — Guía para Diseño de ERP > ESCENARIO 1: Recepción de Granos (Recepción de Mercadería) > Paso 5 — Determinación de Grado y Descuentos
+Text:
+1. Los resultados del análisis se comparan contra las **tablas de tolerancias** establecidas en las Normas de Calidad para la Comercialización de cada grano, emitidas por resoluciones de SAGPyA/SENASA y publicadas por la Cámara Arbitral de Cereales de la Bolsa de Comercio de Rosario.[^16][^15][^17]
+2. Se determina el **grado** del lote (Grado 1, 2, 3, o Fuera de Estándar para cereales):
+
+| Grado | Trigo pan | Maíz | Sorgo |
+|---|---|---|---|
+| Grado 1 | Bonificación 1,5% | Bonificación 1,0% | Bonificación 1,0% |
+| Grado 2 | Sin bonificación ni rebaja | Sin bonificación ni rebaja | Sin bonificación ni rebaja |
+| Grado 3 | Rebaja 1,0% | Rebaja 1,5% | Rebaja 1,5% |
+
+Para soja y girasol, la norma establece **bases y tolerancias de recibo** con rebajas porcentuales progresivas por cada punto o fracción que exceda la tolerancia (no usa sistema de grados 1-2-3).[^15]
+
+3. Se calculan los **descuentos porcentuales** aplicables cuando los valores exceden las tolerancias. Por ejemplo, en soja: materias extrañas superiores al 1% generan rebaja de 1% por cada punto de exceso hasta 3%, y 1,5% por cada punto arriba de 3%.[^15]
+
+**Datos a capturar en el ERP:**
+- Grado asignado
+- Factor de bonificación o rebaja (%) por grado
+- Detalle de cada descuento por exceso de tolerancia (rubro, % de exceso, % de descuento)
+- Factor total resultante (Factor 100 ± ajustes)
+
+***
+

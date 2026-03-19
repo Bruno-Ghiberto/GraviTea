@@ -1,0 +1,235 @@
+=== Qdrant Search Results ===
+Query: storage legal framework warrants deposito certificado
+Collections: arca_dev_guides, arca_setup_certs
+Results: 5
+
+--- Result 1 (score: 0.4370, ranked: 1.1000) ---
+Collection: arca_setup_certs
+Source: WSASS_manual.pdf
+Page: 15
+Section: Introducción
+Context: Y CONTROL ADUANERO
+Text:
+Autogestion de
+servicios
+Introducción
+▷ Servicios
+▷Certificados
+Nuevo
+Certificado
+WSASS Autoservicio de Acceso a WebServices
+(TESTING/HOMOLOGACIÓN)
+Información del DN
+Alias del DN
+CUIT
+demo1
+20190178154
+SERIALNUMBER-CUIT 20190178154, CN-dema1
+DN
+Certificados asociados
+Crear
+▷autorización a
+servicio
+FEmision
+FVencimiento
+estado
+serial
+Ver 30/09/2019 02:59:43 p.m. 29/09/2021 02:59:43 p.m. VALIDO 304a7543d0620beb
+Eliminar
+autorización a
+servicio
+▷Autorizaciones
+Agregar
+certificado a
+alias
+>Contáctenos
+----BEGIN CERTIFICATE---
+MIIDRTCCAi2gAwIBAgIIMEp109BiC+swDQYJKoZIhvcNAQENBQAwODEaMBgGA1UEAwwRQ29tcHV0
+YWRuemVzIFR1c3QxDTALBgNVBAOMBEFGSVAxCzAJBGNVBAYTA1F3MB4XDTE5MDk#MDEONTkOM1oX
+DTIxMDkyOTEONTk0M1owKzEOMAwGA1UEAwwFZGVtbzExGTAXBGNVBAUTEENVSVQgMjAxOTAxNgx
+NTQwggEiMA0GC8qGSIb3DQEBAQUAA4IBDMAwggEKAoIBAQCweZiXyTVLnwcn2QNONwV8hXe0t9v5
+J1YsC+EXMR1dxmW7QTI1CyoZ+5W1TIkAnErxH3tykm3LGCqcF2LtOGADEETCL1VbtADhTMGX8wc7
+IV5xx75wuZ29VinHn3uD9FNxFB70GUHog8qjoqaHN=ZHEUiDnFMGdBPrcbQSa+IEYK1RdHhLJtD/
+sstjFI8bn6FrtDmsBcB0f4CcDS87PggytX/1+XkdEwR3rT2511reGZ1xnkbv83UY9xb4B+ZRWcuGm
+I0XV2VG093233uh462jGMwp0C£1M2nJEsqtbU2tjH75GOwI3Vs06yqcWKg6VQ3£jZQnqXRsM3ex
+FgObPRB/AgMBAAGjYDBeMAwGAlUdEwEB/wQCMAAwHwYDVROjBBgwFoAUs7LT//3put7eja8RIZ=W
+ІНзут28wНQYDUROOBBYEFIBFH90230YddL1G8znFF10AB05yMA4GA1UdDwEB/wQEAwIF4DANBgkq
+hkiG9wOBAQOFAAOCAQEAPZvbyKj£3AbEM62#XlluL2t9IYeUWBETbu38lvMZfyhlNYq5npYjo2gK
+Xir6FUjNk02JZcL9QX5T9+R1VteALq0LhCoqu4P93bZOj/VOUuo4MaEFZAgosrzj37mYX6T288u
+rVplHutsJ1+bfpI+2WHlIb=GplFlvGF2FGB4B4Hz4kH9dgljRYsgi4hBeauFH2PFcLeMjW8=PYF3
+kiNUQzIoYrAkQ2d5m4pAdnTvpqihaUkCWC8AK22VvULom4Ko+3QFPt93U+uQqiJ+I8mA7m52Ec4T
+3JVIULKWs27EJiCqenkaTxmq+/q8CWtDGxkYNkmTNUPMMfxUKiIGSazXwQ
+-----END CERTIFICATE-----
+Acciones posibles
+Agregar Autorizaciones a este alias de DN
+Cerrar Sesión
+ARCA
+AGENCIA DE RECAUDACIÓN
+Y CONTROL ADUANERO
+
+--- Result 2 (score: 0.6008, ranked: 0.6000) ---
+Collection: arca_dev_guides
+Source: manual_wslpg_1.24.pdf
+Page: 150
+Context: RECHAZADA > Descripción > 2.4.18 Consulta de tipos de Certificados de Depósito.
+Text:
+150 
+ 
+ 
+Response 
+ 
+ 
+Permite consultar cuales son los certificados de depósito posibles de informar en el array de 
+certificados de una liquidación. 
+<wsl:gradoEntregadoReq> 
+<auth> 
+<token>1</token> 
+<sign>2</sign> 
+<cuit>11111111111</cuit> 
+</auth> 
+<codGrano>1</codGrano> 
+</wsl:gradoEntregadoReq> 
+</soapenv:Body> 
+</soapenv:Envelope> 
+<S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/"> 
+<S:Body> 
+<ns2:gradoEntregadoResp 
+xmlns:ns2="http://serviciosjava.afip.gob.ar/wslpg/"> 
+<gradoEntReturn> 
+<gradoEnt> 
+<gradoEnt> 
+<codigoDescripcion> 
+<codigo>G1</codigo> 
+<descripcion>Grado 1</descripcion> 
+</codigoDescripcion> 
+<valor>1.01</valor> 
+</gradoEnt> 
+<gradoEnt> 
+<codigoDescripcion> 
+<codigo>G2</codigo> 
+<descripcion>Grado 2</descripcion> 
+</codigoDescripcion> 
+<valor>1.00</valor> 
+</gradoEnt> 
+<gradoEnt> 
+<codigoDescripcion> 
+<codigo>G3</codigo> 
+<descripcion>Grado 3</descripcion> 
+</codigoDescripcion> 
+<valor>0.985</valor> 
+</gradoEnt> 
+... 
+</gradoEntReturn> 
+</ns2:gradoEntregadoResp> 
+</S:Body> 
+</S:Envelope> 
+2.4.18 Consulta de tipos de Certificados de Depósito. 
+(tipoCertificadoDepositoConsultar)
+
+--- Result 3 (score: 0.4167, ranked: 0.4839) ---
+Collection: arca_setup_certs
+Source: WSAA.ObtenerCertificado.pdf
+Page: 4
+Context: AFIP/SDGSIT/DIOPIN/DESOTE > Introducción
+Text:
+Solicitud del Certificado Digital 
+Para ejemplificar el procedimiento se utilizará un caso ficticio. En este caso el usuario JOSE 
+PEREZ ROMERO (CUIT 20120940288) es un técnico informático que trabaja para la empresa 
+“EMPRESA DE FACTURACION S.A.” (CUIT 30710955057). La empresa es una firma que brinda 
+servicio de facturación a otras empresas. A su vez factura electrónicamente a sus clientes. 
+El Administrador de Relaciones de la Empresa le ha delegado a JOSE PEREZ ROMERO el servicio 
+“Administrador de Certificados Digitales”. 
+1. El Acceso al Sistema se hace ingresando por el portal institucional 
+(https://www.arca.gob.ar/landing/default.asp). Deberá ubicar el enlace “Acceso con Clave 
+Fiscal” 
+ 
+ 
+ 
+2. En la pantalla de autenticación con Clave Fiscal, deberá ingresar la CUIT/CUIL/CDI de su 
+usuario (sin guiones ni separadores de ningún tipo) y a continuación la contraseña en el campo 
+Clave.
+
+--- Result 4 (score: 0.4166, ranked: 0.4792) ---
+Collection: arca_setup_certs
+Source: WSAA.ObtenerCertificado.pdf
+Page: 1
+Context: AFIP/SDGSIT/DIOPIN/DESOTE
+Text:
+Generación 
+de Certificados 
+para 
+Producción 
+Publicación 1.0 
+ 
+AFIP/SDGSIT/DIOPIN/DESOTE
+
+--- Result 5 (score: 0.5875, ranked: 0.4355) ---
+Collection: arca_dev_guides
+Source: manual_wslpg_1.24.pdf
+Page: 207
+Context: RECHAZADA > Descripción
+Text:
+207 
+ 
+<!--Optional:--> 
+<retiroTransferencia> 
+<certificadoDeposito> 
+<coeCertificadoDeposito>long</coeCertificadoDeposito> 
+<pesoNeto>LpgPesoNetoType</pesoNeto> 
+</certificadoDeposito> 
+<nroActDepositario>LpgActividadType</nroActDepositario> 
+<!--Optional:--> 
+<cuitReceptor>LpgCuitType</cuitReceptor> 
+<!--Optional:--> 
+<nroCartaPorteAUtilizar>Numero_9_0_Type</nroCartaPorteAUtilizar> 
+<!--Optional:--> 
+<nroCTG>Numero_12_0_Type</nroCTG> 
+<descripcionCausaJudicial>String_400_Type 
+</descripcionCausaJudicial> 
+</retiroTransferencia> 
+<!--Optional:--> 
+<preexistente> 
+<nroPlanta>Numero_6_0_Type</nroPlanta> 
+<tipoCertificadoDepositoPreexistente>? 
+Numero_1_0_Type 
+</tipoCertificadoDepositoPreexistente> 
+<nroCertificadoDepositoPreexistente> 
+Numero_12_0_Type 
+</nroCertificadoDepositoPreexistente> 
+<cacCertificadoDepositoPreexistente> 
+Numero_14_0_Type 
+</cacCertificadoDepositoPreexistente> 
+<fechaEmisionCertificadoDepositoPreexistente> 
+date 
+</fechaEmisionCertificadoDepositoPreexistente> 
+<pesoNeto>LpgPesoNetoType</pesoNeto> 
+</preexistente> 
+<!--Optional:--> 
+<preexistente> 
+<nroPlanta>Numero_6_0_Type</nroPlanta> 
+<nroCertificadoDepositoPreexistente> 
+Numero_12_0_Type 
+</nroCertificadoDepositoPreexistente> 
+<fechaEmisionCertificadoDepositoPreexistente> 
+date 
+</fechaEmisionCertificadoDepositoPreexistente> 
+<pesoNeto>LpgPesoNetoType</pesoNeto> 
+</preexistente> 
+</wsl:cgAutorizarReq> 
+</soapenv:Body> 
+</soapenv:Envelope> 
+Donde: 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Campo 
+Descripción 
+Obligatorio 
+Tipo 
+Longitud 
+<cgAutorizarReq> es del tipo CgAutorizarReqType:
+

@@ -1,0 +1,80 @@
+=== Qdrant Search Results ===
+Query: romaneo data fields ERP capture
+Results: 5
+
+--- Result 1 (score: 0.5825, ranked: 1.1000) ---
+Source: 8.2 CTG Document Structure and State Machine.md
+Page: 0
+Section: Miscellaneous
+Context: Creation‑phase fields (origin operator) > Miscellaneous
+Text:
+| Field | WS path | Type | Mand. | Notes |
+| :-- | :-- | :-- | :-- | :-- |
+| Observations | `observaciones` | string (up to ≈2000 chars) | Optional | Free text; one per CPE.[^1][^4] |
+
+All of the above are **captured at creation** and sent in a **single call** to `autorizarCPEAutomotor`; ARCA returns CTG, CPE number and sets the initial state.[^4][^10][^1]
+
+***
+
+--- Result 2 (score: 0.5824, ranked: 1.0892) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: Infrastructure Error Codes
+Context: AFIP/ARCA WSLPG Technical Documentation for Python/Django ERP Integration > 4. Error Handling > Infrastructure Error Codes
+Text:
+| Code | Cause |
+|---|---|
+| `500` | General application error |
+| `501` | General application error |
+| `600` | No data found matching the search parameters |
+| `700` | Synchronization error |
+| `800` | Service not available |
+
+--- Result 3 (score: 0.5745, ranked: 0.6008) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: Parameter Lookup Methods
+Context: AFIP/ARCA WSLPG Technical Documentation for Python/Django ERP Integration > 2. Complete SOAP Methods Catalog > Parameter Lookup Methods
+Text:
+| SOAP Method | Returns |
+|---|---|
+| `campaniasConsultar` | Available campaigns (e.g., `1314`, `2324`) |
+| `tipoGranoConsultar` | Grain types (codes + descriptions — soja, trigo, maíz, girasol, etc.) |
+| `codigoGradoReferenciaConsultar` | Reference grade codes per grain |
+| `codigoGradoEntregadoXTipoGranoConsultar` | Delivered grade codes and values per grain type |
+| `tipoCertificadoDepositoConsultar` | Deposit certificate types (1: F1116/RT, 5: F1116/A, 332: Electronic) |
+| `tipoDeduccionConsultar` | Deduction types (AL: Almacenaje, CO: Comisión, OD: Otras, etc.) |
+| `tipoRetencionConsultar` | Retention types (RI: IVA, RG: Ganancias, etc.) |
+| `puertoConsultar` | Enabled ports |
+| `tipoActividadConsultar` | Activity types universe |
+| `tipoActividadRepresentadoConsultar` | Activities the emisor/representado is registered for in RUOCA |
+| `provinciasConsultar` | Provinces |
+| `localidadXProvinciaConsultar` | Localities by province |
+| `tipoOperacionXActividadConsultar` | Operation types per activity (01: Compra/Venta, 02: Consignación) |
+
+All parameter lookup methods return an array of `LpgCodigoDescripcionType` with `codigo` and `descripcion` fields.[^7][^2]
+
+***
+
+--- Result 4 (score: 0.5725, ranked: 0.4744) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: Common Error Scenarios and Solutions
+Context: AFIP/ARCA WSLPG Technical Documentation for Python/Django ERP Integration > 4. Error Handling > Common Error Scenarios and Solutions
+Text:
+- **Error 1508** — Non-consecutive order number. Solution: call `liquidacionUltimoNroOrdenConsultar` to get the last accepted order number and use the next integer.[^4]
+- **Error 1645** — Was "maximum one certificate per liquidation" (removed since v1.5; multiple certificates are now allowed).[^3]
+- **Error 1856** — When providing a retention certificate number, `alicuota` must be `0`.[^3]
+- **Error 600** — No data found; typically when querying a non-existent COE or order number.[^4]
+- **Error 800** — Service temporarily unavailable; implement retry logic.[^4]
+
+***
+
+--- Result 5 (score: 0.5665, ranked: 0.1500) ---
+Source: 8.2 CTG Document Structure and State Machine.md
+Page: 0
+Section: Creation‑phase fields (origin operator)
+Context: Creation‑phase fields (origin operator)
+Text:
+The main creation payload for grains automotor is `autorizarCPEAutomotor.solicitud`, which groups fields into `cabecera`, `origen`, `intervinientes`, `datosCarga`, `destino`, `destinatario`, `transporte` and `observaciones`.[^4][^13]
+

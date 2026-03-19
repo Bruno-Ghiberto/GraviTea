@@ -1,0 +1,113 @@
+=== Qdrant Search Results ===
+Query: quality grading grade 1 2 3 fuera estandar bonificacion rebaja
+Results: 5
+
+--- Result 1 (score: 0.6070, ranked: 1.1000) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: Parameter Lookup Methods
+Context: AFIP/ARCA WSLPG Technical Documentation for Python/Django ERP Integration > 2. Complete SOAP Methods Catalog > Parameter Lookup Methods
+Text:
+| SOAP Method | Returns |
+|---|---|
+| `campaniasConsultar` | Available campaigns (e.g., `1314`, `2324`) |
+| `tipoGranoConsultar` | Grain types (codes + descriptions — soja, trigo, maíz, girasol, etc.) |
+| `codigoGradoReferenciaConsultar` | Reference grade codes per grain |
+| `codigoGradoEntregadoXTipoGranoConsultar` | Delivered grade codes and values per grain type |
+| `tipoCertificadoDepositoConsultar` | Deposit certificate types (1: F1116/RT, 5: F1116/A, 332: Electronic) |
+| `tipoDeduccionConsultar` | Deduction types (AL: Almacenaje, CO: Comisión, OD: Otras, etc.) |
+| `tipoRetencionConsultar` | Retention types (RI: IVA, RG: Ganancias, etc.) |
+| `puertoConsultar` | Enabled ports |
+| `tipoActividadConsultar` | Activity types universe |
+| `tipoActividadRepresentadoConsultar` | Activities the emisor/representado is registered for in RUOCA |
+| `provinciasConsultar` | Provinces |
+| `localidadXProvinciaConsultar` | Localities by province |
+| `tipoOperacionXActividadConsultar` | Operation types per activity (01: Compra/Venta, 02: Consignación) |
+
+All parameter lookup methods return an array of `LpgCodigoDescripcionType` with `codigo` and `descripcion` fields.[^7][^2]
+
+***
+
+--- Result 2 (score: 0.5901, ranked: 0.9086) ---
+Source: 2.1 Day-to-Day Operations of an Acopiador.md
+Page: 0
+Section: Paso 5 — Determinación de Grado y Descuentos
+Context: Flujo Operativo Completo de un Acopiador de Granos en la Pampa Húmeda Argentina — Guía para Diseño de ERP > ESCENARIO 1: Recepción de Granos (Recepción de Mercadería) > Paso 5 — Determinación de Grado y Descuentos
+Text:
+1. Los resultados del análisis se comparan contra las **tablas de tolerancias** establecidas en las Normas de Calidad para la Comercialización de cada grano, emitidas por resoluciones de SAGPyA/SENASA y publicadas por la Cámara Arbitral de Cereales de la Bolsa de Comercio de Rosario.[^16][^15][^17]
+2. Se determina el **grado** del lote (Grado 1, 2, 3, o Fuera de Estándar para cereales):
+
+| Grado | Trigo pan | Maíz | Sorgo |
+|---|---|---|---|
+| Grado 1 | Bonificación 1,5% | Bonificación 1,0% | Bonificación 1,0% |
+| Grado 2 | Sin bonificación ni rebaja | Sin bonificación ni rebaja | Sin bonificación ni rebaja |
+| Grado 3 | Rebaja 1,0% | Rebaja 1,5% | Rebaja 1,5% |
+
+Para soja y girasol, la norma establece **bases y tolerancias de recibo** con rebajas porcentuales progresivas por cada punto o fracción que exceda la tolerancia (no usa sistema de grados 1-2-3).[^15]
+
+3. Se calculan los **descuentos porcentuales** aplicables cuando los valores exceden las tolerancias. Por ejemplo, en soja: materias extrañas superiores al 1% generan rebaja de 1% por cada punto de exceso hasta 3%, y 1,5% por cada punto arriba de 3%.[^15]
+
+**Datos a capturar en el ERP:**
+- Grado asignado
+- Factor de bonificación o rebaja (%) por grado
+- Detalle de cada descuento por exceso de tolerancia (rubro, % de exceso, % de descuento)
+- Factor total resultante (Factor 100 ± ajustes)
+
+***
+
+--- Result 3 (score: 0.5957, ranked: 0.8062) ---
+Source: 8.1 Grain Types and Quality Parameter Reference Data.md
+Page: 0
+Section: AFIP/ARCA species codes for relevant grains
+Context: Reference data catalog for Argentine grain trade (quality parameters and ARCA species codes) > AFIP/ARCA species codes for relevant grains
+Text:
+These are the "ncespecie" codes used in CTG and F.1116 web services.[^4]
+
+--- Result 4 (score: 0.5574, ranked: 0.3456) ---
+Source: 2.2 Grain Quality Management Standards.md
+Page: 0
+Section: 2. Maiz (Corn) – Norma XII (Res. SAGyP 1075/94)
+Context: Research the official grain quality standards and grading parameters used in Argentine > 2. Maiz (Corn) – Norma XII (Res. SAGyP 1075/94)
+Text:
+| Grado | Peso hectolítrico mínimo (kg/hl) | Tipo % | Color % | Granos picados % | Humedad % | Granos dañados % | Granos quebrados % | Materias extrañas % |
+| :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- |
+| 1 | 75 | 3,00 | 2,00 | 1,00 | 5,00 | 5,00 | 3,00 | 14,5 |
+| 2 | 72 | 5,00 | 3,00 | 1,50 | (not shown – typically ≤14,0 %) | 8,00 | 5,00 | 2,00 |
+| 3 | 69 | 8,00 | 5,00 | 2,00 | (not shown) | — | — | — |
+
+*Note: The humidity column in the PDF refers to the maximum allowed humidity for each grade; the commercial base humidity for maize is **14,0 %** (excess triggers merma de secado).*
+
+**Commercial deductions (rebajas)** – applied when a parameter exceeds its tolerance for the contracted grade:
+
+- **Humedad**: Merma = [(Hᵢ – 14,0) × 100] ÷ (100 – 14,0) %
+- **Granos dañados**: > tolerance: 1,0 % / cada % exceso
+- **Granos quebrados**: > tolerance: 0,5 % / cada % exceso (for Grado 1) – values vary by grade
+- **Materias extrañas**: > tolerance: 1,0 % / cada % exceso (up to a limit, then arbitration)
+- **Olores objetables / Granos amohosados**: 0,5 %–2,0 % según intensidad
+- **Chamico**: 1,3 % de merma de peso y gastos de zarandeo (2 semillas / 100 g)
+
+**Grade‑based bonuses/rebajas** – Grado 1: +1,0 % bonificación; Grado 2: 0; Grado 3: –1,5 % rebaja.
+
+**Official entity** – Cámara Arbitral de Cereales (CAC) – Norma XII (Res. SAGyP 1075/94).
+
+**Merma de almacenamiento** – 0,5 % de materia seca por mes $$
+
+$$ (alternatively 0,075 %/mes según EMAPA $$
+
+$$).
+
+**Factor de conversión** – $F = (100 - H_{\text{actual}})/(100 - 14,0)$.
+**Merma de secado** – same as humidity formula above.
+**Zarandeo** – deductions for excess of Materias extrañas, Granos quebrados, Granos dañados, Chamico, etc., as per the tolerance tables.
+
+***
+
+--- Result 5 (score: 0.5490, ranked: 0.3000) ---
+Source: 2.3 Producer Current Accounts (Cuentas Corrientes de Productores).md
+Page: 0
+Section: Price Adjustments and Quality Bonuses
+Context: Producer Current Accounts at Argentine Grain Storage Operators: Complete ERP Design Reference > Credit Entries (A Favor del Productor) > Price Adjustments and Quality Bonuses
+Text:
+- **Bonificaciones por calidad**: Price increases for grade 1 grain (1% bonus for wheat/corn), high protein content in wheat (2% per point above 11% base), or special quality attributes like high oleic in sunflower.[^2][^1]
+- **Ajustes de precio**: When a producer who delivered grain "a fijar" (without a fixed price) subsequently fixes the price, a new LPG is issued at the fixed price, generating a credit entry.[^2]
+

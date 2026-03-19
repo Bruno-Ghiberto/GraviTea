@@ -1,0 +1,72 @@
+=== Qdrant Search Results ===
+Query: romaneo descarga storage destination silo assignment
+Results: 5
+
+--- Result 1 (score: 0.5925, ranked: 1.3000) ---
+Source: 8.3 Romaneo (Weighing Ticket) and Reception Document Structure.md
+Page: 0
+Section: **5\. Final Operational and Authorization Data**
+Context: **The Argentine Grain Weighing Ticket (Romaneo): Structural, Legal, and Operational Framework within the Acopio System** > **Comprehensive Structural Architecture of the Romaneo** > **5\. Final Operational and Authorization Data**
+Text:
+The final section of the romaneo document solidifies the internal logistics and provides legal authorization for the transaction.
+
+* **Silo/Celda Assignment:** An internal logistical routing code indicating the exact physical destination of the unloaded grain. It specifies whether the grain was deposited directly into a vertical concrete silo, a horizontal storage cell (celda), or if its high moisture content required it to be routed immediately to the wet holding bins prior to entering the dryer (secadora).19 This is essential for internal traceability and quality segregation.  
+* **Signatures and Digital Confirmations:** Historically, the printed romaneo required the wet physical signatures of the facility's certified scale operator (*recibidor de granos*) and the truck driver, who acts as the legally authorized proxy for the producer and the transport company.5 In the contemporary digitized landscape, while printed tickets are still signed and archived for immediate physical proof, the definitive authorizations are executed via secure digital confirmations, cryptographic timestamps, and user-permission logging within the *acopio's* centralized ERP environment.
+
+--- Result 2 (score: 0.5030, ranked: 0.5068) ---
+Source: 8.3 Romaneo (Weighing Ticket) and Reception Document Structure.md
+Page: 0
+Section: **1\. Header, Identification, and Traceability Data**
+Context: **The Argentine Grain Weighing Ticket (Romaneo): Structural, Legal, and Operational Framework within the Acopio System** > **Comprehensive Structural Architecture of the Romaneo** > **1\. Header, Identification, and Traceability Data**
+Text:
+The upper section of the romaneo serves to establish the legal entities involved in the transaction, define the temporal reality of the event, and permanently link the physical grain to its authorizing transit documentation. This creates an unbroken chain of custody from the point of harvest to the point of storage. | Identification Field | Comprehensive Description and Regulatory Function |
+| :---- | :---- |
+| **Document Number and Date** | A unique, sequential alphanumeric control number generated automatically by the *acopio's* Enterprise Resource Planning (ERP) system (e.g., Albor Campo, Physis, Finnegans GO Agro). This is accompanied by the exact calendar date and the precise timestamps of the truck's entry onto the gross weighbridge and its exit from the tare weighbridge.12 |
+| **Producer Data (Remitente Comercial)** | The legal identification of the entity delivering the grain. This mandates the inclusion of the legal registered name (Razón Social), the unique Fiscal Identification Code (CUIT), and the registered fiscal domicile.15 In complex agricultural operations involving sharecropping, pools de siembra, or leased land (which constitute 70% of Argentine production), this ensures the correct entity is credited for the physical stock.1 |
+| **Acopio Data (Destinatario / CUIT Destino)** | The legal identification of the receiving elevator facility. Crucially, this must include the specific plant authorization number (Número de planta de descarga) registered within the *Sistema de Información Simplificado Agrícola* (SISA), which replaced the older RUCA registry requirement.17 |
+| **CPE and CTG Reference Numbers** | The unique tracking number of the Carta de Porte Electrónica and its embedded Código de Trazabilidad de Granos.8 The inclusion of these numbers on the printed or digital romaneo is an absolute legal mandate to prove the grain arrived under lawful authorization.
+
+--- Result 3 (score: 0.4931, ranked: 0.2191) ---
+Source: 8.3 Romaneo (Weighing Ticket) and Reception Document Structure.md
+Page: 0
+Section: **1\. Header, Identification, and Traceability Data**
+Context: **The Argentine Grain Weighing Ticket (Romaneo): Structural, Legal, and Operational Framework within the Acopio System** > **Comprehensive Structural Architecture of the Romaneo** > **1\. Header, Identification, and Traceability Data**
+Text:
+tracking number of the Carta de Porte Electrónica and its embedded Código de Trazabilidad de Granos.8 The inclusion of these numbers on the printed or digital romaneo is an absolute legal mandate to prove the grain arrived under lawful authorization. |
+| **Grain Type and Campaign Year** | The specific agricultural commodity being delivered, which must be identified by standardized national AFIP/ARCA codes to ensure database interoperability (e.g., Code 19 for Corn, Code 23 for Soybeans, Code 15 for Bread Wheat, Code 22 for Sorghum).3 This is accompanied by the agricultural campaign year (e.g., 2024/2025) to properly segregate historical stocks from fresh harvests. |
+| **Truck and Transport Data** | Comprehensive identification of the logistical vector. This includes the distinct license plates (patentes) of the truck cab (chasis) and the trailing unit (acoplado), the full name and national identity document (DNI) of the driver, and the CUIT of the transport company (Transportista).8 This data is cross-referenced against national transport registries to ensure compliance with maximum weight limits per axle.18 |
+
+--- Result 4 (score: 0.4930, ranked: 0.1181) ---
+Source: 8.2 CTG Document Structure and State Machine.md
+Page: 0
+Section: Creation‑phase fields (origin operator)
+Context: Creation‑phase fields (origin operator)
+Text:
+The main creation payload for grains automotor is `autorizarCPEAutomotor.solicitud`, which groups fields into `cabecera`, `origen`, `intervinientes`, `datosCarga`, `destino`, `destinatario`, `transporte` and `observaciones`.[^4][^13]
+
+--- Result 5 (score: 0.4796, ranked: 0.0000) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: Parameter Lookup Methods
+Context: AFIP/ARCA WSLPG Technical Documentation for Python/Django ERP Integration > 2. Complete SOAP Methods Catalog > Parameter Lookup Methods
+Text:
+| SOAP Method | Returns |
+|---|---|
+| `campaniasConsultar` | Available campaigns (e.g., `1314`, `2324`) |
+| `tipoGranoConsultar` | Grain types (codes + descriptions — soja, trigo, maíz, girasol, etc.) |
+| `codigoGradoReferenciaConsultar` | Reference grade codes per grain |
+| `codigoGradoEntregadoXTipoGranoConsultar` | Delivered grade codes and values per grain type |
+| `tipoCertificadoDepositoConsultar` | Deposit certificate types (1: F1116/RT, 5: F1116/A, 332: Electronic) |
+| `tipoDeduccionConsultar` | Deduction types (AL: Almacenaje, CO: Comisión, OD: Otras, etc.) |
+| `tipoRetencionConsultar` | Retention types (RI: IVA, RG: Ganancias, etc.) |
+| `puertoConsultar` | Enabled ports |
+| `tipoActividadConsultar` | Activity types universe |
+| `tipoActividadRepresentadoConsultar` | Activities the emisor/representado is registered for in RUOCA |
+| `provinciasConsultar` | Provinces |
+| `localidadXProvinciaConsultar` | Localities by province |
+| `tipoOperacionXActividadConsultar` | Operation types per activity (01: Compra/Venta, 02: Consignación) |
+
+All parameter lookup methods return an array of `LpgCodigoDescripcionType` with `codigo` and `descripcion` fields.[^7][^2]
+
+***
+

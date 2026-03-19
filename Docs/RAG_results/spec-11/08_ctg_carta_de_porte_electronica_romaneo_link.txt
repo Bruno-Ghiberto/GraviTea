@@ -1,0 +1,85 @@
+=== Qdrant Search Results ===
+Query: CTG carta de porte electronica romaneo link
+Results: 5
+
+--- Result 1 (score: 0.7182, ranked: 1.3000) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: Sample Test Values
+Context: 4. Create and authorize a liquidation > 6. Testing Environment (Homologation) > Sample Test Values
+Text:
+Example data provided by AFIP for certificate testing:[^2][^4]
+
+| Field | Value | XML Tag |
+|---|---|---|
+| Carta de Porte | `530306310` | `<nroCartaDePorte>` |
+| CTG | `892` | `<nroCTG>` |
+| Grain code | `23` | `dGrano>` |
+| Campaign | `1314` | `ampania>` |
+| CUIT Depositante | `20111111112` | `uitDepositante>` |
+
+--- Result 2 (score: 0.7130, ranked: 1.1229) ---
+Source: 8.3 Romaneo (Weighing Ticket) and Reception Document Structure.md
+Page: 0
+Section: **1\. Header, Identification, and Traceability Data**
+Context: **The Argentine Grain Weighing Ticket (Romaneo): Structural, Legal, and Operational Framework within the Acopio System** > **Comprehensive Structural Architecture of the Romaneo** > **1\. Header, Identification, and Traceability Data**
+Text:
+tracking number of the Carta de Porte Electrónica and its embedded Código de Trazabilidad de Granos.8 The inclusion of these numbers on the printed or digital romaneo is an absolute legal mandate to prove the grain arrived under lawful authorization. |
+| **Grain Type and Campaign Year** | The specific agricultural commodity being delivered, which must be identified by standardized national AFIP/ARCA codes to ensure database interoperability (e.g., Code 19 for Corn, Code 23 for Soybeans, Code 15 for Bread Wheat, Code 22 for Sorghum).3 This is accompanied by the agricultural campaign year (e.g., 2024/2025) to properly segregate historical stocks from fresh harvests. |
+| **Truck and Transport Data** | Comprehensive identification of the logistical vector. This includes the distinct license plates (patentes) of the truck cab (chasis) and the trailing unit (acoplado), the full name and national identity document (DNI) of the driver, and the CUIT of the transport company (Transportista).8 This data is cross-referenced against national transport registries to ensure compliance with maximum weight limits per axle.18 |
+
+--- Result 3 (score: 0.6957, ranked: 0.3309) ---
+Source: 8.2 CTG Document Structure and State Machine.md
+Page: 0
+Section: Creation‑phase fields (origin operator)
+Context: Creation‑phase fields (origin operator)
+Text:
+The main creation payload for grains automotor is `autorizarCPEAutomotor.solicitud`, which groups fields into `cabecera`, `origen`, `intervinientes`, `datosCarga`, `destino`, `destinatario`, `transporte` and `observaciones`.[^4][^13]
+
+--- Result 4 (score: 0.6890, ranked: 0.3000) ---
+Source: 2.1 Day-to-Day Operations of an Acopiador.md
+Page: 0
+Section: Paso 1 — Llegada del camión e inspección documental
+Context: Flujo Operativo Completo de un Acopiador de Granos en la Pampa Húmeda Argentina — Guía para Diseño de ERP > ESCENARIO 1: Recepción de Granos (Recepción de Mercadería) > Paso 1 — Llegada del camión e inspección documental
+Text:
+## ESCENARIO 1: Recepción de Granos (Recepción de Mercadería)
+
+
+
+1. El camión ingresa a la planta y se presenta en la garita/oficina de recepción.
+2. El chofer presenta la **Carta de Porte Electrónica (CPE)**, que desde la RG Conjunta 5017/2021 es el único documento válido para respaldar el transporte automotor de granos no destinados a siembra (cereales, oleaginosas, legumbres secas) dentro del territorio argentino.[^1][^2]
+3. La CPE contiene el **Código de Trazabilidad de Granos (CTG)**, un código otorgado por AFIP/ARCA que debe consignarse en cada carta de porte y que permite la trazabilidad del envío desde origen hasta destino.[^3][^4]
+4. El operador de la planta de destino debe verificar/confirmar el CTG a través del servicio web de ARCA antes de autorizar la descarga. La CPE tiene una validez de 5 días para transporte automotor.[^5][^2]
+
+**Datos a capturar en el ERP:**
+- Número de CPE y CTG asociado
+- CUIT del remitente (productor), del intermediario/corredor (si aplica), del transportista
+- Origen (establecimiento de producción, CUIT, localidad)
+- Destino (planta del acopiador, número de planta SISA)
+- Tipo de grano y campaña (cosecha)
+- Peso bruto declarado en origen
+- Patentes del camión y acoplado
+- Fecha/hora de arribo
+
+**Documento generado:** Registro de ingreso de camión (interno).
+
+***
+
+--- Result 5 (score: 0.6911, ranked: 0.1729) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: Grain Certification (CG — RG 3691/2014)
+Context: AFIP/ARCA WSLPG Technical Documentation for Python/Django ERP Integration > 2. Complete SOAP Methods Catalog > Grain Certification (CG — RG 3691/2014)
+Text:
+| SOAP Method | Description |
+|---|---|
+| `cgAutorizar` | Authorize a grain certificate (deposit F1116A, withdrawal/transfer F1116RT, or preexisting) |
+| `cgBuscarCtg` | Search CTGs (Grain Traceability Code) available for certification |
+| `cgBuscarCertConSaldoDisponible` | Search certificates with available balance for liquidation/withdrawal |
+| `cgSolicitarAnulacion` | Request cancellation of a grain certificate |
+| `cgConfirmarAnulacion` | Confirm cancellation of a grain certificate |
+| `cgConsultarXCoe` | Consult a certificate by COE |
+| `cgConsultarXNroOrden` | Consult a certificate by order number |
+| `cgConsultarUltimoNroOrden` | Last registered certificate order number |
+| `cgInformarCalidad` | Report quality details for a certificate |
+

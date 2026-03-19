@@ -1,0 +1,61 @@
+=== Qdrant Search Results ===
+Query: acopiador daily operations truck queue reception
+Results: 5
+
+--- Result 1 (score: 0.5912, ranked: 1.0000) ---
+Source: 8.2 CTG Document Structure and State Machine.md
+Page: 0
+Section: Creation‑phase fields (origin operator)
+Context: Creation‑phase fields (origin operator)
+Text:
+The main creation payload for grains automotor is `autorizarCPEAutomotor.solicitud`, which groups fields into `cabecera`, `origen`, `intervinientes`, `datosCarga`, `destino`, `destinatario`, `transporte` and `observaciones`.[^4][^13]
+
+--- Result 2 (score: 0.5726, ranked: 0.4078) ---
+Source: 8.2 CTG Document Structure and State Machine.md
+Page: 0
+Section: Transport: truck and driver
+Context: Creation‑phase fields (origin operator) > Transport: truck and driver
+Text:
+ete` | CUIT | Optional | When there is an intermediary de flete in the model.[^4][^21] | Intermediario de flete |
+| Fumigated? | `transporte.mercaderiaFumigada` | boolean | Optional | Indicates if cargo is fumigated; flagged in UI.[^4][^7] | Origin |
+
+AFIP simple types constrain `codigoTurno` to a 30‑char string and domain to 6–7 alphanumerics.[^1]
+
+--- Result 3 (score: 0.5622, ranked: 0.2500) ---
+Source: 6.1 Market Sizing -- Geographic Distribution of Acopiadores.md
+Page: 0
+Section: Fleet and Operations
+Context: Acopiadores de Granos in Argentina: Market Size, Geographic Distribution & Structure (2024–2026) > Size Distribution of Acopiadores > Fleet and Operations
+Text:
+About 65% of acopiadores maintain their own truck fleet (averaging 6 vehicles per company), for a sector total of approximately 3,000 trucks. Railway usage is minimal—under 10% of firms use rail, accounting for only ~6% of grain transported. Approximately 55% of acopiadores also operate their own agricultural production, averaging ~4,000 hectares each, with a combined cultivated area exceeding 1.8 million hectares.[^32]
+
+--- Result 4 (score: 0.5694, ranked: 0.2492) ---
+Source: 2.3 Producer Current Accounts (Cuentas Corrientes de Productores).md
+Page: 0
+Section: Special Rules
+Context: Producer Current Accounts at Argentine Grain Storage Operators: Complete ERP Design Reference > Órdenes de Entrega (Delivery Orders) > Special Rules
+Text:
+- Only **one Carta de Porte per retiro** is permitted[^17]
+- If the destination is another operator with a registered plant, the receiving operator must issue a new CEG[^17]
+- Retiros require a pre-existing CEG; no retiro can be issued without stock backing[^17]
+
+***
+
+--- Result 5 (score: 0.5632, ranked: 0.1342) ---
+Source: 8.2 CTG Document Structure and State Machine.md
+Page: 0
+Section: CPE/CTG lifecycle in practice
+Context: CPE/CTG lifecycle in practice
+Text:
+For grains CPE Automotor, the operational phases are:[^3][^7][^1]
+
+1. **Creation/Authorization (Emisión)** – Origin operator calls `autorizarCPEAutomotor`; ARCA returns CTG, CPE number and initial state (usually Activa).
+2. **Transit** – Truck travels with printed/QR CPE; optional contingencies or desvío/regreso can be reported via WS methods.[^8][^1]
+3. **Arrival** – Destination (or its system) calls `confirmarArriboCPE`, which only changes state, not business data.[^9][^1]
+4. **Unloading / Descarga** – Destination calls `descargadoDestinoCPE` and then `confirmacionDefinitivaCPEAutomotor` sending final gross/tare; ARCA computes net and closes the CTG.[^10][^9]
+5. **Closure / Exceptions** – Anulación, rechazo, regreso a origen, contingencias and vencimiento follow side paths in the state machine (see below).[^11][^12][^1]
+
+These phases map well to separate write‑events in your ERP: **Create → Arrive → Unload → Close**, with intermediate events for **Cancel/Reject/Divert/Contingency**.
+
+***
+

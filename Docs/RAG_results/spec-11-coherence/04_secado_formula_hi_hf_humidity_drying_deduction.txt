@@ -1,0 +1,114 @@
+=== Qdrant Search Results ===
+Query: secado formula Hi Hf humidity drying deduction
+Results: 5
+
+--- Result 1 (score: 0.6988, ranked: 1.1000) ---
+Source: 2.5 Merma (Grain Loss) Calculations and Tolerance Tables.md
+Page: 0
+Section: Fórmula universal
+Context: Merma en Operaciones de Acopio de Granos en Argentina: Tablas, Fórmulas y Normativa > Merma de secado (merma por humedad) > Fórmula universal
+Text:
+## Merma de secado (merma por humedad)
+
+
+
+La fórmula aplicada para todos los granos es:[^2][^1]
+
+\[
+\%\text{Merma} = \frac{H_i - H_f}{100 - H_f} \times 100
+\]
+
+donde:
+- \( H_i \) = humedad inicial (real del lote, medida al recibo)
+- \( H_f \) = humedad final para el cálculo (no la base comercial, ver tabla abajo)
+
+La fórmula del usuario es conceptualmente correcta:
+
+`peso_seco = peso_humedo × (100 − humedad_real) / (100 − humedad_base)`
+
+Sin embargo, la **humedad final (\( H_f \)) usada en las tablas oficiales no es exactamente la base comercial**, sino un valor **inferior** a la base. La ex-JNG estableció una diferencia que varía por grano para compensar pérdidas adicionales por manipuleo y conservación:[^2]
+
+| Grano | Base comercial (%) | Diferencia (puntos) | \( H_f \) para cálculo de merma (%) |
+|---|---|---|---|
+| Maíz | 14,5 | 1,0 | 13,5 |
+| Sorgo granífero | 15,0 | 1,5 | 13,5 |
+| Trigo pan | 14,0 | 0,5 | 13,5 |
+| Cebada forrajera | 14,0 | 0,5 | 13,5 |
+| Girasol | 11,0 | 0,5 | 10,5 |
+| Soja | 13,5 (tolerancia recibo) | 0,5 | 13,0 (base) / 12,5 |
+| Cebada cervecera | 12,0 (base) / 12,5 (tol.) | — | Fórmula directa |
+
+Fuente: Documento JNG reproducido en FAO.[^2]
+
+**Nota clave para software**: Soja tiene base 13,5% pero tolerancia de recibo 13,5%. Las tablas de merma comienzan a descontar desde 13,6%. La cebada cervecera **no utiliza tablas tabuladas** sino que aplica directamente la fórmula:[^3][^4][^5]
+
+\[
+\text{Merma (\%)} = \frac{(H_i - H_f)}{100 - H_f} \times 100
+\]
+
+con \( H_f \) = humedad final pactada (generalmente 12% base).[^4]
+
+--- Result 2 (score: 0.6936, ranked: 0.9591) ---
+Source: 2.5 Merma (Grain Loss) Calculations and Tolerance Tables.md
+Page: 0
+Section: Cebada cervecera (Norma V Anexo A — base 12,0%, tolerancia 12,5%)
+Context: Merma en Operaciones de Acopio de Granos en Argentina: Tablas, Fórmulas y Normativa > Merma de secado (merma por humedad) > Tablas completas de merma por secado > Cebada cervecera (Norma V Anexo A — base 12,0%, tolerancia 12,5%)
+Text:
+No se aplica tabla pre-tabulada. La norma SENASA Res. 27/2013 prescribe la fórmula directa para humedad superior a 12,5%:[^13][^4]
+
+\[
+\text{Merma (\%)} = \frac{H_i - H_f}{100 - H_f} \times 100
+\]
+
+El software debe parametrizar \( H_f \) como la humedad base o la pactada contractualmente.
+
+***
+
+--- Result 3 (score: 0.6137, ranked: 0.6380) ---
+Source: 2.3 Producer Current Accounts (Cuentas Corrientes de Productores).md
+Page: 0
+Section: Secado (Drying)
+Context: Producer Current Accounts at Argentine Grain Storage Operators: Complete ERP Design Reference > Debit Entries (A Favor del Acopiador) > Secado (Drying)
+Text:
+Charged when grain moisture exceeds the base standard (14% for wheat and corn, 13% for soy, 11% for sunflower). Drying is the highest-cost conditioning service.[^1]
+
+- **Calculation methods** (from ERP documentation):[^3]
+  - **Basic drying**: A tariff for a first humidity range (e.g., 14.6%–17% for corn), plus a per-point-excess surcharge for higher moisture
+  - **Decimal point drying**: Charges fractional humidity (e.g., 17.2% charges only two tenths, not rounded up)
+  - **Range-based drying**: Different tariffs per defined humidity brackets
+- **Merma por secado (drying shrinkage)**: Calculated with the formula: \(%M = \frac{H_i - H_f}{100 - H_f} \times 100\) where \(H_i\) is initial humidity and \(H_f\) is the commercial base humidity. Official tables published by the Cámara Arbitral de Cereales de Rosario provide exact percentages for each tenth of a percent.[^9][^10][^11]
+
+--- Result 4 (score: 0.5850, ranked: 0.1150) ---
+Source: 2.5 Merma (Grain Loss) Calculations and Tolerance Tables.md
+Page: 0
+Section: Sorgo granífero (Norma XVIII — base 15,0%, tabla desde 15,1%)
+Context: Merma en Operaciones de Acopio de Granos en Argentina: Tablas, Fórmulas y Normativa > Merma de secado (merma por humedad) > Tablas completas de merma por secado > Sorgo granífero (Norma XVIII — base 15,0%, tabla desde 15,1%)
+Text:
+| Humedad (%) | Merma (%) | Humedad (%) | Merma (%) | Humedad (%) | Merma (%) |
+|---|---|---|---|---|---|
+| 15,1 | 1,85 | 18,0 | 5,20 | 21,5 | 9,25 |
+| 16,0 | 2,89 | 19,0 | 6,36 | 22,0 | 9,83 |
+| 17,0 | 4,05 | 20,0 | 7,51 | 23,0 | 10,98 |
+| 17,5 | 4,62 | 21,0 | 8,67 | 24,0 | 12,14 |
+| 18,0 | 5,20 | 21,5 | 9,25 | 25,0 | 13,29 |
+
+La Resolución 189/2025 (actualización de la Norma XVIII) explicita que la humedad final para el cálculo es **13,5%**. Merma por manipuleo: adicionar **0,25%**.[^9][^10][^11]
+
+--- Result 5 (score: 0.5702, ranked: 0.0000) ---
+Source: 2.5 Merma (Grain Loss) Calculations and Tolerance Tables.md
+Page: 0
+Section: Tabla de parámetros por grano para la base de datos
+Context: Merma en Operaciones de Acopio de Granos en Argentina: Tablas, Fórmulas y Normativa > Implementación en software: resumen de fórmulas > Tabla de parámetros por grano para la base de datos
+Text:
+| Grano | Humedad base (%) | Humedad Hf cálculo (%) | Tolerancia humedad recibo (%) | Manipuleo (%) | Volátil máx (%) |
+|---|---|---|---|---|---|
+| Soja | 13,5 | 12,5 | 13,5 | 0,25 | 0,5 |
+| Maíz | 14,5 | 13,5 | 14,5 | 0,25 | 0,3 |
+| Trigo pan | 14,0 | 13,5 | 14,0 | 0,10 | 0,3 |
+| Girasol | 11,0 | 10,5 | 14,0 | 0,20 | 0,5 |
+| Sorgo granífero | 15,0 | 13,5 | 15,0 | 0,25 | 0,5 |
+| Cebada forrajera | 14,0 | 13,5 | 14,0 | 0,20 | 0,3 |
+| Cebada cervecera | 12,0 | Según contrato | 12,5 | — | 0,3 |
+
+***
+

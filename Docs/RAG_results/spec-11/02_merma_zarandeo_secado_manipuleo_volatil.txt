@@ -1,0 +1,108 @@
+=== Qdrant Search Results ===
+Query: merma zarandeo secado manipuleo volatil
+Results: 5
+
+--- Result 1 (score: 0.6300, ranked: 1.3000) ---
+Source: 2.5 Merma (Grain Loss) Calculations and Tolerance Tables.md
+Page: 0
+Section: Orden de aplicación de las mermas
+Context: Merma en Operaciones de Acopio de Granos en Argentina: Tablas, Fórmulas y Normativa > Orden de aplicación de las mermas
+Text:
+La **Circular CAC 10/86** de la Cámara Arbitral de Cereales de Rosario y el **Artículo 5° de la Resolución JNG N° 22027/81** establecen el orden obligatorio para la aplicación secuencial de mermas:[^1]
+
+1. **Merma de zarandeo (limpieza)** — se aplica primero sobre el peso bruto neto
+2. **Merma de secado** — se aplica sobre el resultado del paso 1
+3. **Merma de manipuleo** — se aplica sobre el resultado del paso 2
+4. **Merma volátil** — siempre se aplica última
+
+Cada merma se calcula sobre el peso resultante de la merma anterior, no sobre el peso original. Para el software, el cálculo es encadenado multiplicativamente:
+
+\[
+\text{Peso\_final} = \text{Peso\_bruto} \times (1 - \%Z) \times (1 - \%S) \times (1 - \%M) \times (1 - \%V)
+\]
+
+donde %Z = merma zarandeo, %S = merma secado, %M = merma manipuleo, %V = merma volátil.[^1]
+
+***
+
+--- Result 2 (score: 0.6200, ranked: 0.8959) ---
+Source: 2.5 Merma (Grain Loss) Calculations and Tolerance Tables.md
+Page: 0
+Section: Merma volátil
+Context: Merma en Operaciones de Acopio de Granos en Argentina: Tablas, Fórmulas y Normativa > Merma volátil
+Text:
+La merma volátil es un descuento regulado que compensa las pérdidas por respiración, acondicionamiento, aireación y procesos biológicos durante el almacenamiento. Está establecida por la **Resolución ex-JNG N° 22027/81, Artículo 5°**:[^1]
+
+| Grupo de granos | Merma volátil máxima (%) |
+|---|---|
+| Trigo, avena, cebada, centeno, maíz | **0,3** |
+| Sorgo, soja, girasol, lino, colza | **0,5** |
+
+La merma volátil es el **porcentaje máximo deducible** y se aplica siempre como última. En la práctica:[^1]
+
+- Se cobra como servicio en la Liquidación Primaria de Granos (LPG)[^18]
+- Algunos acopiadores cobran el máximo completo; otros pactan un valor menor
+- El simulador de la Bolsa de Cereales de Córdoba excluye la merma volátil de su cálculo automático, indicando que debe agregarse por separado[^19]
+
+Para el software, la merma volátil es un parámetro configurable entre 0 y el máximo legal según tipo de grano.
+
+***
+
+--- Result 3 (score: 0.5948, ranked: 0.4061) ---
+Source: 1.3 Liquidacion Primaria de Granos -- Form 1116 B and C.md
+Page: 0
+Section: **4.2 Merma por Manipuleo and Volátiles**
+Context: **Technical and Regulatory Framework for Primary Grain Liquidations in Argentina: ERP Architecture and Fiscal Compliance (2024-2026)** > **4\. The Physics of Grain in ERP: Mermas and Quality Standardizations** > **4.2 Merma por Manipuleo and Volátiles**
+Text:
+In addition to moisture, standard commercial practice within the Argentine market dictates mandatory deductions for the physical handling of the grain and the loss of volatile dust.
+
+* **Manipuleo (Handling):** A flat addition of 0.25% is standardly applied to the calculated moisture deduction. This accounts for the physical loss of grain as it is moved through the augers, bucket elevators, and conveyors of the silo facility.15  
+* **Volátil (Volatile Matter):** An additional 0.30% deduction is frequently calculated for the loss of volatile matter (dust and micro-particulates) during the aeration and storage process.18 The ERP must subtract these percentages directly from the gross weight before applying the financial price.
+
+--- Result 4 (score: 0.5907, ranked: 0.3018) ---
+Source: 8.3 Romaneo (Weighing Ticket) and Reception Document Structure.md
+Page: 0
+Section: **4\. Deductions (Mermas) and Final Reconciled Weight**
+Context: **The Argentine Grain Weighing Ticket (Romaneo): Structural, Legal, and Operational Framework within the Acopio System** > **Comprehensive Structural Architecture of the Romaneo** > **4\. Deductions (Mermas) and Final Reconciled Weight**
+Text:
+corn).20 Beyond this physical weight deduction, the producer is also charged a monetary "Tarifa de Secada" (Drying Tariff) to cover the significant natural gas and electrical costs incurred by the *acopio* to operate the high-capacity grain dryers.22
+
+**Merma de Zarandeo (Cleaning Shrinkage):** This deduction accounts for the physical removal of foreign matter, dirt, and unmarketable broken grains that exceed the allowed commercial tolerances. The laboratory determines the percentage of excess waste, and this percentage is translated into physical kilograms deducted from the raw net weight, accompanied by a monetary cleaning tariff (Tarifa Zaranda).3
+
+**Merma Volátil (Volatile Shrinkage) / Merma de Recibo:** Unlike moisture or foreign matter, which are directly measured, volatile shrinkage is a standardized, non-negotiable deduction applied across the board to account for invisible, unavoidable physical losses during the violent mechanical unloading process. This covers the mass lost to suspended dust plumes, pulverized vegetative matter, and microscopic grain abrasion that blows away in the wind or is extracted by the facility's aspiration systems. The standard recognized deduction is generally 0.3% of the total weight for cereals (wheat, corn) and 0.5% for oilseeds (soybeans, sunflower).22
+
+**Merma por Manipuleo (Handling Shrinkage):** A secondary standard deduction applied to account for the physical degradation, breakage, and loss of grain as it is violently moved through the facility's vast network of bucket elevators, conveyor belts, mechanical sieves, and dryers. Standard agreed-upon rates are 0.10% for Wheat, 0.20% for Sunflower, and 0.25% for Corn and Soybeans.22
+
+After all of these percentage-based *mermas* are mathematically calculated and converted into specific kilograms, they are aggregated and subtracted from the raw Peso Neto. The resulting mathematical figure is the **Peso Neto Conforme** (Final Adjusted Commercial Weight).22
+
+--- Result 5 (score: 0.5906, ranked: 0.3000) ---
+Source: 2.1 Day-to-Day Operations of an Acopiador.md
+Page: 0
+Section: Paso 7 — Cálculo de peso neto y deducciones por acondicionamiento
+Context: Flujo Operativo Completo de un Acopiador de Granos en la Pampa Húmeda Argentina — Guía para Diseño de ERP > ESCENARIO 1: Recepción de Granos (Recepción de Mercadería) > Paso 7 — Cálculo de peso neto y deducciones por acondicionamiento
+Text:
+El cálculo sigue un orden secuencial obligatorio establecido por la Circular CAC 10/86:[^18]
+
+1. **Merma por zarandeo (limpieza):** Si la mercadería tiene materias extrañas por encima de la base, se descuenta la merma correspondiente. Ejemplo: trigo 2% merma y gastos de zarandeo; maíz 1,3%.[^15][^6]
+2. **Merma por secado:** Sobre el peso resultante después de zarandeo, se aplica la merma según **tablas de merma por secado** vigentes (publicadas por la Cámara Arbitral para cada grano), que indican el porcentaje de merma según la humedad de ingreso respecto de la humedad base de comercialización.[^19][^20][^21]
+3. **Merma por manipuleo:** Sobre el peso resultante después de secado, se aplica un porcentaje fijo: trigo 0,10%; maíz y soja 0,25%; girasol 0,20%.[^6]
+4. **Merma volátil:** Se descuenta adicionalmente: 0,3% para cereales (trigo, maíz, avena, cebada, centeno); 0,5% para oleaginosas (soja, girasol).[^22][^6]
+
+**Fórmula simplificada:**
+
+Peso neto bruto → (−zarandeo) → (−secado) → (−manipuleo) → (−merma volátil) = **Peso neto final certificado**
+
+Además se cobra:
+- **Tarifa de secada:** Convenida entre las partes o según tarifario de planta.
+- **Paritaria:** Cargo por movimiento de grano (energía eléctrica, personal), cobrado como tarifa por tonelada.[^23][^6]
+
+**Datos a capturar en el ERP:**
+- Peso neto bruto (kg)
+- % de merma y kg descontados por cada concepto (zarandeo, secado, manipuleo, merma volátil)
+- Peso neto final certificado (kg)
+- Tarifa de secada aplicada
+- Tarifa de paritaria
+- Costo total de acondicionamiento
+
+***
+

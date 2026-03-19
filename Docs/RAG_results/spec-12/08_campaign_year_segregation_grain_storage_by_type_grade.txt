@@ -1,0 +1,77 @@
+=== Qdrant Search Results ===
+Query: campaign year segregation grain storage by type grade
+Results: 5
+
+--- Result 1 (score: 0.6365, ranked: 1.3000) ---
+Source: 9.1 AI-ML Applications for Grain Storage Operations.md
+Page: 0
+Section: **Obras citadas**
+Context: **Strategic Deployment of Artificial Intelligence and Machine Learning in Cloud-Native Grain Storage ERP Systems** > **Strategic Implications and Operational Outlook** > **Obras citadas**
+Text:
+ique-method-to-prediction-and-manage-segregation-in-hoppers-silos-and-stockpiles/](https://bulkinside.com/bulk-solids-handling/storage-transportation/novel-and-unique-method-to-prediction-and-manage-segregation-in-hoppers-silos-and-stockpiles/)  
+28. Grain Quality – It's Time To Check Your Stored Grain | Purdue University Pest\&Crop newsletter, fecha de acceso: marzo 13, 2026, [https://extension.entm.purdue.edu/newsletters/pestandcrop/article/grain-quality-its-time-to-check-your-stored-grain/](https://extension.entm.purdue.edu/newsletters/pestandcrop/article/grain-quality-its-time-to-check-your-stored-grain/)  
+29. Modeling of Temperature of Grain During Storage with Aeration \- ASABE Technical Library, fecha de acceso: marzo 13, 2026, [https://elibrary.asabe.org/abstract.asp??JID=3\&AID=28367\&CID=t1993\&v=36\&i=2\&T=1](https://elibrary.asabe.org/abstract.asp??JID=3&AID=28367&CID=t1993&v=36&i=2&T=1)  
+30. Mechanism and Data-Driven Grain Condition Information Perception Method for Comprehensive Grain Storage Monitoring \- MDPI, fecha de acceso: marzo 13, 2026, [https://www.mdpi.com/2304-8158/14/19/3426](https://www.mdpi.com/2304-8158/14/19/3426)  
+31. Research on Storage Grain Temperature Prediction Method Based on FTA-CNN-SE-LSTM with Dual-Domain Data Augmentation and Deep Learning \- PMC, fecha de acceso: marzo 13, 2026, [https://pmc.ncbi.nlm.nih.gov/articles/PMC12111741/](https://pmc.ncbi.nlm.nih.gov/articles/PMC12111741/)  
+32. Agricultural commodity futures prices prediction based on a new hybrid forecasting model combining quadratic decomposition technology and LSTM model \- Frontiers, fecha de acceso: marzo 13, 2026, [https://www.frontiersin.org/journals/sustainable-food-systems/articles/10.3389/fsufs.2024.1334098/full](https://www.frontiersin.org/journals/sustainable-food-systems/articles/10.3389/fsufs.2024.1334098/full)  
+33.
+
+--- Result 2 (score: 0.6183, ranked: 0.6712) ---
+Source: 2.6 Campaign Year Management.md
+Page: 0
+Section: How the ERP Handles It
+Context: Campaign (Campaña) Cycles in Argentine Grain Agriculture: A Guide for Acopiador ERP Software > Handling Campaign Overlap > How the ERP Handles It
+Text:
+- **Logical segregation**: The AFIP system enforces that stock declarations are per grain per campaign. The ERP mirrors this with a composite key: (plant_id, grain_code, campaign_id).[^18]
+- **Physical segregation when possible**: Acopiadores try to empty cells between campaigns, but with limited silo capacity, co-mingling of the same grain from different campaigns is common. The "Giro de la Instalación" (plant turnover ratio) measures how efficiently the acopio cycles grain through its capacity.[^27]
+- **Carry stock (stock de enlace)**: Grain carried over from a previous campaign into the new one is explicitly tracked. The BCR reports this as "stocks iniciales" at the beginning of each new commercial year. For 2025/26 wheat, the carry from 2024/25 was estimated at 2.3 million tons nationally.[^31]
+- **Position netting**: The acopiador calculates a net exposed position across all campaigns and all operations (purchases, "a fijar" holdings, forward sales, canje obligations) to manage price risk.[^27]
+
+--- Result 3 (score: 0.6161, ranked: 0.5964) ---
+Source: 9.1 AI-ML Applications for Grain Storage Operations.md
+Page: 0
+Section: **Obras citadas**
+Context: **Strategic Deployment of Artificial Intelligence and Machine Learning in Cloud-Native Grain Storage ERP Systems** > **Strategic Implications and Operational Outlook** > **Obras citadas**
+Text:
+ps://openaccess.city.ac.uk/id/eprint/35748/8/Operations%20supply%20chain%20management%20principles%20and%20practice.pdf](https://openaccess.city.ac.uk/id/eprint/35748/8/Operations%20supply%20chain%20management%20principles%20and%20practice.pdf)  
+24. Production Optimization in a Grain Facility through Mixed-Integer Linear Programming, fecha de acceso: marzo 13, 2026, [https://www.researchgate.net/publication/362762588\_Production\_Optimization\_in\_a\_Grain\_Facility\_through\_Mixed-Integer\_Linear\_Programming](https://www.researchgate.net/publication/362762588_Production_Optimization_in_a_Grain_Facility_through_Mixed-Integer_Linear_Programming)  
+25. A multi-objective optimization approach to balancing cost and traceability in bulk grain handling | Request PDF \- ResearchGate, fecha de acceso: marzo 13, 2026, [https://www.researchgate.net/publication/221947975\_A\_multi-objective\_optimization\_approach\_to\_balancing\_cost\_and\_traceability\_in\_bulk\_grain\_handling](https://www.researchgate.net/publication/221947975_A_multi-objective_optimization_approach_to_balancing_cost_and_traceability_in_bulk_grain_handling)  
+26. Granular size segregation in silos with and without inserts \- The Royal Society, fecha de acceso: marzo 13, 2026, [https://royalsocietypublishing.org/rspa/article/477/2245/20200242/82317/Granular-size-segregation-in-silos-with-and](https://royalsocietypublishing.org/rspa/article/477/2245/20200242/82317/Granular-size-segregation-in-silos-with-and)  
+27. Novel and Unique Method to Prediction and Manage Segregation in Hoppers, Silos and Stockpiles \- BulkInside, fecha de acceso: marzo 13, 2026, [https://bulkinside.com/bulk-solids-handling/storage-transportation/novel-and-unique-method-to-prediction-and-manage-segregation-in-hoppers-silos-and-stockpiles/](https://bulkinside.com/bulk-solids-handling/storage-transportation/novel-and-unique-method-to-prediction-and-manage-segregation-in-hoppers-silos-and-stockpiles/)  
+28.
+
+--- Result 4 (score: 0.6089, ranked: 0.3484) ---
+Source: 2.6 Campaign Year Management.md
+Page: 0
+Section: Grain Inventory Tracking
+Context: Campaign (Campaña) Cycles in Argentine Grain Agriculture: A Guide for Acopiador ERP Software > How Campaign Affects Acopiador ERP Operations > Grain Inventory Tracking
+Text:
+## How Campaign Affects Acopiador ERP Operations
+
+
+
+An acopiador's ERP must track stock along three mandatory axes: **plant → grain → campaign**. Even when physical co-mingling occurs in the same silo cell, the AFIP's systemic registration (RG 3593) requires logical segregation by campaign.[^19][^18]
+
+In practice, this means:
+
+- The same silo cell might contain wheat from campaign 2024/25 and wheat from campaign 2025/26 after the new harvest begins in December.
+- The ERP tracks these as separate logical lots. Incoming Cartas de Porte with a CTG (Código de Trazabilidad de Granos) are registered against the corresponding campaign.[^18]
+- When the AFIP's online system displays stock for declaration, it shows the last 3 campaigns for operators to fill in quantities per plant.[^24]
+- Segregation protocols should be applied where practical, and the INTA recommends strict protocols to minimize contamination between crops and campaigns.[^25][^26]
+
+--- Result 5 (score: 0.6075, ranked: 0.3000) ---
+Source: 8.4 Form 1116 B-C Field Structure for Data Model Design.md
+Page: 0
+Section: **4\. Grain Data and Agronomic Origin Vectors**
+Context: **Architectural and Data Dictionary Analysis of ARCA Forms 1116-C and 1116-B via the WSLPG Web Service** > **Exhaustive Structure of Form 1116-C: Liquidación Primaria de Granos** > **4\. Grain Data and Agronomic Origin Vectors**
+Text:
+This payload section identifies the specific physical commodity and traces its geographic origins. This is an essential control mechanism allowing ARCA to audit the volume of grain a producer sells against the number of hectares they previously declared in their mandatory pre-harvest agricultural census.
+
+| Field Name | Data Type | Length/Precision | Requirement | Valid Values and Business Meaning |
+| :---- | :---- | :---- | :---- | :---- |
+| codGrano | Integer | 3 digits | Mandatory | The official code for the commodity (e.g., Soybeans, Wheat, Corn). Validated against active WSLPG catalogs.9 |
+| codCampania | String | 4 chars (YY/YY) | Mandatory | The harvest campaign cycle (e.g., "23/24"). ARCA restricts liquidations to valid, active campaigns.9 |
+| provinciaProcedencia | Integer | 2 digits | Mandatory | The numerical code representing the Argentine province where the grain was cultivated.10 Determines the provincial jurisdiction for Gross Receipts Tax (Ingresos Brutos). |
+| cpProcedencia | String | 8 chars | Mandatory | The Postal Code (Código Postal) of the exact rural locality where the field is situated.10 Used for hyper-local yield estimations. |
+| codGrado | Integer | 2 digits | Optional | Code representing the standardized quality grade delivered. Used as a baseline for determining quality deductions.11 |
+

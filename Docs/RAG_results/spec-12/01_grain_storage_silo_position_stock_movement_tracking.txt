@@ -1,0 +1,95 @@
+=== Qdrant Search Results ===
+Query: grain storage silo position stock movement tracking
+Results: 5
+
+--- Result 1 (score: 0.5938, ranked: 1.3000) ---
+Source: 9.1 AI-ML Applications for Grain Storage Operations.md
+Page: 0
+Section: **Optimal Storage Management: Silo Assignment and Aeration Routing**
+Context: **Strategic Deployment of Artificial Intelligence and Machine Learning in Cloud-Native Grain Storage ERP Systems** > **Optimal Storage Management: Silo Assignment and Aeration Routing**
+Text:
+The logistical orchestration of incoming grain—determining which truck unloads into which specific silo—is a critical operational bottleneck during the Argentine harvest season. Decisions made at the weighbridge and unloading pit dictate the facility's ability to maintain grade segregation, optimize blending margins, and ensure end-to-end traceability.19
+
+--- Result 2 (score: 0.5858, ranked: 0.8819) ---
+Source: 2.1 Day-to-Day Operations of an Acopiador.md
+Page: 0
+Section: Resumen de Entidades de Datos Clave para el ERP
+Context: Flujo Operativo Completo de un Acopiador de Granos en la Pampa Húmeda Argentina — Guía para Diseño de ERP > Resumen de Entidades de Datos Clave para el ERP
+Text:
+| Entidad | Descripción |
+|---|---|
+| **Productor/Depositante** | CUIT, razón social, datos SISA, cuenta corriente de granos |
+| **Camión/Transporte** | Patentes, transportista, chofer |
+| **Carta de Porte Electrónica** | Número, CTG, origen, destino, datos de partes, estado (emitida, confirmada, cerrada) |
+| **Muestra / Análisis de Calidad** | Parámetros medidos, grado, fecha, perito, contramuestra |
+| **Ticket de Balanza** | Peso bruto, tara, peso neto, fecha/hora, balanza |
+| **Romaneo / Boleta de Recepción** | Resumen de recepción vinculando CPE, análisis, pesadas, deducciones |
+| **Certificación Primaria** | Depósito/Retiro/Transferencia electrónica (ARCA) |
+| **Silo / Celda** | Identificación, grano actual, capacidad, stock, temperatura, estado |
+| **Monitoreo de Silo** | Temperatura, CO₂, insectos, humedad, aireación, fumigación |
+| **Cuenta Corriente de Granos** | Por productor × grano × campaña: entradas, mermas, salidas, saldo |
+| **Liquidación Primaria (LPG)** | Parcial/Final, tipo 01 o 02, precio, factor, deducciones, neto |
+| **Liquidación Secundaria (LSG)** | Venta a comprador final, precio, comisiones |
+| **Contrato de Compraventa** | Comprador, grano, tonelaje, precio (hecho o a fijar), lugar, plazo |
+| **Registro Sistémico ARCA** | Movimientos y existencias declarados periódicamente |
+
+***
+
+--- Result 3 (score: 0.5845, ranked: 0.6823) ---
+Source: 8.1 Grain Types and Quality Parameter Reference Data.md
+Page: 0
+Section: AFIP/ARCA species codes for relevant grains
+Context: Reference data catalog for Argentine grain trade (quality parameters and ARCA species codes) > AFIP/ARCA species codes for relevant grains
+Text:
+These are the "ncespecie" codes used in CTG and F.1116 web services.[^4]
+
+--- Result 4 (score: 0.5757, ranked: 0.4821) ---
+Source: 2.3 Producer Current Accounts (Cuentas Corrientes de Productores).md
+Page: 0
+Section: Transaction Type Summary
+Context: Producer Current Accounts at Argentine Grain Storage Operators: Complete ERP Design Reference > ERP Design Considerations > Transaction Type Summary
+Text:
+| Transaction | Kilos Account Effect | Pesos Account Effect | Document |
+|-------------|---------------------|---------------------|----------|
+| Grain reception | + Net kilos | — | CEG |
+| Sale (total or partial) | − Kilos sold | + Net proceeds | LPG |
+| Retiro/delivery order | − Kilos withdrawn | — (or + if LPG from external buyer) | Cert. Retiro |
+| Transfer to another operator | − Kilos transferred | — | Cert. Transferencia |
+| Cash advance | — | + Advance amount | Factura anticipo |
+| Paritaria, secado, zarandeo, fumigación | (may deduct merma kilos) | − Service charge | CEG or Factura Servicios |
+| Almacenaje | — | − Storage charge | LPG or Factura Servicios |
+| Comisión | — | − Commission amount | LPG |
+| Tax retentions | — | − Retention amounts | LPG + F.2005 |
+| Canje — grain delivery | − Kilos delivered | + LPG amount | LPG |
+| Canje — input receipt | — | − Input invoice amount | Factura compra |
+| Canje — compensation | — | Net offset | Orden de pago/compensación |
+| Price fixing (fijación) | − Kilos fixed | + Fixed price × kilos | LPG |
+
+***
+
+--- Result 5 (score: 0.5687, ranked: 0.1000) ---
+Source: 4.2 AGIS-AmericaGIS Deep Competitive Analysis.md
+Page: 0
+Section: References
+Context: Competitive Analysis: AGIS (AmericaGIS) – Grain Storage Management Software > References
+Text:
+.ar/sistema-produccion-manufactura-fabricacion) - Con nuestro ERP para producción obtendrás mayor rentabilidad y tendrás control absoluto de la admini...
+
+26. [AgroAcopio - Alejandro Eguinoa Arteaga & Asociados](https://aeayasoc.com/site/agroacopio/)
+
+27. [Comercialización](https://www.agrosistemas.com.ar/productos/comercializacion/)
+
+28. [Adhoc S.A. | The Odoo Community Association | OCA](https://odoo-community.org/partners/adhoc-s-a-1600)
+
+29. [Preguntas frecuentes - America GIS](https://americagis.com.ar/rastreo-vehicular-satelital/preguntas-frecuentes) - ¿Cómo ingreso al sistema? Para empezar, debe dirigirse a la página web de América Gis www.americagis...
+
+30. [Rastreo Vehicular AGIS - Aplicaciones en Google Play](https://play.google.com/store/apps/details?id=com.americaagis.platform&hl=es) - Con Rastreo Vehicular AGIS el usuario podrá conocer la ubicación de su vehículo
+
+31. [Startup del agro y pionera tecnológica digitalizarán las operaciones ...](https://www.agroclave.com.ar/empresas/startup-del-agro-y-pionera-tecnologica-digitalizaran-las-operaciones-mas-20-millones-toneladas-granos-n10030440.html) - A través de una alianza estratégica, una empresa pionera en sistemas de gestión de granos y una jove...
+
+32. [Digitalizarán las operaciones de más de 20 millones de toneladas ...](https://www.lanacion.com.ar/economia/campo/digitalizaran-las-operaciones-de-mas-de-20-millones-de-toneladas-de-granos-nid17102022/) - Será por una alianza que concretaron Silohub y Algoritmo
+
+33. [Agrosistemas](https://agrosistemas.com.ar) - Elegimos Agrosistemas por su sistema intuitivo que facilita la gestión de insumos, cereales y cuenta...
+
+34. [Algoritmo S.A. | LinkedIn](https://ar.linkedin.com/company/algoritmo-sa) - Algoritmo S.A. | 1239 seguidores en LinkedIn. Proveer soluciones de software de calidad, creativas y...
+

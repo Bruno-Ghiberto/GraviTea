@@ -1,0 +1,81 @@
+=== Qdrant Search Results ===
+Query: romaneo workflow steps truck arrival weighbridge
+Results: 5
+
+--- Result 1 (score: 0.6274, ranked: 1.3000) ---
+Source: 8.3 Romaneo (Weighing Ticket) and Reception Document Structure.md
+Page: 0
+Section: **2\. Volumetric and Scale Data**
+Context: **The Argentine Grain Weighing Ticket (Romaneo): Structural, Legal, and Operational Framework within the Acopio System** > **Comprehensive Structural Architecture of the Romaneo** > **2\. Volumetric and Scale Data**
+Text:
+The metrological core of the romaneo captures the raw physical mass of the delivery. The strict procedures surrounding this data dictate a sequential double-weighing mechanism on calibrated, industrial weighbridges to eliminate manual estimation or fraud.
+
+The process begins when the fully loaded truck drives onto the primary scale. The system captures the **Peso Bruto (Gross Weight)**, which represents the combined absolute mass of the vehicle, its fuel, the driver, and the agricultural cargo.3 Following this initial measurement, the truck proceeds into the facility's logistical circuit, stops at the pneumatic sampling station, and eventually positions itself over the *tolva de recepción* (receiving hopper) to discharge the grain via gravity or hydraulic lifts.19
+
+Once entirely empty, the truck loops back to the scale infrastructure—often a dedicated secondary scale to prevent logistical bottlenecks—to capture the **Tara (Tare Weight)**.19 The ERP software instantly calculates the mathematical difference between the Peso Bruto and the Tara, yielding the raw **Peso Neto (Net Weight)**.3 This Peso Neto represents the absolute metrological mass of the physical material delivered, before any qualitative analysis reveals how much of that mass is actually viable commercial grain versus water, dirt, or foreign matter.
+
+--- Result 2 (score: 0.6265, ranked: 1.2846) ---
+Source: 8.3 Romaneo (Weighing Ticket) and Reception Document Structure.md
+Page: 0
+Section: **The Relational Mechanics: Romaneo, CTG, and the Carta de Porte Electrónica**
+Context: **The Argentine Grain Weighing Ticket (Romaneo): Structural, Legal, and Operational Framework within the Acopio System** > **The Relational Mechanics: Romaneo, CTG, and the Carta de Porte Electrónica**
+Text:
+possible under current ARCA regulations to issue a single romaneo covering multiple trucks, nor can a single truck generate multiple primary romaneos for a single unified cargo hold.8 The workflow progresses through highly specific systemic gateways:
+
+First, the truck arrives at the *acopio* facility. The security or scale operator accesses the ARCA web service—or utilizes the SMS validation system via the shortcode 2347—to verify that the CPE is in an "Activa" (Active) state and has not exceeded its strict five-day validity period.8 Upon verification, the facility executes a systemic *Confirmación de Arribo* (Confirmation of Arrival), which alerts the federal tax authority that the truck has reached its declared destination.8
+
+Following the physical weighing, sampling, and unloading processes—which culminate in the generation of the internal romaneo—the destination *acopio* must execute the final and most critical regulatory step: the *Confirmación Definitiva* (Definitive Confirmation).8 This systemic action is the exact intersection where the operational reality of the romaneo overrides the logistical estimation of the CPE. ARCA protocols explicitly dictate that during the *Confirmación Definitiva*, the destination facility is required to modify the "kilograms received" field.9 The operator inputs the exact *Peso Neto* (Net Weight) derived from the freshly generated romaneo, thereby overwriting the producer's initial estimated field weight. This action legally closes the CPE, extinguishes the CTG, and officially transfers the physical responsibility and custody of the exact grain volume to the *acopiador*.7 Once this confirmation is finalized, the CPE cannot be annulled, ensuring absolute integrity in the state's tracking of agricultural commodities.7
+
+--- Result 3 (score: 0.5911, ranked: 0.5434) ---
+Source: 8.2 CTG Document Structure and State Machine.md
+Page: 0
+Section: CPE/CTG lifecycle in practice
+Context: CPE/CTG lifecycle in practice
+Text:
+For grains CPE Automotor, the operational phases are:[^3][^7][^1]
+
+1. **Creation/Authorization (Emisión)** – Origin operator calls `autorizarCPEAutomotor`; ARCA returns CTG, CPE number and initial state (usually Activa).
+2. **Transit** – Truck travels with printed/QR CPE; optional contingencies or desvío/regreso can be reported via WS methods.[^8][^1]
+3. **Arrival** – Destination (or its system) calls `confirmarArriboCPE`, which only changes state, not business data.[^9][^1]
+4. **Unloading / Descarga** – Destination calls `descargadoDestinoCPE` and then `confirmacionDefinitivaCPEAutomotor` sending final gross/tare; ARCA computes net and closes the CTG.[^10][^9]
+5. **Closure / Exceptions** – Anulación, rechazo, regreso a origen, contingencias and vencimiento follow side paths in the state machine (see below).[^11][^12][^1]
+
+These phases map well to separate write‑events in your ERP: **Create → Arrive → Unload → Close**, with intermediate events for **Cancel/Reject/Divert/Contingency**.
+
+***
+
+--- Result 4 (score: 0.5781, ranked: 0.3096) ---
+Source: 8.3 Romaneo (Weighing Ticket) and Reception Document Structure.md
+Page: 0
+Section: **5\. Final Operational and Authorization Data**
+Context: **The Argentine Grain Weighing Ticket (Romaneo): Structural, Legal, and Operational Framework within the Acopio System** > **Comprehensive Structural Architecture of the Romaneo** > **5\. Final Operational and Authorization Data**
+Text:
+The final section of the romaneo document solidifies the internal logistics and provides legal authorization for the transaction.
+
+* **Silo/Celda Assignment:** An internal logistical routing code indicating the exact physical destination of the unloaded grain. It specifies whether the grain was deposited directly into a vertical concrete silo, a horizontal storage cell (celda), or if its high moisture content required it to be routed immediately to the wet holding bins prior to entering the dryer (secadora).19 This is essential for internal traceability and quality segregation.  
+* **Signatures and Digital Confirmations:** Historically, the printed romaneo required the wet physical signatures of the facility's certified scale operator (*recibidor de granos*) and the truck driver, who acts as the legally authorized proxy for the producer and the transport company.5 In the contemporary digitized landscape, while printed tickets are still signed and archived for immediate physical proof, the definitive authorizations are executed via secure digital confirmations, cryptographic timestamps, and user-permission logging within the *acopio's* centralized ERP environment.
+
+--- Result 5 (score: 0.5721, ranked: 0.3000) ---
+Source: 3.1 Weighbridge Integration Standards.md
+Page: 0
+Section: Standard Two-Weighing Procedure
+Context: Weighbridge Systems at Argentine Acopios: Integration Guide for ERP Software > The Weighing Process at an Acopio > Standard Two-Weighing Procedure
+Text:
+## The Weighing Process at an Acopio
+
+
+
+The grain reception process at a typical acopio follows a well-established sequence:[^43][^44]
+
+1. **Arrival and documentation:** The truck arrives with a Carta de Porte Electrónica (electronic waybill, CPE), which is mandatory for grain transport and must include gross weight, tare, and net kilos.[^45][^46]
+
+2. **Gross weight (Peso Bruto):** The loaded truck drives onto the weighbridge. The operator records the gross weight (truck + grain).[^43]
+
+3. **Sampling (Calado):** Before or after the gross weighing, a probe (calador) extracts grain samples to assess quality parameters (moisture, foreign matter, damaged grain). These determine any commercial discounts (mermas/rebajas).[^43]
+
+4. **Unloading (Descarga):** The truck proceeds to an unloading platform (plataforma volcable) to dump its grain load.
+
+5. **Tare weight (Peso Tara):** The empty truck is weighed again on the weighbridge. The Carta de Porte is finalized at this stage.[^43]
+
+6. **Net weight calculation:** Net = Gross − Tare. This is the billable grain weight before quality discounts.
+

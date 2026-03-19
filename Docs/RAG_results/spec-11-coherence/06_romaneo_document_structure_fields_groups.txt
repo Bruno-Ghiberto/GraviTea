@@ -1,0 +1,68 @@
+=== Qdrant Search Results ===
+Query: romaneo document structure fields groups
+Results: 5
+
+--- Result 1 (score: 0.5303, ranked: 1.0000) ---
+Source: 8.2 CTG Document Structure and State Machine.md
+Page: 0
+Section: Miscellaneous
+Context: Creation‑phase fields (origin operator) > Miscellaneous
+Text:
+| Field | WS path | Type | Mand. | Notes |
+| :-- | :-- | :-- | :-- | :-- |
+| Observations | `observaciones` | string (up to ≈2000 chars) | Optional | Free text; one per CPE.[^1][^4] |
+
+All of the above are **captured at creation** and sent in a **single call** to `autorizarCPEAutomotor`; ARCA returns CTG, CPE number and sets the initial state.[^4][^10][^1]
+
+***
+
+--- Result 2 (score: 0.5254, ranked: 0.9196) ---
+Source: 8.4 Form 1116 B-C Field Structure for Data Model Design.md
+Page: 0
+Section: **1\. Header Information (Secondary)**
+Context: **Architectural and Data Dictionary Analysis of ARCA Forms 1116-C and 1116-B via the WSLPG Web Service** > **Exhaustive Structure of Form 1116-B: Liquidación Secundaria de Granos** > **1\. Header Information (Secondary)**
+Text:
+The header mirrors the primary liquidation, utilizing the same puntoEmision and numeroOrden logic. However, the tipo\_reg field dictates to the schema parser that this payload represents an LSG, invoking a completely different set of validation rules.2
+
+--- Result 3 (score: 0.5093, ranked: 0.9071) ---
+Source: 8.2 CTG Document Structure and State Machine.md
+Page: 0
+Section: Creation‑phase fields (origin operator)
+Context: Creation‑phase fields (origin operator)
+Text:
+The main creation payload for grains automotor is `autorizarCPEAutomotor.solicitud`, which groups fields into `cabecera`, `origen`, `intervinientes`, `datosCarga`, `destino`, `destinatario`, `transporte` and `observaciones`.[^4][^13]
+
+--- Result 4 (score: 0.4843, ranked: 0.3498) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: Parameter Lookup Methods
+Context: AFIP/ARCA WSLPG Technical Documentation for Python/Django ERP Integration > 2. Complete SOAP Methods Catalog > Parameter Lookup Methods
+Text:
+| SOAP Method | Returns |
+|---|---|
+| `campaniasConsultar` | Available campaigns (e.g., `1314`, `2324`) |
+| `tipoGranoConsultar` | Grain types (codes + descriptions — soja, trigo, maíz, girasol, etc.) |
+| `codigoGradoReferenciaConsultar` | Reference grade codes per grain |
+| `codigoGradoEntregadoXTipoGranoConsultar` | Delivered grade codes and values per grain type |
+| `tipoCertificadoDepositoConsultar` | Deposit certificate types (1: F1116/RT, 5: F1116/A, 332: Electronic) |
+| `tipoDeduccionConsultar` | Deduction types (AL: Almacenaje, CO: Comisión, OD: Otras, etc.) |
+| `tipoRetencionConsultar` | Retention types (RI: IVA, RG: Ganancias, etc.) |
+| `puertoConsultar` | Enabled ports |
+| `tipoActividadConsultar` | Activity types universe |
+| `tipoActividadRepresentadoConsultar` | Activities the emisor/representado is registered for in RUOCA |
+| `provinciasConsultar` | Provinces |
+| `localidadXProvinciaConsultar` | Localities by province |
+| `tipoOperacionXActividadConsultar` | Operation types per activity (01: Compra/Venta, 02: Consignación) |
+
+All parameter lookup methods return an array of `LpgCodigoDescripcionType` with `codigo` and `descripcion` fields.[^7][^2]
+
+***
+
+--- Result 5 (score: 0.4689, ranked: 0.0000) ---
+Source: 8.4 Form 1116 B-C Field Structure for Data Model Design.md
+Page: 0
+Section: **Obras citadas**
+Context: **Architectural and Data Dictionary Analysis of ARCA Forms 1116-C and 1116-B via the WSLPG Web Service** > **Conclusion** > **Obras citadas**
+Text:
+n6L1vKlz/MW6vuiVFoctgOynEedYNti7d2d3aMjMXAH2/95YU7fvp301B7guIwwLGIjQPogHjRL3/VogDZaauXf3kdcYz4XWG3I6ZT9ho/Tz9fWrcA0fU5zbh6/U+xI3T/aw12Jjz3GA7r/5GnmftRsC5rLV589vXJ7E+sQ9jWQkb6i+GBJvwTE4fA2XJREMMYy2WA+PC55ZssGHsvMxKv8RnYrwP0vg8ymaZ6666subkcYA8n5b0zaNd+TC+flxlEfRiocZjHdAhdAkwDr0NH2Sj6WNAp37RhK/ZqDELbGTcGBWrgHwkigL4TokJyycWDAnf2bNziAYbkwoK9TRrPSgQvQm/D3EgH58sUfKotF1kg+0eVhZ4Fm2gPHEBdWI+GFE5n3w9C3jnzTtkDkcDcTcaJ+9osDF5ZINtXB1I7x4XJy5cfW2U6Xq/ewGIPyHcc9mk+LhydzHEw9Z1JArIWJz6vDrcj2HSsUGfwRaNr+dbmyYbAre1Up4b1F9niMEGC63Ynm3l3s71F8MN3LsW6TLYovGSDbaoO5SZZ73MP6xyxhubM8ffT/9GbyULPJ4Lh3TZYMN7yLu7Ah6LobhuRqLe4xmKUBb+KKirn7zO4HWG3I4Z5qKIp3+GLf7QnnvuSYFosLHp7TLYuvLnG0uM9wjjxtPy29cn8X0eZ67ZFORAn73IShq8Q7y/j2k9bHidYjnQK/9uNBtsZ1jxRlKerrKPgzQ+j7LZ8OtcV8jjgLTxuB3i2hfpyof2do9/JI79XAcfy2ySvb1ZXzFogfRZpzhGRk54eJDjncvlFyuYt9lwg80VC4ONXaLDwsXuaydrDSiIipiPprh3kJXJANgd4E1wfCFxmLw4wokwcDyPjSEO/t6cD8ePDkd9x4frWUGe9+2QOetsuMHGIuL4O/rqcKC1i7zDB9mAB2ijdbdRJk8gXLuhQTzqi8vGxZfS9kMMNnQ3lxWeY0Wej8lgl3TNItb1jkifwYaMv/KD91t7nISXxnWOSTY+ixFwCyuT8T423mDbLQutyA8IcfQFXaNPmNQdjrsoh+ftk/3m+gssJByhQNYdnvMjHcqM8UuZMXKiwR7rFo2WP4Q4ZINmllCG7F1E7zn6RO9ZsLyfgH7Cm+L9BN5PXmfwOkNX/0fw6OaFHhjreGScY62cUJweZJ8Jcby96AVgjB1e4xzpXqPGgfKj3xjdDkf80ZPNePN2Z7zFPon1ifFo/NKG5OtHw7zvBe3tRQwx2M6uv7wrHt8COohRBl5W+i9eA8/E+WgSpPF5lP71Z6irrznUlTUnj4NfWmu4c/+1VubROL/HtaYrH46tve9eZ6Xv4tiPGwoMLzew/PgVGNvu2eZkwnXq0lZ06rR6DdFRghH8wHAtVjC+WycwsBnwfk1Hd8UfYa2H7RwrnrMFa7mblWMXlJCPX9db+2xcgJkE/tuEpwcZA+PTVrwVEd81EuLOGeJkyGJ8gZWF3D+87crnC1a+AYjejlnyXisLONAe1Iuyn27lOxk3NCk7A434qVbajfiZPGjFYDvMSt/g8o7kOmAQextF/mjFq+beja42cugff4cHBj/GMjB5uzx6QKjToVa+w+Oe7yhpe75LWUrbTzLYsu5m2ABkmCRJH9vywir7apBF2NnH9ohH2XhKWTDZ2DwgyCHqHG1+ohVPHkYEnoUdrUzktO+RNZ3Tlx/c2YpHBkONxSUusIwbFp64qHofOJT5iCa8vP6SBwuE5+cfe1Nm+tvLTD6UGZ5p5X+eub7+vMqvZ6Uv6N/8BxL+BxzzgDJwxBRB72kL13v6ib7M44h+8vaJdaYtvc5sQskj91OGMXWUlQ0Y6RkPcIiV75h88wS0FWmPs6KrpH9Uvcf8Sp8sVPn5VU6fn2KtwQ77WRlLzBOAZ4pnmIPA+4Q03ie+0aEP0SHi6CfsZaVNmIcx8sjzYCub5QfXNH0MMdi+Y2VtwPPjYIydZaOeIDY1cd6ifh+wcozKnIlhg5eJsneN9QhpfB6
+

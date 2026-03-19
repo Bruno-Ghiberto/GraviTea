@@ -1,0 +1,66 @@
+=== Qdrant Search Results ===
+Query: romaneo peso bruto tara neto conforme
+Results: 5
+
+--- Result 1 (score: 0.6620, ranked: 1.3000) ---
+Source: 8.3 Romaneo (Weighing Ticket) and Reception Document Structure.md
+Page: 0
+Section: **2\. Volumetric and Scale Data**
+Context: **The Argentine Grain Weighing Ticket (Romaneo): Structural, Legal, and Operational Framework within the Acopio System** > **Comprehensive Structural Architecture of the Romaneo** > **2\. Volumetric and Scale Data**
+Text:
+The metrological core of the romaneo captures the raw physical mass of the delivery. The strict procedures surrounding this data dictate a sequential double-weighing mechanism on calibrated, industrial weighbridges to eliminate manual estimation or fraud.
+
+The process begins when the fully loaded truck drives onto the primary scale. The system captures the **Peso Bruto (Gross Weight)**, which represents the combined absolute mass of the vehicle, its fuel, the driver, and the agricultural cargo.3 Following this initial measurement, the truck proceeds into the facility's logistical circuit, stops at the pneumatic sampling station, and eventually positions itself over the *tolva de recepción* (receiving hopper) to discharge the grain via gravity or hydraulic lifts.19
+
+Once entirely empty, the truck loops back to the scale infrastructure—often a dedicated secondary scale to prevent logistical bottlenecks—to capture the **Tara (Tare Weight)**.19 The ERP software instantly calculates the mathematical difference between the Peso Bruto and the Tara, yielding the raw **Peso Neto (Net Weight)**.3 This Peso Neto represents the absolute metrological mass of the physical material delivered, before any qualitative analysis reveals how much of that mass is actually viable commercial grain versus water, dirt, or foreign matter.
+
+--- Result 2 (score: 0.6129, ranked: 0.7417) ---
+Source: 8.3 Romaneo (Weighing Ticket) and Reception Document Structure.md
+Page: 0
+Section: **4\. Deductions (Mermas) and Final Reconciled Weight**
+Context: **The Argentine Grain Weighing Ticket (Romaneo): Structural, Legal, and Operational Framework within the Acopio System** > **Comprehensive Structural Architecture of the Romaneo** > **4\. Deductions (Mermas) and Final Reconciled Weight**
+Text:
+ntage-based *mermas* are mathematically calculated and converted into specific kilograms, they are aggregated and subtracted from the raw Peso Neto. The resulting mathematical figure is the **Peso Neto Conforme** (Final Adjusted Commercial Weight).22
+
+The *Peso Neto Conforme* represents the ultimate commercial climax of the romaneo. This specific figure becomes the definitive, legally recognized volume of the agricultural asset. It is this exact quantity of kilograms that is officially credited to the producer's *Cuenta Corriente Granaria* (grain current account) held with the *acopio*, and it is the sole metric utilized subsequently to calculate the total financial payout in the electronic Liquidación Primaria de Granos.14
+
+--- Result 3 (score: 0.6042, ranked: 0.6437) ---
+Source: 8.3 Romaneo (Weighing Ticket) and Reception Document Structure.md
+Page: 0
+Section: **4\. Deductions (Mermas) and Final Reconciled Weight**
+Context: **The Argentine Grain Weighing Ticket (Romaneo): Structural, Legal, and Operational Framework within the Acopio System** > **Comprehensive Structural Architecture of the Romaneo** > **4\. Deductions (Mermas) and Final Reconciled Weight**
+Text:
+The most critical functional and mathematical purpose of the romaneo is the algorithmic conversion of the raw *Peso Neto* into the **Peso Neto Conforme** (Final Adjusted Weight). The raw net weight is a physical truth, but it is not a commercial truth. To achieve commercial equity, the raw weight must be subjected to a series of physical and commercial deductions known within the Argentine market as *mermas*. The application of these mermas is hardcoded into the ERP systems based on the laboratory results and BCR regulations.
+
+**Merma de Secado (Drying Shrinkage):** If the *Humedad* percentage determined by the laboratory exceeds the base commercial standard for that specific grain, the facility must artificially dry the grain to prevent spoilage. This process physically removes water weight from the grain mass. To account for this physical loss, a mathematically precise deduction is subtracted from the producer's net weight. The standard formula universally applied across the industry, legally recognized by arbitration boards, and calculated directly on the romaneo is:
+
+![][image1]  
+In this equation, ![][image2] represents the initial moisture percentage measured by the laboratory upon arrival, and ![][image3] represents the final base moisture standard dictated by the commercial norms for that specific grain type (e.g., 14.5% for corn).20 Beyond this physical weight deduction, the producer is also charged a monetary "Tarifa de Secada" (Drying Tariff) to cover the significant natural gas and electrical costs incurred by the *acopio* to operate the high-capacity grain dryers.22
+
+--- Result 4 (score: 0.5883, ranked: 0.4625) ---
+Source: 2.1 Day-to-Day Operations of an Acopiador.md
+Page: 0
+Section: Paso 6 — Segunda pesada (Tara)
+Context: Flujo Operativo Completo de un Acopiador de Granos en la Pampa Húmeda Argentina — Guía para Diseño de ERP > ESCENARIO 1: Recepción de Granos (Recepción de Mercadería) > Paso 6 — Segunda pesada (Tara)
+Text:
+1. Después de la descarga del grano, el camión vacío se pesa nuevamente en la balanza.
+2. Se registra la **tara** (peso del camión vacío).
+3. Se calcula el **peso neto bruto**: Peso bruto de entrada − Tara.
+
+**Datos a capturar en el ERP:**
+- Tara (kg)
+- Fecha/hora de pesada de salida
+- Peso neto bruto calculado automáticamente
+
+***
+
+--- Result 5 (score: 0.5740, ranked: 0.1000) ---
+Source: 8.3 Romaneo (Weighing Ticket) and Reception Document Structure.md
+Page: 0
+Section: **1\. Header, Identification, and Traceability Data**
+Context: **The Argentine Grain Weighing Ticket (Romaneo): Structural, Legal, and Operational Framework within the Acopio System** > **Comprehensive Structural Architecture of the Romaneo** > **1\. Header, Identification, and Traceability Data**
+Text:
+tracking number of the Carta de Porte Electrónica and its embedded Código de Trazabilidad de Granos.8 The inclusion of these numbers on the printed or digital romaneo is an absolute legal mandate to prove the grain arrived under lawful authorization. |
+| **Grain Type and Campaign Year** | The specific agricultural commodity being delivered, which must be identified by standardized national AFIP/ARCA codes to ensure database interoperability (e.g., Code 19 for Corn, Code 23 for Soybeans, Code 15 for Bread Wheat, Code 22 for Sorghum).3 This is accompanied by the agricultural campaign year (e.g., 2024/2025) to properly segregate historical stocks from fresh harvests. |
+| **Truck and Transport Data** | Comprehensive identification of the logistical vector. This includes the distinct license plates (patentes) of the truck cab (chasis) and the trailing unit (acoplado), the full name and national identity document (DNI) of the driver, and the CUIT of the transport company (Transportista).8 This data is cross-referenced against national transport registries to ensure compliance with maximum weight limits per axle.18 |
+

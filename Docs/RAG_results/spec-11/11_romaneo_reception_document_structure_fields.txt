@@ -1,0 +1,67 @@
+=== Qdrant Search Results ===
+Query: romaneo reception document structure fields
+Results: 5
+
+--- Result 1 (score: 0.6051, ranked: 1.0000) ---
+Source: 8.4 Form 1116 B-C Field Structure for Data Model Design.md
+Page: 0
+Section: **1\. Header Information (Secondary)**
+Context: **Architectural and Data Dictionary Analysis of ARCA Forms 1116-C and 1116-B via the WSLPG Web Service** > **Exhaustive Structure of Form 1116-B: Liquidación Secundaria de Granos** > **1\. Header Information (Secondary)**
+Text:
+The header mirrors the primary liquidation, utilizing the same puntoEmision and numeroOrden logic. However, the tipo\_reg field dictates to the schema parser that this payload represents an LSG, invoking a completely different set of validation rules.2
+
+--- Result 2 (score: 0.5859, ranked: 0.8057) ---
+Source: 8.2 CTG Document Structure and State Machine.md
+Page: 0
+Section: Creation‑phase fields (origin operator)
+Context: Creation‑phase fields (origin operator)
+Text:
+The main creation payload for grains automotor is `autorizarCPEAutomotor.solicitud`, which groups fields into `cabecera`, `origen`, `intervinientes`, `datosCarga`, `destino`, `destinatario`, `transporte` and `observaciones`.[^4][^13]
+
+--- Result 3 (score: 0.5921, ranked: 0.7671) ---
+Source: 8.2 CTG Document Structure and State Machine.md
+Page: 0
+Section: Miscellaneous
+Context: Creation‑phase fields (origin operator) > Miscellaneous
+Text:
+| Field | WS path | Type | Mand. | Notes |
+| :-- | :-- | :-- | :-- | :-- |
+| Observations | `observaciones` | string (up to ≈2000 chars) | Optional | Free text; one per CPE.[^1][^4] |
+
+All of the above are **captured at creation** and sent in a **single call** to `autorizarCPEAutomotor`; ARCA returns CTG, CPE number and sets the initial state.[^4][^10][^1]
+
+***
+
+--- Result 4 (score: 0.5496, ranked: 0.2065) ---
+Source: 8.3 Romaneo (Weighing Ticket) and Reception Document Structure.md
+Page: 0
+Section: **5\. Final Operational and Authorization Data**
+Context: **The Argentine Grain Weighing Ticket (Romaneo): Structural, Legal, and Operational Framework within the Acopio System** > **Comprehensive Structural Architecture of the Romaneo** > **5\. Final Operational and Authorization Data**
+Text:
+The final section of the romaneo document solidifies the internal logistics and provides legal authorization for the transaction.
+
+* **Silo/Celda Assignment:** An internal logistical routing code indicating the exact physical destination of the unloaded grain. It specifies whether the grain was deposited directly into a vertical concrete silo, a horizontal storage cell (celda), or if its high moisture content required it to be routed immediately to the wet holding bins prior to entering the dryer (secadora).19 This is essential for internal traceability and quality segregation.  
+* **Signatures and Digital Confirmations:** Historically, the printed romaneo required the wet physical signatures of the facility's certified scale operator (*recibidor de granos*) and the truck driver, who acts as the legally authorized proxy for the producer and the transport company.5 In the contemporary digitized landscape, while printed tickets are still signed and archived for immediate physical proof, the definitive authorizations are executed via secure digital confirmations, cryptographic timestamps, and user-permission logging within the *acopio's* centralized ERP environment.
+
+--- Result 5 (score: 0.5492, ranked: 0.0500) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: Certificados (Certificates) Structure
+Context: AFIP/ARCA WSLPG Technical Documentation for Python/Django ERP Integration > 3. Data Structures for `liquidacionAutorizar` > Certificados (Certificates) Structure
+Text:
+```xml
+ertificados>
+  ertificado>
+    <tipoCertificadoDeposito>5</tipoCertificadoDeposito>   <!-- 1:F1116/RT, 5:F1116/A, 332:Electronic -->
+    <nroCertificadoDeposito>101200604</nroCertificadoDeposito>
+    <pesoNeto>1000</pesoNeto>                               <!-- in kg -->
+    dLocalidadProcedencia>3</codLocalidadProcedencia>
+    dProvProcedencia>1</codProvProcedencia>
+    ampania>1213</campania>
+    <fechaCierre>2013-01-13</fechaCierre>
+  </certificado>
+</certificados>
+```
+
+Either `certificados` or `pesoNetoSinCertificado` must be provided. Multiple certificates are allowed since v1.5.[^3]
+
