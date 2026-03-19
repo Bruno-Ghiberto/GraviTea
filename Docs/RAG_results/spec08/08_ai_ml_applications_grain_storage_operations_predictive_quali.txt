@@ -1,0 +1,77 @@
+=== Qdrant Search Results ===
+Query: AI ML applications grain storage operations predictive quality merma
+Results: 5
+
+--- Result 1 (score: 0.7331, ranked: 1.3000) ---
+Source: 9.1 AI-ML Applications for Grain Storage Operations.md
+Page: 0
+Section: **Obras citadas**
+Context: **Strategic Deployment of Artificial Intelligence and Machine Learning in Cloud-Native Grain Storage ERP Systems** > **Strategic Implications and Operational Outlook** > **Obras citadas**
+Text:
+ique-method-to-prediction-and-manage-segregation-in-hoppers-silos-and-stockpiles/](https://bulkinside.com/bulk-solids-handling/storage-transportation/novel-and-unique-method-to-prediction-and-manage-segregation-in-hoppers-silos-and-stockpiles/)  
+28. Grain Quality – It's Time To Check Your Stored Grain | Purdue University Pest\&Crop newsletter, fecha de acceso: marzo 13, 2026, [https://extension.entm.purdue.edu/newsletters/pestandcrop/article/grain-quality-its-time-to-check-your-stored-grain/](https://extension.entm.purdue.edu/newsletters/pestandcrop/article/grain-quality-its-time-to-check-your-stored-grain/)  
+29. Modeling of Temperature of Grain During Storage with Aeration \- ASABE Technical Library, fecha de acceso: marzo 13, 2026, [https://elibrary.asabe.org/abstract.asp??JID=3\&AID=28367\&CID=t1993\&v=36\&i=2\&T=1](https://elibrary.asabe.org/abstract.asp??JID=3&AID=28367&CID=t1993&v=36&i=2&T=1)  
+30. Mechanism and Data-Driven Grain Condition Information Perception Method for Comprehensive Grain Storage Monitoring \- MDPI, fecha de acceso: marzo 13, 2026, [https://www.mdpi.com/2304-8158/14/19/3426](https://www.mdpi.com/2304-8158/14/19/3426)  
+31. Research on Storage Grain Temperature Prediction Method Based on FTA-CNN-SE-LSTM with Dual-Domain Data Augmentation and Deep Learning \- PMC, fecha de acceso: marzo 13, 2026, [https://pmc.ncbi.nlm.nih.gov/articles/PMC12111741/](https://pmc.ncbi.nlm.nih.gov/articles/PMC12111741/)  
+32. Agricultural commodity futures prices prediction based on a new hybrid forecasting model combining quadratic decomposition technology and LSTM model \- Frontiers, fecha de acceso: marzo 13, 2026, [https://www.frontiersin.org/journals/sustainable-food-systems/articles/10.3389/fsufs.2024.1334098/full](https://www.frontiersin.org/journals/sustainable-food-systems/articles/10.3389/fsufs.2024.1334098/full)  
+33.
+
+--- Result 2 (score: 0.7304, ranked: 1.2291) ---
+Source: 9.1 AI-ML Applications for Grain Storage Operations.md
+Page: 0
+Section: **Obras citadas**
+Context: **Strategic Deployment of Artificial Intelligence and Machine Learning in Cloud-Native Grain Storage ERP Systems** > **Strategic Implications and Operational Outlook** > **Obras citadas**
+Text:
+https://www.youtube.com/watch?v=3q_tQPDsrK0)  
+13. A Monitoring Device and Grade Prediction System for Grain Mildew \- MDPI, fecha de acceso: marzo 13, 2026, [https://www.mdpi.com/1424-8220/24/20/6556](https://www.mdpi.com/1424-8220/24/20/6556)  
+14. AI-driven grain storage solutions: Exploring current technologies, applications, and future trends \- ResearchGate, fecha de acceso: marzo 13, 2026, [https://www.researchgate.net/publication/391351296\_AI-driven\_grain\_storage\_solutions\_Exploring\_current\_technologies\_applications\_and\_future\_trends](https://www.researchgate.net/publication/391351296_AI-driven_grain_storage_solutions_Exploring_current_technologies_applications_and_future_trends)  
+15. Estimating energy efficiency of the aeration process of stored grains through machine learning \- SciELO, fecha de acceso: marzo 13, 2026, [https://www.scielo.br/j/rbeaa/a/vtqQrPTvCZQHPBTNc4mhH4F/?lang=en](https://www.scielo.br/j/rbeaa/a/vtqQrPTvCZQHPBTNc4mhH4F/?lang=en)  
+16. Algorithms to predict moisture content of grain using relative humidity time-series \- Charles Delahunt, fecha de acceso: marzo 13, 2026, [https://charlesdelahunt.github.io/assets/gmaGhtc\_9july2020.pdf](https://charlesdelahunt.github.io/assets/gmaGhtc_9july2020.pdf)  
+17. Temperature-Dependent Fungal Diversity, Storage Quality, and Processing Quality of High-Moisture Wheat During Post-Harvest Storage \- PMC, fecha de acceso: marzo 13, 2026, [https://pmc.ncbi.nlm.nih.gov/articles/PMC12840849/](https://pmc.ncbi.nlm.nih.gov/articles/PMC12840849/)  
+18. A Model for Predicting and Grading the Quality of Grain Storage Processes Affected by Microorganisms under Different Environments \- PMC, fecha de acceso: marzo 13, 2026, [https://pmc.ncbi.nlm.nih.gov/articles/PMC10001665/](https://pmc.ncbi.nlm.nih.gov/articles/PMC10001665/)  
+19.
+
+--- Result 3 (score: 0.7111, ranked: 0.7142) ---
+Source: 9.1 AI-ML Applications for Grain Storage Operations.md
+Page: 0
+Section: **Obras citadas**
+Context: **Strategic Deployment of Artificial Intelligence and Machine Learning in Cloud-Native Grain Storage ERP Systems** > **Strategic Implications and Operational Outlook** > **Obras citadas**
+Text:
+ha de acceso: marzo 13, 2026, [https://investsk.ca/2025/05/13/ground-truth-agriculture-advancing-grain-grading-with-cutting-edge-agtech/](https://investsk.ca/2025/05/13/ground-truth-agriculture-advancing-grain-grading-with-cutting-edge-agtech/)  
+61. Cropin | SaaS-based AgTech | Smart Farming App | Agriculture Technology, fecha de acceso: marzo 13, 2026, [https://www.cropin.com/](https://www.cropin.com/)  
+62. Top 100 Agritech Companies in Canada (2026) \- ensun, fecha de acceso: marzo 13, 2026, [https://ensun.io/search/agritech/canada](https://ensun.io/search/agritech/canada)  
+63. hellodfan/GrainSpace: GrainSpace: A Large-scale Dataset ... \- GitHub, fecha de acceso: marzo 13, 2026, [https://github.com/hellodfan/GrainSpace](https://github.com/hellodfan/GrainSpace)  
+64. hellodfan/GrainSet: Repository for our Nature Scientific Data paper: An annotated grain kernel image database for visual quality inspection. \- GitHub, fecha de acceso: marzo 13, 2026, [https://github.com/hellodfan/GrainSet](https://github.com/hellodfan/GrainSet)  
+65. Prediction and determination of mildew grade in grain storage based on FOA-SVM algorithm | Food Quality and Safety | Oxford Academic, fecha de acceso: marzo 13, 2026, [https://academic.oup.com/fqs/article/doi/10.1093/fqsafe/fyac071/6862016](https://academic.oup.com/fqs/article/doi/10.1093/fqsafe/fyac071/6862016)
+
+--- Result 4 (score: 0.7010, ranked: 0.4438) ---
+Source: 9.1 AI-ML Applications for Grain Storage Operations.md
+Page: 0
+Section: **Obras citadas**
+Context: **Strategic Deployment of Artificial Intelligence and Machine Learning in Cloud-Native Grain Storage ERP Systems** > **Strategic Implications and Operational Outlook** > **Obras citadas**
+Text:
+ing the Quality of Grain Storage Processes Affected by Microorganisms under Different Environments \- PMC, fecha de acceso: marzo 13, 2026, [https://pmc.ncbi.nlm.nih.gov/articles/PMC10001665/](https://pmc.ncbi.nlm.nih.gov/articles/PMC10001665/)  
+19. Analyzing the receiving operation of different grain types in a single–pit country elevator \- SciSpace, fecha de acceso: marzo 13, 2026, [https://scispace.com/pdf/analyzing-the-receiving-operation-of-different-grain-types-8hsdyebvs1.pdf](https://scispace.com/pdf/analyzing-the-receiving-operation-of-different-grain-types-8hsdyebvs1.pdf)  
+20. A fuzzy chance-constrained programming model for integrated planning of the wheat supply ... \- SID, fecha de acceso: marzo 13, 2026, [https://www.sid.ir/en/VEWSSID/J\_pdf/9552022eie0503.pdf](https://www.sid.ir/en/VEWSSID/J_pdf/9552022eie0503.pdf)  
+21. GHG Protocol, fecha de acceso: marzo 13, 2026, [https://ghgprotocol.org/sites/default/files/2026-01/Land-Sector-and-Removals-Guidance-2022-Draft-Pilot-Testing-Review-Part2-2022.9.1-Archival.pdf](https://ghgprotocol.org/sites/default/files/2026-01/Land-Sector-and-Removals-Guidance-2022-Draft-Pilot-Testing-Review-Part2-2022.9.1-Archival.pdf)  
+22. Grain | Grossman Software Solutions, fecha de acceso: marzo 13, 2026, [https://www.gss.ag/taxonomy/term/14](https://www.gss.ag/taxonomy/term/14)  
+23. Operations & supply chain management: principles and practice \- City Research Online, fecha de acceso: marzo 13, 2026, [https://openaccess.city.ac.uk/id/eprint/35748/8/Operations%20supply%20chain%20management%20principles%20and%20practice.pdf](https://openaccess.city.ac.uk/id/eprint/35748/8/Operations%20supply%20chain%20management%20principles%20and%20practice.pdf)  
+24.
+
+--- Result 5 (score: 0.6956, ranked: 0.2000) ---
+Source: 9.1 AI-ML Applications for Grain Storage Operations.md
+Page: 0
+Section: **Obras citadas**
+Context: **Strategic Deployment of Artificial Intelligence and Machine Learning in Cloud-Native Grain Storage ERP Systems** > **Strategic Implications and Operational Outlook** > **Obras citadas**
+Text:
+nvergence.com/wp-content/uploads/2019/08/Agriculture-Startup-Implements-Oracle-ERP-and-SCM-Cloud-in-Argentina.pdf](https://www.itconvergence.com/wp-content/uploads/2019/08/Agriculture-Startup-Implements-Oracle-ERP-and-SCM-Cloud-in-Argentina.pdf)  
+6. Albor Campo \- El software agropecuario \- agricultura y ganadería, fecha de acceso: marzo 13, 2026, [https://www.alboragro.com/albor-campo/](https://www.alboragro.com/albor-campo/)  
+7. shivamsingha/aiot-food-storage \- GitHub, fecha de acceso: marzo 13, 2026, [https://github.com/shivamsingha/aiot-food-storage](https://github.com/shivamsingha/aiot-food-storage)  
+8. AI empowers Argentine small farmers and winemakers to compete better \- Microsoft Source, fecha de acceso: marzo 13, 2026, [https://news.microsoft.com/source/features/ai/argentina-wine-agriculture/](https://news.microsoft.com/source/features/ai/argentina-wine-agriculture/)  
+9. Predicting Porosity in Grain Compression Experiments Using Random Forest and Metaheuristic Optimization Algorithms \- PMC, fecha de acceso: marzo 13, 2026, [https://pmc.ncbi.nlm.nih.gov/articles/PMC11953009/](https://pmc.ncbi.nlm.nih.gov/articles/PMC11953009/)  
+10. Smart Grain Storage Solution: Integrated Deep Learning Framework ..., fecha de acceso: marzo 13, 2026, [https://www.mdpi.com/2304-8158/14/6/1024](https://www.mdpi.com/2304-8158/14/6/1024)  
+11. The Intelligent Silo \- | Miller Magazine, fecha de acceso: marzo 13, 2026, [https://millermagazine.com/blog/the-intelligent-silo-3434](https://millermagazine.com/blog/the-intelligent-silo-3434)  
+12. Machine vision and AI take the guess work out of grain grading \- YouTube, fecha de acceso: marzo 13, 2026, [https://www.youtube.com/watch?v=3q\_tQPDsrK0](https://www.youtube.com/watch?v=3q_tQPDsrK0)  
+13. A Monitoring Device and Grade Prediction System for Grain Mildew \- MDPI, fecha de acceso: marzo 13, 2026, [https://www.mdpi.com/1424-8220/24/20/6556](https://www.mdpi.com/1424-8220/24/20/6556)  
+14.
+

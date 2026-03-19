@@ -1,0 +1,96 @@
+=== Qdrant Search Results ===
+Query: WSLPG liquidacion primaria granos Form 1116 B C XML fields codGrano
+Results: 5
+
+--- Result 1 (score: 0.7815, ranked: 1.1000) ---
+Source: 8.1 Grain Types and Quality Parameter Reference Data.md
+Page: 0
+Section: AFIP/ARCA species codes for relevant grains
+Context: Reference data catalog for Argentine grain trade (quality parameters and ARCA species codes) > AFIP/ARCA species codes for relevant grains
+Text:
+These are the "ncespecie" codes used in CTG and F.1116 web services.[^4]
+
+--- Result 2 (score: 0.7282, ranked: 0.5397) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: Parameter Lookup Methods
+Context: AFIP/ARCA WSLPG Technical Documentation for Python/Django ERP Integration > 2. Complete SOAP Methods Catalog > Parameter Lookup Methods
+Text:
+| SOAP Method | Returns |
+|---|---|
+| `campaniasConsultar` | Available campaigns (e.g., `1314`, `2324`) |
+| `tipoGranoConsultar` | Grain types (codes + descriptions — soja, trigo, maíz, girasol, etc.) |
+| `codigoGradoReferenciaConsultar` | Reference grade codes per grain |
+| `codigoGradoEntregadoXTipoGranoConsultar` | Delivered grade codes and values per grain type |
+| `tipoCertificadoDepositoConsultar` | Deposit certificate types (1: F1116/RT, 5: F1116/A, 332: Electronic) |
+| `tipoDeduccionConsultar` | Deduction types (AL: Almacenaje, CO: Comisión, OD: Otras, etc.) |
+| `tipoRetencionConsultar` | Retention types (RI: IVA, RG: Ganancias, etc.) |
+| `puertoConsultar` | Enabled ports |
+| `tipoActividadConsultar` | Activity types universe |
+| `tipoActividadRepresentadoConsultar` | Activities the emisor/representado is registered for in RUOCA |
+| `provinciasConsultar` | Provinces |
+| `localidadXProvinciaConsultar` | Localities by province |
+| `tipoOperacionXActividadConsultar` | Operation types per activity (01: Compra/Venta, 02: Consignación) |
+
+All parameter lookup methods return an array of `LpgCodigoDescripcionType` with `codigo` and `descripcion` fields.[^7][^2]
+
+***
+
+--- Result 3 (score: 0.7079, ranked: 0.3894) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: References
+Context: 4. Create and authorize a liquidation > References
+Text:
+1. [Factura Electrónica libre - WSLPG: Liq. Cert. Granos](https://www.pyafipws.com.ar/agropecuarios/wslpg) - Nuevo Servicio Web de la AFIP para operaciones de compra/venta de granos, correspondiente a la Resol...
+
+2. [[PDF] Manual para el Desarrollador - Certificación y Liquidación de Granos](https://www.afip.gob.ar/ws/WSLiquiGranos/manual_wslpg_1.24.pdf) - Comprende desde la definición del WSDL hasta las validaciones de negocio que realizará cada servicio...
+
+3. [LiquidacionPrimariaGranos – SistemasAgiles - Sistemas Ágiles](https://www.sistemasagiles.com.ar/trac/wiki/LiquidacionPrimariaGranos)
+
+4. [[PDF] Manual para el Desarrollador - Certificación y Liquidación de Granos](https://www.afip.gob.ar/ws/WSLiquiGranos/manual_wslpg_1.22.pdf)
+
+5. [Factura Electrónica libre - WSAA](https://www.pyafipws.com.ar/factura-electr%C3%B3nica/wsaa) - Servicio Web de AFIP de autenticación y autorización - obtención de credenciales de seguridad - (WSA...
+
+6. [Certificación y Liquidación](http://www.centrodecorredores.org.ar/cntrorpt/manual_wslpg_1.20.pdf)
+
+7. [Usar el metodo tipoGranoConsultar del web service Liquidación Primaria de Granos con Python](https://afipsdk.com/docs/api-reference/web-services/wslpg/tipoGranoConsultar/prod/python/) - Usar el metodo tipoGranoConsultar del web service Liquidación Primaria de Granos con Python
+
+8. [WSLPG liquidacionautorizar](https://sites.google.com/site/facturaelectronicax/wslpg/wslpg-m%C3%A9todos/wslpg-liquidacionautorizar) - El método "liquidacionAutorizar" del web service WSLPG de liquidación de granos (lpgliquidacionAutor...
+
+9. [pyafipws/wslpg.py at main · reingart/pyafipws](https://github.com/reingart/pyafipws/blob/main/wslpg.py) - Factura Electrónica AFIP y otros servicios web (proyecto software libre) — Interfases, tools and app...
+
+--- Result 4 (score: 0.7127, ranked: 0.3483) ---
+Source: 8.4 Form 1116 B-C Field Structure for Data Model Design.md
+Page: 0
+Section: **4\. Grain Data and Agronomic Origin Vectors**
+Context: **Architectural and Data Dictionary Analysis of ARCA Forms 1116-C and 1116-B via the WSLPG Web Service** > **Exhaustive Structure of Form 1116-C: Liquidación Primaria de Granos** > **4\. Grain Data and Agronomic Origin Vectors**
+Text:
+This payload section identifies the specific physical commodity and traces its geographic origins. This is an essential control mechanism allowing ARCA to audit the volume of grain a producer sells against the number of hectares they previously declared in their mandatory pre-harvest agricultural census.
+
+| Field Name | Data Type | Length/Precision | Requirement | Valid Values and Business Meaning |
+| :---- | :---- | :---- | :---- | :---- |
+| codGrano | Integer | 3 digits | Mandatory | The official code for the commodity (e.g., Soybeans, Wheat, Corn). Validated against active WSLPG catalogs.9 |
+| codCampania | String | 4 chars (YY/YY) | Mandatory | The harvest campaign cycle (e.g., "23/24"). ARCA restricts liquidations to valid, active campaigns.9 |
+| provinciaProcedencia | Integer | 2 digits | Mandatory | The numerical code representing the Argentine province where the grain was cultivated.10 Determines the provincial jurisdiction for Gross Receipts Tax (Ingresos Brutos). |
+| cpProcedencia | String | 8 chars | Mandatory | The Postal Code (Código Postal) of the exact rural locality where the field is situated.10 Used for hyper-local yield estimations. |
+| codGrado | Integer | 2 digits | Optional | Code representing the standardized quality grade delivered. Used as a baseline for determining quality deductions.11 |
+
+--- Result 5 (score: 0.7007, ranked: 0.2000) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: Grain Certification (CG — RG 3691/2014)
+Context: AFIP/ARCA WSLPG Technical Documentation for Python/Django ERP Integration > 2. Complete SOAP Methods Catalog > Grain Certification (CG — RG 3691/2014)
+Text:
+| SOAP Method | Description |
+|---|---|
+| `cgAutorizar` | Authorize a grain certificate (deposit F1116A, withdrawal/transfer F1116RT, or preexisting) |
+| `cgBuscarCtg` | Search CTGs (Grain Traceability Code) available for certification |
+| `cgBuscarCertConSaldoDisponible` | Search certificates with available balance for liquidation/withdrawal |
+| `cgSolicitarAnulacion` | Request cancellation of a grain certificate |
+| `cgConfirmarAnulacion` | Confirm cancellation of a grain certificate |
+| `cgConsultarXCoe` | Consult a certificate by COE |
+| `cgConsultarXNroOrden` | Consult a certificate by order number |
+| `cgConsultarUltimoNroOrden` | Last registered certificate order number |
+| `cgInformarCalidad` | Report quality details for a certificate |
+

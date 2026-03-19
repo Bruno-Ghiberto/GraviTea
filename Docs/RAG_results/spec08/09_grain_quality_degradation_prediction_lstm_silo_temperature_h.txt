@@ -1,0 +1,66 @@
+=== Qdrant Search Results ===
+Query: grain quality degradation prediction LSTM silo temperature humidity
+Results: 5
+
+--- Result 1 (score: 0.7413, ranked: 1.3000) ---
+Source: 9.1 AI-ML Applications for Grain Storage Operations.md
+Page: 0
+Section: **Obras citadas**
+Context: **Strategic Deployment of Artificial Intelligence and Machine Learning in Cloud-Native Grain Storage ERP Systems** > **Strategic Implications and Operational Outlook** > **Obras citadas**
+Text:
+ique-method-to-prediction-and-manage-segregation-in-hoppers-silos-and-stockpiles/](https://bulkinside.com/bulk-solids-handling/storage-transportation/novel-and-unique-method-to-prediction-and-manage-segregation-in-hoppers-silos-and-stockpiles/)  
+28. Grain Quality – It's Time To Check Your Stored Grain | Purdue University Pest\&Crop newsletter, fecha de acceso: marzo 13, 2026, [https://extension.entm.purdue.edu/newsletters/pestandcrop/article/grain-quality-its-time-to-check-your-stored-grain/](https://extension.entm.purdue.edu/newsletters/pestandcrop/article/grain-quality-its-time-to-check-your-stored-grain/)  
+29. Modeling of Temperature of Grain During Storage with Aeration \- ASABE Technical Library, fecha de acceso: marzo 13, 2026, [https://elibrary.asabe.org/abstract.asp??JID=3\&AID=28367\&CID=t1993\&v=36\&i=2\&T=1](https://elibrary.asabe.org/abstract.asp??JID=3&AID=28367&CID=t1993&v=36&i=2&T=1)  
+30. Mechanism and Data-Driven Grain Condition Information Perception Method for Comprehensive Grain Storage Monitoring \- MDPI, fecha de acceso: marzo 13, 2026, [https://www.mdpi.com/2304-8158/14/19/3426](https://www.mdpi.com/2304-8158/14/19/3426)  
+31. Research on Storage Grain Temperature Prediction Method Based on FTA-CNN-SE-LSTM with Dual-Domain Data Augmentation and Deep Learning \- PMC, fecha de acceso: marzo 13, 2026, [https://pmc.ncbi.nlm.nih.gov/articles/PMC12111741/](https://pmc.ncbi.nlm.nih.gov/articles/PMC12111741/)  
+32. Agricultural commodity futures prices prediction based on a new hybrid forecasting model combining quadratic decomposition technology and LSTM model \- Frontiers, fecha de acceso: marzo 13, 2026, [https://www.frontiersin.org/journals/sustainable-food-systems/articles/10.3389/fsufs.2024.1334098/full](https://www.frontiersin.org/journals/sustainable-food-systems/articles/10.3389/fsufs.2024.1334098/full)  
+33.
+
+--- Result 2 (score: 0.7136, ranked: 1.0203) ---
+Source: 9.1 AI-ML Applications for Grain Storage Operations.md
+Page: 0
+Section: **Obras citadas**
+Context: **Strategic Deployment of Artificial Intelligence and Machine Learning in Cloud-Native Grain Storage ERP Systems** > **Strategic Implications and Operational Outlook** > **Obras citadas**
+Text:
+https://www.youtube.com/watch?v=3q_tQPDsrK0)  
+13. A Monitoring Device and Grade Prediction System for Grain Mildew \- MDPI, fecha de acceso: marzo 13, 2026, [https://www.mdpi.com/1424-8220/24/20/6556](https://www.mdpi.com/1424-8220/24/20/6556)  
+14. AI-driven grain storage solutions: Exploring current technologies, applications, and future trends \- ResearchGate, fecha de acceso: marzo 13, 2026, [https://www.researchgate.net/publication/391351296\_AI-driven\_grain\_storage\_solutions\_Exploring\_current\_technologies\_applications\_and\_future\_trends](https://www.researchgate.net/publication/391351296_AI-driven_grain_storage_solutions_Exploring_current_technologies_applications_and_future_trends)  
+15. Estimating energy efficiency of the aeration process of stored grains through machine learning \- SciELO, fecha de acceso: marzo 13, 2026, [https://www.scielo.br/j/rbeaa/a/vtqQrPTvCZQHPBTNc4mhH4F/?lang=en](https://www.scielo.br/j/rbeaa/a/vtqQrPTvCZQHPBTNc4mhH4F/?lang=en)  
+16. Algorithms to predict moisture content of grain using relative humidity time-series \- Charles Delahunt, fecha de acceso: marzo 13, 2026, [https://charlesdelahunt.github.io/assets/gmaGhtc\_9july2020.pdf](https://charlesdelahunt.github.io/assets/gmaGhtc_9july2020.pdf)  
+17. Temperature-Dependent Fungal Diversity, Storage Quality, and Processing Quality of High-Moisture Wheat During Post-Harvest Storage \- PMC, fecha de acceso: marzo 13, 2026, [https://pmc.ncbi.nlm.nih.gov/articles/PMC12840849/](https://pmc.ncbi.nlm.nih.gov/articles/PMC12840849/)  
+18. A Model for Predicting and Grading the Quality of Grain Storage Processes Affected by Microorganisms under Different Environments \- PMC, fecha de acceso: marzo 13, 2026, [https://pmc.ncbi.nlm.nih.gov/articles/PMC10001665/](https://pmc.ncbi.nlm.nih.gov/articles/PMC10001665/)  
+19.
+
+--- Result 3 (score: 0.6597, ranked: 0.4766) ---
+Source: 9.1 AI-ML Applications for Grain Storage Operations.md
+Page: 0
+Section: **Predictive Analytics for Grain Quality Degradation and Spatiotemporal Monitoring**
+Context: **Strategic Deployment of Artificial Intelligence and Machine Learning in Cloud-Native Grain Storage ERP Systems** > **Predictive Analytics for Grain Quality Degradation and Spatiotemporal Monitoring**
+Text:
+The preservation of harvested grain is a complex thermodynamic and biological challenge. During long-term storage, grains are subjected to continuous heat and moisture migration driven by cellular respiration, microbial metabolism, and external environmental fluctuations.9 Traditional grain monitoring relies heavily on static temperature cables and the manual interpretation of tabular data or localized heat maps by facility managers.10 This approach is inherently reactive; by the time a temperature spike is visually identified by an operator, localized spoilage, dry matter loss, or insect infestation has often already reached an irreversible threshold.10
+
+--- Result 4 (score: 0.6477, ranked: 0.3555) ---
+Source: 9.1 AI-ML Applications for Grain Storage Operations.md
+Page: 0
+Section: **Forecasting the Temperature Field and Mildew Genesis**
+Context: **Strategic Deployment of Artificial Intelligence and Machine Learning in Cloud-Native Grain Storage ERP Systems** > **Predictive Analytics for Grain Quality Degradation and Spatiotemporal Monitoring** > **Forecasting the Temperature Field and Mildew Genesis**
+Text:
+While classification identifies current states, proactive ERP systems must forecast future states to trigger preventative workflows. The 3DCNN-LSTM hybrid model excels in this predictive domain.10 The 3D-CNN module captures the spatial dependencies across the grain mass, ensuring that the thermal inertia of the grain and the insulative properties of the silo walls are mathematically represented.10 Concurrently, the LSTM module models the dynamic temporal sequences of temperature fluctuations, allowing the system to project the thermal field days or weeks into the future.10
+
+The predictive accuracy of these models is significantly enhanced by incorporating multi-modal data inputs. Relying solely on temperature is insufficient for accurate biological modeling; the inclusion of absolute water potential and relative humidity time-series data drastically reduces prediction error.10 Because humidity and temperature maintain an equilibrium relationship within the interstitial air of the grain pile, algorithms leveraging these combined inputs have achieved a Mean Absolute Error (MAE) of just 0.24 °C and a Root Mean Square Error (RMSE) of 0.28 °C in predicting future temperature fields.10 Furthermore, to provide rapid moisture content (MC) estimations without waiting for the sensors to reach perfect equilibrium, advanced edge algorithms utilize curve-fitting techniques on relative humidity (RH) time-series to estimate asymptotic RH, leveraging the Chung-Pfost equilibrium equations to calculate MC to within ±1% accuracy in under 12 minutes.16
+
+--- Result 5 (score: 0.6422, ranked: 0.3000) ---
+Source: 9.1 AI-ML Applications for Grain Storage Operations.md
+Page: 0
+Section: **Deep Learning Architectures for Spatiotemporal Condition Monitoring**
+Context: **Strategic Deployment of Artificial Intelligence and Machine Learning in Cloud-Native Grain Storage ERP Systems** > **Predictive Analytics for Grain Quality Degradation and Spatiotemporal Monitoring** > **Deep Learning Architectures for Spatiotemporal Condition Monitoring**
+Text:
+pirical validation indicates that 3D DenseNet architectures can achieve overall classification accuracies of 97.38%, with highly sensitive detection rates for critical minority risk categories like condensation (95.73%) and mildew genesis (90.91%).10
+
+| Model Architecture | Primary Storage Application | Key Performance Metric | Underlying Mechanism |
+| :---- | :---- | :---- | :---- |
+| **3D DenseNet** | Real-time state classification | 97.38% overall accuracy | Dense feature sharing across 3D temperature grids.10 |
+| **3DCNN-LSTM** | Temperature field forecasting | MAE of 0.24 °C | Combines spatial convolutions with temporal sequence memory.10 |
+| **CNN-LSTM-A** | Mildew grading and prediction | 98.00% accuracy | Integrates attention mechanisms to focus on localized heat anomalies.13 |
+| **SVM-Poly** | Aeration energy efficiency | 99.98% accuracy | Non-linear margin separation for binary efficiency classification.14 |
+

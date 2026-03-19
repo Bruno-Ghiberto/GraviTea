@@ -1,0 +1,94 @@
+=== Qdrant Search Results ===
+Query: SISA retention withholding tier Estado IVA Ganancias RG 5689
+Results: 5
+
+--- Result 1 (score: 0.7319, ranked: 1.3000) ---
+Source: 7.3 Withholding Tax Calculations for Grain Operations.md
+Page: 0
+Section: 6.4.1. SISA reduced rates
+Context: Withholding tax rules on grain purchase/sale in Argentina (IVA, Ganancias, IIBB, SUSS) for ERP automation – 2025‑2026 > 6. Special considerations for ERP implementation > 6.4. Handling reduced‑rate situations (SISA states and IIBB padrones) > 6.4.1. SISA reduced rates
+Text:
+## 6.4. Handling reduced‑rate situations (SISA states and IIBB padrones)
+
+
+
+- **SISA State 1** corresponds effectively to **0% Ganancias** and the **lowest IVA retention (5%) with full refund**, so ERP should treat **State 1 as the default “reduced” case** for federal regimes.[^27][^2]
+- SISA state can change periodically; the SISA portal and ARCA documentation specify that SISA performs **periodic recalification based on compliance**, and producers/operators must be checked online **at the moment of retention**.[^29][^2]
+
+ERP implication: at the moment of issuing LPG/invoice, **query SISA (or import its padron) to know the current state**, and only then determine Ganancias/IVA rates; store the **state and timestamp** for audit.
+
+--- Result 2 (score: 0.7205, ranked: 0.7635) ---
+Source: 7.3 Withholding Tax Calculations for Grain Operations.md
+Page: 0
+Section: 2.2. IVA withholding rates by SISA status and seller type
+Context: Withholding tax rules on grain purchase/sale in Argentina (IVA, Ganancias, IIBB, SUSS) for ERP automation – 2025‑2026 > 2. IVA withholding on grain purchases (successor to RG 2300) > 2.2. IVA withholding rates by SISA status and seller type
+Text:
+According to the SISA/AFIP table for IVA grain retention:[^2]
+
+| Seller situation (SISA / AFIP) | IVA retention rate |
+| --- | --- |
+| SISA State 1 (RIESGO BAJO) – grain producer or operator | **5%** of taxable IVA base |
+| SISA State 2 (RIESGO MEDIO) – grain producer or operator | **8%** of taxable IVA base |
+| SISA State 3 (RIESGO ALTO) – grain producer or operator | **10,5%** of taxable IVA base |
+| Non‑registered in SISA / suspended / excluded (but IVA RI) | **16%** of taxable IVA base |
+| Registrants with “sin operar” / inhabilitado status | **16%** of taxable IVA base and other sanctions may apply |
+| Seller monotributista or IVA‑exempt | **0%** (regime not applicable) |
+
+- For **operations with rice**, AFIP maintains a separate table; in practice, most acopiadores handle cereals/oleaginosas and legumbres secas, for which the table above is relevant.[^2]
+- The **5% rate for State 1** is typically **fully refundable** by AFIP to producers through a systematic credit/reintegro mechanism, which is why State 1 implies no net IVA cost if the producer is compliant.[^27][^29]
+
+As of early **2026**, there are **no published AFIP norms changing these IVA grain rates**; updates since 2024 have focused on general IVA/Ganancias retention/perception thresholds for other regimes, not on the grain‑specific SISA table.[^30]
+
+--- Result 3 (score: 0.7180, ranked: 0.6464) ---
+Source: 7.3 Withholding Tax Calculations for Grain Operations.md
+Page: 0
+Section: 1. Scope and main sources
+Context: Withholding tax rules on grain purchase/sale in Argentina (IVA, Ganancias, IIBB, SUSS) for ERP automation – 2025‑2026 > 1. Scope and main sources
+Text:
+- **AFIP – IVA on grains:** historical RG 2300 and its predecessors, and the current SISA‑based regime documented by AFIP/ARCA under the heading “Régimen de retención del IVA – Operaciones de granos y semillas en proceso de certificación (cereales y oleaginosas) y legumbres secas”, which specifies the current percentages by SISA state and situation of the seller.[^1][^2]
+- **AFIP – Ganancias on grains:** RG 4325 (Impuesto a las Ganancias – Comercialización de granos no destinados a la siembra y legumbres secas – Régimen de retención), which replaced RG 2118 and expressly ties the regime to SISA scoring.[^3][^4][^5]
+- **AFIP – Ganancias general:** RG 830 and its amendments, especially RG 4525, which updated the “montos no sujetos a retención” for the general regime; plus professional interpretations confirming that those amounts continue to be used where the specific grain regime does not apply.[^6][^7]
+- **AFIP/ARCA – SISA:** official explanations of SISA states and obligations of agents of retention, and professional summaries (Blog del Contador) of how RG 4325 and 4326 interact with SISA.[^2][^8]
+- **Liquidación Primaria de Granos (LPG):** RG 3419 (and later amendments) establishing the electronic LPG as mandatory documentation of primary grain operations and clarifying that the LPG, together with F.2005 in SIRE, functions as the certificate of retention for IVA and Ganancias.[^9][^10][^11]
+- **SIRE / F.2005:** RG 3726 and RG 4523, plus AFIP/Consejo circulars explaining that for LPG to be valid as retention support, the F.2005 certificate must be generated in SIRE.[^12][^13][^14]
+
+--- Result 4 (score: 0.7120, ranked: 0.3660) ---
+Source: 1.3 Liquidacion Primaria de Granos -- Form 1116 B and C.md
+Page: 0
+Section: **7.1 Value Added Tax (IVA) and the SISA Regime (RG 2300\)**
+Context: **Technical and Regulatory Framework for Primary Grain Liquidations in Argentina: ERP Architecture and Fiscal Compliance (2024-2026)** > **7\. The Taxation Engine: Federal and Provincial Retenciones** > **7.1 Value Added Tax (IVA) and the SISA Regime (RG 2300\)**
+Text:
+The withholding of Value Added Tax on grains is governed by RG 2300 and is strictly modulated by the *Sistema de Información Simplificado Agrícola* (SISA).25 SISA is a real-time risk scoring matrix maintained by ARCA, designed to reward compliant taxpayers and punish evasive behavior. Before issuing an 1116-C, the ERP must query the producer's CUIT against the SISA database API to determine their risk tier (Estado 1, 2, or 3), which dynamically alters the withholding rate.25
+
+* **Base IVA Rate:** The sale of standard agricultural grains is taxed at a reduced IVA rate of 10.5%.28  
+* **Estado 1 (Low Risk):** For highly compliant producers, the *acopiador* withholds 5% of the gross value. ARCA automatically refunds this entire 5% directly to the producer's CBU within 45 days (though systemic delays of 35-40 days often occur in reality).25  
+* **Estado 2 (Medium Risk):** The withholding jumps to 7%. The state refunds 6% to the producer, retaining 1%.25  
+* **Estado 3 (High Risk):** A punitive withholding of 8% is applied. No automatic refund is issued; the producer must claim it through complex annual tax filings.25  
+* **ERP Logic:** The system must calculate the base 10.5% IVA, subtract the SISA-determined withholding percentage, and allocate the remainder to the IVA Res AFIP 2300 field on the form, which represents the net IVA to be deposited directly into the producer's account.9
+
+--- Result 5 (score: 0.7106, ranked: 0.3000) ---
+Source: 7.3 Withholding Tax Calculations for Grain Operations.md
+Page: 0
+Section: 7. Summary of numeric rates and thresholds (2025‑2026)
+Context: Withholding tax rules on grain purchase/sale in Argentina (IVA, Ganancias, IIBB, SUSS) for ERP automation – 2025‑2026 > 7. Summary of numeric rates and thresholds (2025‑2026)
+Text:
+The table below consolidates the **main numeric parameters** likely to be hard‑coded or at least pre‑configured in an ERP (leaving padron‑driven values as data inputs): | Tax / Regime | Concept | Value (2025‑2026) | Basis | Source |
+| --- | --- | --- | --- | --- |
+| **IVA grains (SISA)** | SISA State 1 | **5%** IVA retention | IVA base excl. IVA | AFIP/ARCA SISA IVA table[^2] |
+|  | SISA State 2 | **8%** IVA retention | IVA base excl. IVA | AFIP/ARCA SISA IVA table[^2] |
+|  | SISA State 3 | **10,5%** IVA retention | IVA base excl. IVA | AFIP/ARCA SISA IVA table[^2] |
+|  | Non‑registered / suspended | **16%** IVA retention | IVA base excl. IVA | AFIP/ARCA SISA IVA table[^2] |
+|  | Monotributista / IVA‑exempt | **0%** (regime not applicable) | – | Blog del Contador / AFIP SISA notes[^8][^29] |
+| **Ganancias grains (RG 4325)** | SISA State 1 | **0%** | Net amount excl. IVA; LPG/invoice | RG 4325 + professional summaries[^3][^26] |
+|  | SISA State 2 | **2%** | Same base | RG 4325[^3][^26] |
+|  | SISA State 3 | **15%** | Same base | RG 4325[^3][^26] |
+|  | Non‑registered | **30%** | Same base | RG 4325[^3][^26] |
+|  | Monotributista | **0%** (excluded) | – | RG 4325 + Blog del Contador[^8] |
+|  | Monto no sujeto a retención | **142.400 pesos** per payment | Grain operations | RG 4325 Art. 11 & summaries[^3][^26][^34] |
+|  | Min. retention (general ref.) | ~**240 pesos** | General RG 830 | RG 4525 & professional Q&A[^6][^7] |
+| **Ganancias general (RG 830)** | Enajenación bienes muebles/bienes de cambio | **2%** on excess over **224.000 pesos** | Net amount excl. IVA | RG 4525 modifying RG 830[^6][^7] |
+| **Santa Fe IIBB (API RG 37/2025)** | Non‑padronised, non‑inscribed – Retención | **5%** | IIBB base (net excl. IVA) | RG 37/2025[^18] |
+|  | Non‑padronised, non‑inscribed – Percepción | **6%** | Same | RG 37/2025[^18] |
+|  | Min. per payment – Retenciones | **650.000 pesos** (general) | Payment amount | RG 37/2025[^17][^18] |
+|  | Min. per payment – special ret.
+

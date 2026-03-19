@@ -1,0 +1,65 @@
+=== Qdrant Search Results ===
+Query: weighbridge fraud detection anomalous weight pattern behavioural baseline
+Results: 5
+
+--- Result 1 (score: 0.7257, ranked: 1.3000) ---
+Source: 9.1 AI-ML Applications for Grain Storage Operations.md
+Page: 0
+Section: **Obras citadas**
+Context: **Strategic Deployment of Artificial Intelligence and Machine Learning in Cloud-Native Grain Storage ERP Systems** > **Strategic Implications and Operational Outlook** > **Obras citadas**
+Text:
+le, fecha de acceso: marzo 13, 2026, [https://www.mt.com/us/en/home/library/guides/transport-logistics/vehicle\_scale\_fraud\_prevention.html](https://www.mt.com/us/en/home/library/guides/transport-logistics/vehicle_scale_fraud_prevention.html)  
+50. Weighbridge Frauds The prevalence of frauds in weighing of trucks on weighbridges is a major concern amongst all industry segmen, fecha de acceso: marzo 13, 2026, [https://www.averyweigh-tronix.com/en-in/wp-content/uploads/sites/4/2025/04/Anti\_fraud\_Portfolio\_brochure\_D2\_\_002\_.pdf](https://www.averyweigh-tronix.com/en-in/wp-content/uploads/sites/4/2025/04/Anti_fraud_Portfolio_brochure_D2__002_.pdf)  
+51. Ultimate Guide to Weight Fraud Detection in Steel Orders \- SteelonCall, fecha de acceso: marzo 13, 2026, [https://steeloncall.com/blog/prevent-weight-fraud-truck-scales](https://steeloncall.com/blog/prevent-weight-fraud-truck-scales)  
+52. Combat Fraud at the Truck Scale \- Mettler Toledo, fecha de acceso: marzo 13, 2026, [https://www.mt.com/au/en/home/library/stories/transport-logistics/combat-fraud-at-the-truck-scale.html](https://www.mt.com/au/en/home/library/stories/transport-logistics/combat-fraud-at-the-truck-scale.html)  
+53. Anomaly detection in fraud prevention: Benefits, development and future trends, fecha de acceso: marzo 13, 2026, [https://www.leewayhertz.com/anomaly-detection-in-fraud-prevention/](https://www.leewayhertz.com/anomaly-detection-in-fraud-prevention/)  
+54. Anomaly detection in market data for fraud and risk monitoring, fecha de acceso: marzo 13, 2026, [https://journalijsra.com/sites/default/files/fulltext\_pdf/IJSRA-2025-1824.pdf](https://journalijsra.com/sites/default/files/fulltext_pdf/IJSRA-2025-1824.pdf)  
+55. Anomaly Detection in Weighing Data: How AI Distinguishes Noise from Error, fecha de acceso: marzo 13, 2026, [https://weighingreview.com/content/anomaly-detection-weighing-data](https://weighingreview.com/content/anomaly-detection-weighing-data)  
+56.
+
+--- Result 2 (score: 0.6604, ranked: 0.9408) ---
+Source: 9.1 AI-ML Applications for Grain Storage Operations.md
+Page: 0
+Section: **Defending the Weighbridge: Machine Learning for Fraud Prevention**
+Context: **Strategic Deployment of Artificial Intelligence and Machine Learning in Cloud-Native Grain Storage ERP Systems** > **Defending the Weighbridge: Machine Learning for Fraud Prevention**
+Text:
+The weighbridge is the absolute nexus of financial transaction in bulk grain logistics. It is also the most vulnerable point for systemic revenue leakage and organized fraud.49 Operations that passively write off product shrinkage as acceptable scale inaccuracy are frequently the victims of sophisticated, incremental theft that severely degrades enterprise margins.49
+
+--- Result 3 (score: 0.5918, ranked: 0.5632) ---
+Source: 9.1 AI-ML Applications for Grain Storage Operations.md
+Page: 0
+Section: **The Mechanics of Weighbridge Fraud**
+Context: **Strategic Deployment of Artificial Intelligence and Machine Learning in Cloud-Native Grain Storage ERP Systems** > **Defending the Weighbridge: Machine Learning for Fraud Prevention** > **The Mechanics of Weighbridge Fraud**
+Text:
+Criminal typologies at the truck scale are diverse and continually evolving. Key vectors include 49:
+
+1. **Improper Positioning:** Drivers intentionally resting axles off the scale plate to manipulate gross or tare weights, thereby altering the calculated net payload.  
+2. **Load-Cell Tampering:** The installation of remote-controlled bypass chips or stealth hardware into the analogue load-cell circuitry, allowing perpetrators to artificially alter the signal sent to the terminal.  
+3. **Tare Weight Manipulation:** Adding rocks, sandbags, or hidden water tanks to the vehicle during the initial tare weigh-in, and dumping them before loading, creating a phantom payload that the *acopio* pays for but never receives.  
+4. **Altering Data and Collusion:** Weighbridge operators conspiring with drivers to alter digital records within unsecured software or generate fraudulent weight tickets for ghost trucks that were never actually delivered.
+
+--- Result 4 (score: 0.5904, ranked: 0.5558) ---
+Source: 9.1 AI-ML Applications for Grain Storage Operations.md
+Page: 0
+Section: **Unsupervised Anomaly Detection Frameworks**
+Context: **Strategic Deployment of Artificial Intelligence and Machine Learning in Cloud-Native Grain Storage ERP Systems** > **Defending the Weighbridge: Machine Learning for Fraud Prevention** > **Unsupervised Anomaly Detection Frameworks**
+Text:
+Traditional rule-based fraud detection is insufficient due to the dynamic nature of these attacks and the continuous adaptation of fraudsters.53 An intelligent ERP must deploy machine learning anomaly detection frameworks to continuously monitor the telemetry from the weighbridge hardware.53
+
+Models such as Isolation Forests or One-Class Support Vector Machines (SVM) are specifically designed to operate on highly imbalanced datasets where fraudulent events are rare compared to legitimate traffic.39 Crucially, these unsupervised algorithms do not require labeled examples of every possible fraud method; instead, they ingest vast amounts of historical data to establish a high-dimensional baseline of "normal" operational behavior.53
+
+By aggregating diverse inputs—such as the historical tare weights of specific truck license plates, the temporal duration of the loading process, micro-fluctuations in load-cell voltage stability, and cross-referencing with overhead camera image parameters—the AI can instantly detect contextual and collective anomalies.39 For instance, if a truck's tare weight deviates from its 6-month historical mean by 3%, or if the time elapsed between the gross weigh-in and tare weigh-out is mathematically inconsistent with the physical distance to the unloading pit, the ERP automatically flags the transaction. The financial settlement is instantly locked until a physical audit is conducted.51 Advanced implementations using methodologies like the Enhanced Locally Selective Combination in Parallel Outlier Ensembles (ELSCP) have demonstrated Area Under the Precision-Recall Curve (AUCPR) scores of 0.972 in agricultural temporal data streams, vastly outperforming legacy statistical methods and drastically reducing false positives.53
+
+--- Result 5 (score: 0.5439, ranked: 0.3000) ---
+Source: 3.1 Weighbridge Integration Standards.md
+Page: 0
+Section: Automation and Technology
+Context: Weighbridge Systems at Argentine Acopios: Integration Guide for ERP Software > The Weighing Process at an Acopio > Automation and Technology
+Text:
+- **License plate recognition (LPR/ANPR):** VisArt is the leading Argentine LPR software, specifically designed for Argentine plate formats. It is used at some weighbridge installations to automatically identify trucks on the scale, reducing manual data entry and preventing fraud.[^48][^49]
+- **RFID:** Not widely adopted at Argentine acopios for weighbridge automation, though it is more common in controlled industrial environments.
+- **Semaphore/traffic control:** The Sipel Orion indicator has built-in I/O for controlling traffic lights and position barriers at axle-weighing stations. Cachapuz SmartWeigh also includes intelligent positioning and access control.[^15][^27]
+- **The workflow remains predominantly manual** at most acopios: a balancero (scale operator) manages the weighing process, enters vehicle/driver data, triggers weight capture, prints tickets, and manages the Carta de Porte documentation.
+
+***
+

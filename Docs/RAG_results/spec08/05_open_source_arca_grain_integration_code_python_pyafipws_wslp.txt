@@ -1,0 +1,109 @@
+=== Qdrant Search Results ===
+Query: open source ARCA grain integration code Python pyafipws WSLPG
+Results: 5
+
+--- Result 1 (score: 0.8341, ranked: 1.3000) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: References
+Context: 4. Create and authorize a liquidation > References
+Text:
+n de granos (lpgliquidacionAutor...
+
+9. [pyafipws/wslpg.py at main · reingart/pyafipws](https://github.com/reingart/pyafipws/blob/main/wslpg.py) - Factura Electrónica AFIP y otros servicios web (proyecto software libre) — Interfases, tools and app...
+
+10. [pyafipws/README.md at main · reingart/pyafipws](https://github.com/reingart/pyafipws/blob/main/README.md) - Factura Electrónica AFIP y otros servicios web (proyecto software libre) — Interfases, tools and app...
+
+11. [PyAfipWs on Pypi](https://libraries.io/pypi/PyAfipWs) - Interfases, tools and apps for Argentina's gov't. webservices (soap, com/dll, pdf, dbf, xml, etc.)
+
+12. [py3afipws · PyPI](https://pypi.org/project/py3afipws/) - pyafipws for python3
+
+13. [Python - Liquidación Primaria de Granos - Afip SDK](https://afipsdk.com/docs/api-reference/web-services/wslpg/lsgConsultarXNroOrden/dev/python/) - Creamos una instancia del web service ws = afip.webService("wslpg") # Aqui deben cambiar los datos p...
+
+14. [afip.py · PyPI](https://pypi.org/project/afip.py/) - Conéctate a ARCA hoy mismo
+
+15. [Python](https://afipsdk.com/docs/automations/integrations/python/) - Aprendé cómo usar las automatizaciones de Afip SDK con Python.
+
+16. [django-afip](https://pypi.org/project/django-afip/2.1.1/) - AFIP integration for django
+
+17. [django-afip · PyPI](https://pypi.org/project/django-afip/7.1.0/) - AFIP integration for django
+
+18. [GitHub - WhyNotHugo/django-afip: ⚖️ AFIP invoice integration for django.](https://github.com/WhyNotHugo/django-afip) - ⚖️ AFIP invoice integration for django. Contribute to WhyNotHugo/django-afip development by creating...
+
+19. [WSLPG como usar](https://sites.google.com/site/facturaelectronicax/wslpg/wslpg-como-usar) - La interfaz WSAFIPFE contiene un conjunto de métodos y propiedades (todos comenzando con "lpg") que ...
+
+--- Result 2 (score: 0.8034, ranked: 0.7736) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: Afip SDK (afip.py)
+Context: 4. Create and authorize a liquidation > Afip SDK (afip.py)
+Text:
+A commercial alternative SDK that wraps WSLPG with a simpler API:[^13][^14]
+
+```python
+pip install afip.py
+```
+```python
+from afip import Afip
+afip = Afip({"access_token": "YOUR_TOKEN"})
+ws = afip.webService("wslpg")
+response = ws.executeRequest("tipoGranoConsultar", {"auth": {...}})
+```
+
+This uses a hosted service model requiring an `access_token` from afipsdk.com.[^15]
+
+--- Result 3 (score: 0.7676, ranked: 0.3760) ---
+Source: 10.1 Existing Open-Source ARCA Grain Integration Code.md
+Page: 0
+Section: **Obras citadas**
+Context: **Comprehensive Analysis of ARCA Grain Web Service Integrations: Architecture, Libraries, and Implementation Strategies for WSCPE and WSLPG** > **Advanced Architectural Implementation Strategies** > **The Anti-Corruption Layer and Microservice Proxies** > **Obras citadas**
+Text:
+ps://github.com/reingart/pyafipws](https://github.com/reingart/pyafipws)  
+8. Releases · reingart/pyafipws \- GitHub, fecha de acceso: marzo 13, 2026, [https://github.com/reingart/pyafipws/releases](https://github.com/reingart/pyafipws/releases)  
+9. pyafipws/wslpg.py at main · reingart/pyafipws · GitHub, fecha de acceso: marzo 13, 2026, [https://github.com/reingart/pyafipws/blob/main/wslpg.py](https://github.com/reingart/pyafipws/blob/main/wslpg.py)  
+10. relopezbriega/arca\_arg: Modulo para interacturar con los ... \- GitHub, fecha de acceso: marzo 13, 2026, [https://github.com/relopezbriega/arca\_arg](https://github.com/relopezbriega/arca_arg)  
+11. gteijeiro/arca-lpg-ocr: Obtención y lectura de los pdf de los archivos de Liquidacion primaria de granos. \- GitHub, fecha de acceso: marzo 13, 2026, [https://github.com/gteijeiro/arca-lpg-ocr](https://github.com/gteijeiro/arca-lpg-ocr)  
+12. fecha de acceso: diciembre 31, 1969, [https://github.com/lucianocastilla/Afip.Net](https://github.com/lucianocastilla/Afip.Net)  
+13. Manual para el Desarrollador \- Certificación y Liquidación de Granos, fecha de acceso: marzo 13, 2026, [https://www.afip.gob.ar/ws/WSLiquiGranos/manual\_wslpg\_1.17.pdf](https://www.afip.gob.ar/ws/WSLiquiGranos/manual_wslpg_1.17.pdf)  
+14. Librería ARCA Arg: Conectando tu Aplicación con los Servicios Web de ARCA AFIP con Python \- Raul E. Lopez Briega, fecha de acceso: marzo 13, 2026, [https://relopezbriega.github.io/blog/2025/01/27/libreria-arca-arg-conectando-tu-aplicacion-con-los-servicios-web-de-arca-afip-con-python/](https://relopezbriega.github.io/blog/2025/01/27/libreria-arca-arg-conectando-tu-aplicacion-con-los-servicios-web-de-arca-afip-con-python/)  
+15. Actions · relopezbriega/arca\_arg \- GitHub, fecha de acceso: marzo 13, 2026, [https://github.com/relopezbriega/arca\_arg/actions](https://github.com/relopezbriega/arca_arg/actions)  
+16.
+
+--- Result 4 (score: 0.7642, ranked: 0.3299) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: Executive Summary
+Context: AFIP/ARCA WSLPG Technical Documentation for Python/Django ERP Integration > Executive Summary
+Text:
+## AFIP/ARCA WSLPG Technical Documentation for Python/Django ERP Integration
+
+
+
+The WSLPG (Web Service de Liquidación Primaria de Granos) is AFIP's SOAP-based web service for the electronic authorization of grain purchase/sale settlements (Liquidación Primaria de Granos), governed by Resolución General 3419/2012 and complementary regulations (RG 3690/2014, RG 3691/2014). The latest version is **v1.24**, published on January 30, 2026. This report covers endpoints, all available SOAP methods, data structures, error handling, open-source implementations, and testing environment details for a Python/Django integration.[^1][^2][^3]
+
+***
+
+--- Result 5 (score: 0.7621, ranked: 0.3000) ---
+Source: 5.1 WSLPG -- Technical API Documentation.md
+Page: 0
+Section: References
+Context: 4. Create and authorize a liquidation > References
+Text:
+1. [Factura Electrónica libre - WSLPG: Liq. Cert. Granos](https://www.pyafipws.com.ar/agropecuarios/wslpg) - Nuevo Servicio Web de la AFIP para operaciones de compra/venta de granos, correspondiente a la Resol...
+
+2. [[PDF] Manual para el Desarrollador - Certificación y Liquidación de Granos](https://www.afip.gob.ar/ws/WSLiquiGranos/manual_wslpg_1.24.pdf) - Comprende desde la definición del WSDL hasta las validaciones de negocio que realizará cada servicio...
+
+3. [LiquidacionPrimariaGranos – SistemasAgiles - Sistemas Ágiles](https://www.sistemasagiles.com.ar/trac/wiki/LiquidacionPrimariaGranos)
+
+4. [[PDF] Manual para el Desarrollador - Certificación y Liquidación de Granos](https://www.afip.gob.ar/ws/WSLiquiGranos/manual_wslpg_1.22.pdf)
+
+5. [Factura Electrónica libre - WSAA](https://www.pyafipws.com.ar/factura-electr%C3%B3nica/wsaa) - Servicio Web de AFIP de autenticación y autorización - obtención de credenciales de seguridad - (WSA...
+
+6. [Certificación y Liquidación](http://www.centrodecorredores.org.ar/cntrorpt/manual_wslpg_1.20.pdf)
+
+7. [Usar el metodo tipoGranoConsultar del web service Liquidación Primaria de Granos con Python](https://afipsdk.com/docs/api-reference/web-services/wslpg/tipoGranoConsultar/prod/python/) - Usar el metodo tipoGranoConsultar del web service Liquidación Primaria de Granos con Python
+
+8. [WSLPG liquidacionautorizar](https://sites.google.com/site/facturaelectronicax/wslpg/wslpg-m%C3%A9todos/wslpg-liquidacionautorizar) - El método "liquidacionAutorizar" del web service WSLPG de liquidación de granos (lpgliquidacionAutor...
+
+9. [pyafipws/wslpg.py at main · reingart/pyafipws](https://github.com/reingart/pyafipws/blob/main/wslpg.py) - Factura Electrónica AFIP y otros servicios web (proyecto software libre) — Interfases, tools and app...
+

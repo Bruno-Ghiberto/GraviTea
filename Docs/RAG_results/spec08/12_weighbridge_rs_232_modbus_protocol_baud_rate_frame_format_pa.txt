@@ -1,0 +1,91 @@
+=== Qdrant Search Results ===
+Query: weighbridge RS-232 Modbus protocol baud rate frame format parity
+Results: 5
+
+--- Result 1 (score: 0.7481, ranked: 1.3000) ---
+Source: 3.1 Weighbridge Integration Standards.md
+Page: 0
+Section: Integration Recommendation
+Context: Weighbridge Systems at Argentine Acopios: Integration Guide for ERP Software > Data Formats > Integration Recommendation
+Text:
+For ERP integration, the recommended approach is:
+
+1. **Primary:** Use Modbus RTU (Sipel Orion) or the command/response protocol (Systel) — both allow the ERP to poll for weight on demand rather than parsing a continuous stream.
+2. **Fallback:** Parse continuous ASCII streams (GaMa A12, Sipel FI=0) using frame delimiters (STX/ETX or CR/LF).
+3. **Network:** Use a KYASERV RS232-Ethernet bridge to make the indicator accessible via TCP/IP, allowing your ERP to connect from anywhere on the LAN.[^30]
+
+***
+
+--- Result 2 (score: 0.7391, ranked: 1.1200) ---
+Source: 3.1 Weighbridge Integration Standards.md
+Page: 0
+Section: RS-232 Serial: The Universal Baseline
+Context: Weighbridge Systems at Argentine Acopios: Integration Guide for ERP Software > Communication Protocols > RS-232 Serial: The Universal Baseline
+Text:
+## Communication Protocols
+
+
+
+RS-232 is the de facto standard communication interface across virtually every weighbridge indicator used in Argentine acopios. All major Argentine indicator brands (Sipel, GaMa, Systel) include an RS-232 port as standard equipment.[^25][^19][^17]
+
+**Typical serial parameters:**
+
+| Parameter | Common Values |
+|---|---|
+| Baud rate | 9600 bps (most common default); 1200, 2400, 4800, 19200, 38400 also configurable[^26][^17] |
+| Data bits | 8 |
+| Parity | None |
+| Stop bits | 1 |
+| Connector | DB-9 male (plastic enclosures) or terminal block (stainless steel enclosures) |
+| Max distance | 15 meters[^27] |
+
+--- Result 3 (score: 0.7302, ranked: 0.9427) ---
+Source: 3.1 Weighbridge Integration Standards.md
+Page: 0
+Section: Modbus RTU / Modbus ASCII
+Context: Weighbridge Systems at Argentine Acopios: Integration Guide for ERP Software > Communication Protocols > Modbus RTU / Modbus ASCII
+Text:
+The **Sipel Orion** supports full Modbus RTU and Modbus ASCII over both RS-232 (single-slave, 15m max) and RS-485 (multi-slave, 1200m max). This is the most structured and integration-friendly protocol available:[^27]
+
+- **Supported functions:** 03h (Read Holding Registers), 06h (Write Single Register), 10h (Write Multiple Registers)
+- **Memory map:** Address 0 = Gross weight (2 registers, 32-bit signed integer), Address 2 = Tare, Address 4 = Net weight, Address 6 = Flags/Status[^27]
+- **Configuration:** Slave ID 0–99, baud 4800–38400, RTU mode (8-N-1) or ASCII mode (7-N-2)[^27]
+
+Some generic indicators from Chinese manufacturers (e.g., XK3190-C8+, TDA-08A) also support Modbus RTU, commonly at 9600 baud.[^28][^29]
+
+--- Result 4 (score: 0.7176, ranked: 0.5413) ---
+Source: 3.1 Weighbridge Integration Standards.md
+Page: 0
+Section: Modbus (Sipel Orion)
+Context: Weighbridge Systems at Argentine Acopios: Integration Guide for ERP Software > Data Formats > Modbus (Sipel Orion)
+Text:
+When using Modbus, the data is structured as standard Modbus registers rather than ASCII strings. Weight values are 32-bit signed integers (two registers each), without a decimal point — the decimal position must be known from the indicator configuration.[^27]
+
+--- Result 5 (score: 0.6980, ranked: 0.3000) ---
+Source: 3.1 Weighbridge Integration Standards.md
+Page: 0
+Section: References
+Context: Weighbridge Systems at Argentine Acopios: Integration Guide for ERP Software > References
+Text:
+el Peso Neto entre Cero y la Capacidad M...
+
+26. [PROTOCOLO DE COMUNICACIONES “A12”](http://basculasgama.com.ar/wp-content/uploads/2019/07/protocolo-de-comunicaciones-a12-.pdf)
+
+27. [SIPEL®](https://www.sipel.com.ar/uploads/Orion/mu_si_orion20h.pdf)
+
+28. [Modbus RTU, indicador de peso, computadora, Modbus Poll](https://www.youtube.com/watch?v=PFg641FSWKo) - En este video, describimos las diferencias entre el estándar de conexión RS-232 y RS-485. Comunicamo...
+
+29. [Comunicación serial RS-232 entre PLC e indicador de peso](https://www.youtube.com/watch?v=MJn8cgqh-70) - En este video, el primero de una serie sobre comunicaciones seriales entre PLC y este indicador de p...
+
+30. [Módulo Conversor Repetidor de peso KYASERV (RS232 – Ethernet](https://kyaserv.com.ar/web/modulo-conversor-de-salida-de-datos-de-balanza/) - Este módulo tiene capacidad para gestionar hasta 4 (cuatro) balanzas, pudiendo redireccionar la sali...
+
+31. [Corvus Agdp Pesaje Inteligente para Tolvas Agrícolas](https://www.agroads.com.ar/detalle.asp?clasi=1044976) - Básculas - Balanzas Otras, Estado: Nuevo, Precio: u$s1.999, Vendedor: MUÑOZ TECNOLOGÍA AGRÍCOLA, Ubi...
+
+32. [Con AGDP controla la cosecha desde tu celular en cualquier parte del mundo](https://corvus.net.ar)
+
+33. [Basculas magris | Tablet AGDP CORVUS](https://basculasmagris.com.ar/producto/agdp-corvus) - Basculas magris
+
+34. [[PDF] Manual Indicador Orión - Sipel](https://www.sipel.com.ar/uploads/Orion/Manual%20Orion_v20f.pdf) - El indicador Orion tiene la posibilidad de reprogramar la salida RTS como salida TxD2 con una cadena...
+
+35. [Indicador Electrónico de Peso GaMa de la Serie A12](http://basculasgama.com.ar/wp-content/uploads/2018/12/indicador-gama-a12-manual-de-uso.pdf) - El indicador electrónico de peso GaMa modelo A12 es un instrumento altamente confiable apto para su ...
+

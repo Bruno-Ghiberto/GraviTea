@@ -1,0 +1,126 @@
+=== Qdrant Search Results ===
+Query: grain quality parameters humidity tolerance base bonificacion rebaja
+Results: 5
+
+--- Result 1 (score: 0.7363, ranked: 1.3000) ---
+Source: 2.2 Grain Quality Management Standards.md
+Page: 0
+Section: 2. Maiz (Corn) – Norma XII (Res. SAGyP 1075/94)
+Context: Research the official grain quality standards and grading parameters used in Argentine > 2. Maiz (Corn) – Norma XII (Res. SAGyP 1075/94)
+Text:
+| Grado | Peso hectolítrico mínimo (kg/hl) | Tipo % | Color % | Granos picados % | Humedad % | Granos dañados % | Granos quebrados % | Materias extrañas % |
+| :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- | :-- |
+| 1 | 75 | 3,00 | 2,00 | 1,00 | 5,00 | 5,00 | 3,00 | 14,5 |
+| 2 | 72 | 5,00 | 3,00 | 1,50 | (not shown – typically ≤14,0 %) | 8,00 | 5,00 | 2,00 |
+| 3 | 69 | 8,00 | 5,00 | 2,00 | (not shown) | — | — | — |
+
+*Note: The humidity column in the PDF refers to the maximum allowed humidity for each grade; the commercial base humidity for maize is **14,0 %** (excess triggers merma de secado).*
+
+**Commercial deductions (rebajas)** – applied when a parameter exceeds its tolerance for the contracted grade:
+
+- **Humedad**: Merma = [(Hᵢ – 14,0) × 100] ÷ (100 – 14,0) %
+- **Granos dañados**: > tolerance: 1,0 % / cada % exceso
+- **Granos quebrados**: > tolerance: 0,5 % / cada % exceso (for Grado 1) – values vary by grade
+- **Materias extrañas**: > tolerance: 1,0 % / cada % exceso (up to a limit, then arbitration)
+- **Olores objetables / Granos amohosados**: 0,5 %–2,0 % según intensidad
+- **Chamico**: 1,3 % de merma de peso y gastos de zarandeo (2 semillas / 100 g)
+
+**Grade‑based bonuses/rebajas** – Grado 1: +1,0 % bonificación; Grado 2: 0; Grado 3: –1,5 % rebaja.
+
+**Official entity** – Cámara Arbitral de Cereales (CAC) – Norma XII (Res. SAGyP 1075/94).
+
+**Merma de almacenamiento** – 0,5 % de materia seca por mes $$
+
+$$ (alternatively 0,075 %/mes según EMAPA $$
+
+$$).
+
+**Factor de conversión** – $F = (100 - H_{\text{actual}})/(100 - 14,0)$.
+**Merma de secado** – same as humidity formula above.
+**Zarandeo** – deductions for excess of Materias extrañas, Granos quebrados, Granos dañados, Chamico, etc., as per the tolerance tables.
+
+***
+
+--- Result 2 (score: 0.7311, ranked: 0.9986) ---
+Source: 8.1 Grain Types and Quality Parameter Reference Data.md
+Page: 0
+Section: Merma de recibo
+Context: Reference data catalog for Argentine grain trade (quality parameters and ARCA species codes) > Rye (Centeno) – code 18 > Merma de recibo
+Text:
+- **Moisture:** discount for humidity above 14% is via humidity merma tables.
+- **Cleaning:** discounts for excess damaged/foreign and ergot are expressed as % of price per unit over tolerance; no single generic cleaning merma is fixed.
+
+--- Result 3 (score: 0.7133, ranked: 0.3156) ---
+Source: 2.5 Merma (Grain Loss) Calculations and Tolerance Tables.md
+Page: 0
+Section: Merma de recibo
+Context: Merma en Operaciones de Acopio de Granos en Argentina: Tablas, Fórmulas y Normativa > Merma de recibo
+Text:
+**No existe un porcentaje fijo de descuento por recibo**. La "merma de recibo" es un concepto que engloba todos los descuentos que se aplican cuando la mercadería excede las tolerancias establecidas en los estándares de comercialización. Se calcula en función de los parámetros de calidad del lote analizado:[^8][^1]
+
+- **Humedad**: si supera la tolerancia de recibo → merma de secado (tabla) + tarifa de secado
+- **Materias extrañas / cuerpos extraños**: si supera la tolerancia → rebaja porcentual
+- **Granos dañados, quebrados, etc.**: descuentos sobre precio, no sobre peso
+- **Chamico** (girasol, sorgo): descuento por peso y/o precio
+
+Las tolerancias de recibo son el umbral a partir del cual se aplican descuentos. Por debajo de la tolerancia, se recibe sin merma. Las bases y tolerancias clave son:
+
+| Grano | Humedad base (%) | Tolerancia recibo humedad (%) | Materias extrañas tolerancia (%) |
+|---|---|---|---|
+| Soja | 13,5 | 13,5 | 1,0 (verde, brotado, etc.) |
+| Maíz | 14,5 | 14,5 | Según grado (1-3%) |
+| Trigo pan | 14,0 | 14,0 | Según grado |
+| Girasol | 11,0 | 14,0 | 3,0[^8] |
+| Sorgo | 15,0 | 15,0 | Según grado (2-4%)[^14] |
+| Cebada cervecera | 12,0 | 12,5 | 0,5[^4] |
+| Cebada forrajera | 14,0 | 14,0 | Según grado[^12] |
+
+Para el software: la merma de recibo se construye dinámicamente a partir de cada rubro de calidad del análisis, no como un porcentaje flat.
+
+***
+
+--- Result 4 (score: 0.7105, ranked: 0.2067) ---
+Source: 2.1 Day-to-Day Operations of an Acopiador.md
+Page: 0
+Section: Paso 5 — Determinación de Grado y Descuentos
+Context: Flujo Operativo Completo de un Acopiador de Granos en la Pampa Húmeda Argentina — Guía para Diseño de ERP > ESCENARIO 1: Recepción de Granos (Recepción de Mercadería) > Paso 5 — Determinación de Grado y Descuentos
+Text:
+1. Los resultados del análisis se comparan contra las **tablas de tolerancias** establecidas en las Normas de Calidad para la Comercialización de cada grano, emitidas por resoluciones de SAGPyA/SENASA y publicadas por la Cámara Arbitral de Cereales de la Bolsa de Comercio de Rosario.[^16][^15][^17]
+2. Se determina el **grado** del lote (Grado 1, 2, 3, o Fuera de Estándar para cereales):
+
+| Grado | Trigo pan | Maíz | Sorgo |
+|---|---|---|---|
+| Grado 1 | Bonificación 1,5% | Bonificación 1,0% | Bonificación 1,0% |
+| Grado 2 | Sin bonificación ni rebaja | Sin bonificación ni rebaja | Sin bonificación ni rebaja |
+| Grado 3 | Rebaja 1,0% | Rebaja 1,5% | Rebaja 1,5% |
+
+Para soja y girasol, la norma establece **bases y tolerancias de recibo** con rebajas porcentuales progresivas por cada punto o fracción que exceda la tolerancia (no usa sistema de grados 1-2-3).[^15]
+
+3. Se calculan los **descuentos porcentuales** aplicables cuando los valores exceden las tolerancias. Por ejemplo, en soja: materias extrañas superiores al 1% generan rebaja de 1% por cada punto de exceso hasta 3%, y 1,5% por cada punto arriba de 3%.[^15]
+
+**Datos a capturar en el ERP:**
+- Grado asignado
+- Factor de bonificación o rebaja (%) por grado
+- Detalle de cada descuento por exceso de tolerancia (rubro, % de exceso, % de descuento)
+- Factor total resultante (Factor 100 ± ajustes)
+
+***
+
+--- Result 5 (score: 0.7103, ranked: 0.1500) ---
+Source: 2.5 Merma (Grain Loss) Calculations and Tolerance Tables.md
+Page: 0
+Section: Tabla de parámetros por grano para la base de datos
+Context: Merma en Operaciones de Acopio de Granos en Argentina: Tablas, Fórmulas y Normativa > Implementación en software: resumen de fórmulas > Tabla de parámetros por grano para la base de datos
+Text:
+| Grano | Humedad base (%) | Humedad Hf cálculo (%) | Tolerancia humedad recibo (%) | Manipuleo (%) | Volátil máx (%) |
+|---|---|---|---|---|---|
+| Soja | 13,5 | 12,5 | 13,5 | 0,25 | 0,5 |
+| Maíz | 14,5 | 13,5 | 14,5 | 0,25 | 0,3 |
+| Trigo pan | 14,0 | 13,5 | 14,0 | 0,10 | 0,3 |
+| Girasol | 11,0 | 10,5 | 14,0 | 0,20 | 0,5 |
+| Sorgo granífero | 15,0 | 13,5 | 15,0 | 0,25 | 0,5 |
+| Cebada forrajera | 14,0 | 13,5 | 14,0 | 0,20 | 0,3 |
+| Cebada cervecera | 12,0 | Según contrato | 12,5 | — | 0,3 |
+
+***
+
