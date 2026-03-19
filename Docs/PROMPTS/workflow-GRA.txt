@@ -1,0 +1,308 @@
+Speckit Workflow - GraviTea ERP Acopio
+======================================
+
+Replace 05 with the spec number and hld with the spec vision.
+
+Example:
+  05=05, hld=hld -> spec-09-New-ARCA-Docs/
+
+General rules:
+  - Run only one spec per Claude Code session. Each cycle consumes a full context window.
+  - Always start the session with: /sc:load engram and serena
+  - Critical: domain knowledge lives in 31 research documents already ingested into Qdrant.
+  - Never read full PDFs directly. Use the RAG pipeline to query only the specific information you need.
+  - This saves thousands of tokens per session.
+
+
+PHASE 0: SESSION SETUP
+======================
+
+Step 0: Load project context and persistent memory
+
+  /sc:load engram and serena
+
+
+PHASE A: CREATE AND REFINE THE SPECIFY CONTEXT
+==============================================
+
+The 09-specify.md file does not exist yet.
+Create it first with /sc:design, then improve it with /sc:improve.
+
+Step 1: Create the specify context prompt from scratch
+This produces the initial 09-specify.md file.
+
+/sc:design "Create the specification context prompt file
+  @Docs/PROMPTS/spec-09-New-ARCA-Docs/09-specify.md for this spec.
+
+  This file provides rich context for /speckit.specify. It must contain:
+  - Feature Description (what this spec produces)
+  - Current State (what exists now that needs changing, if applicable)
+  - Research Inputs section with:
+    * Must-Read file references (paths + specific sections)
+    * RAG Queries to run (see RAG Quick Reference at bottom)
+    * Critical Domain Facts (key facts inlined for minimum context)
+  - Functional Requirements (FR-005, FR-005, ...)
+  - Non-Functional Requirements (NF-005, ...)
+  - Target Document Structure (for blueprint specs 01-08)
+    OR Key Technical Details (for implementation specs 09+)
+  - Acceptance Criteria (AC-05, AC-05, ...)
+  - Dependencies (depends on / blocks)
+
+  IMPORTANT - Domain Knowledge Protocol:
+  Do NOT read the full research PDFs in Docs/Researches/.
+  Instead, use the RAG pipeline to query the Qdrant collections:
+  .venv/bin/python scripts/qdrant/qdrant_search.py -q 'QUERY' -l 5
+
+  Use the RAG queries listed in @Docs/PROMPTS/README.md under
+  'RAG Quick Reference' for this spec number to gather domain facts.
+
+  For reading Project Blueprint docs and codebase symbols,
+  use serena MCP to read only what's necessary.
+
+  Reference @Docs/PROMPTS/README.md for the spec catalog,
+  dependency graph, and research document index.
+
+  Use @'technical-writer (agent)' to write it. You must use these MCP:
+  sequential-thinking : For overall reasoning
+  serena : to execute intelligent semantic code search
+  gitnexus : to analyze complex relations across different files of the codebase and avoid destructive implementations
+"
+
+Step 2: Coherence check
+Improve the specify prompt so it aligns with Project Blueprints and prior specs.
+
+/sc:improve "Check that definition of the context prompt
+  @Docs/PROMPTS/spec-09-New-ARCA-Docs/09-specify.md is coherent with previous
+  specs and the @'Docs/Project Blueprint/' documents.
+
+  IMPORTANT - Domain Knowledge Protocol:
+  Do NOT read the full research PDFs in Docs/Researches/.
+  Instead, use the RAG pipeline to query the Qdrant collections:
+  .venv/bin/python scripts/qdrant/qdrant_search.py -q 'QUERY' -l 5
+
+  The specify context file lists specific RAG queries under
+  '## Research Inputs > ### RAG Queries'. Run those queries
+  to gather domain facts and verify the context prompt
+  references them correctly.
+
+  For reading Project Blueprint docs and codebase symbols,
+  use serena MCP to read only what's necessary to avoid
+  massive token consumption.
+
+  Use @'technical-writer (agent)' to write it. You must use these MCP:
+  sequential-thinking : For overall reasoning
+  serena : to execute intelligent semantic code search
+  gitnexus : to analyze complex relations across different files of the codebase and avoid destructive implementations
+"
+
+Step 3: Generate spec.md from the refined context prompt
+
+/speckit.specify "Read @Docs/PROMPTS/spec-09-New-ARCA-Docs/09-specify.md"
+
+Step 4: Clarify ambiguities
+Answer questions and encode the answers back into the spec.
+
+  /speckit.clarify
+
+
+PHASE B: CREATE AND REFINE THE PLAN CONTEXT
+===========================================
+
+The 09-plan.md file does not exist yet.
+Create it, then improve it.
+
+Step 5: Create the plan context prompt from scratch
+
+/sc:design "Create the plan context prompt file
+  @Docs/PROMPTS/spec-09-New-ARCA-Docs/09-plan.md for this spec.
+
+  This file provides rich context for /speckit.plan. It must contain:
+
+  For blueprint specs (01-08):
+  - Section-by-section writing plan for the target document
+  - Research-to-section mapping (which research feeds each section)
+  - Content guidelines (tone, audience, level of detail)
+  - Existing content to preserve vs. replace
+  - Checkpoint gates (review points after each major section)
+  - Done criteria
+
+  For implementation specs (09+):
+  - Agent Team Orchestration Protocol (tmux multi-pane REQUIRED)
+  - Wave Execution Order (dependency chain between agents)
+  - Files to Create / Files to Modify (explicit lists)
+  - Component Overview
+  - Key Code Patterns (Django model patterns, Rust FFI, etc.)
+  - Checkpoint Gates (verification commands per wave)
+  - Testing Protocol (ALWAYS use @scripts/run-tests-external.sh, NEVER test inside Claude Code)
+  - Done Criteria
+
+  IMPORTANT - Domain Knowledge Protocol:
+  Do NOT read the full research PDFs. Use RAG queries:
+  .venv/bin/python scripts/qdrant/qdrant_search.py -q 'QUERY' -l 5
+
+  The plan MUST be coherent with the actual spec.md just generated.
+  Read the spec.md to understand what was specified.
+
+  Use @'technical-writer (agent)' to write. You must use these MCP:
+  sequential-thinking : For overall reasoning
+  serena : to execute intelligent semantic code search
+  gitnexus : to analyze complex relations across different files of the codebase and avoid destructive implementations
+"
+
+Step 6: Coherence check against the actual spec
+
+/sc:improve "Let's improve the @Docs/PROMPTS/spec-09-New-ARCA-Docs/09-plan.md
+  context prompt, it needs to be coherent with the actual spec.
+
+  IMPORTANT - Domain Knowledge Protocol:
+  Do NOT read the full research PDFs. Use RAG queries:
+  .venv/bin/python scripts/qdrant/qdrant_search.py -q 'QUERY' -l 5
+
+  For implementation specs (09+):
+  - The plan MUST include agent teams for Claude Code.
+  - Always enforce the use of @scripts/run-tests-external.sh
+    for testing. NEVER test inside Claude Code.
+
+  For blueprint specs (01-08):
+  - Single-author execution, no agent teams needed.
+  - Plan should structure the document section-by-section
+    with research-to-section mapping.
+
+  Use @'technical-writer (agent)' to write it. You must use these MCP:
+  sequential-thinking : For overall reasoning
+  serena : to execute intelligent semantic code search
+  gitnexus : to analyze complex relations across different files of the codebase and avoid destructive implementations
+"
+
+Step 7: Generate plan.md from the refined context prompt
+
+/speckit.plan "Read @Docs/PROMPTS/spec-09-New-ARCA-Docs/09-plan.md"
+
+Step 8: Generate tasks.md from spec + plan
+
+  /speckit.tasks
+
+
+PHASE C: QUALITY GATE
+=====================
+
+Step 9: Cross-artifact consistency check
+Validate consistency across spec.md, plan.md, and tasks.md.
+
+  /speckit.analyze
+
+
+PHASE D: CREATE THE IMPLEMENT CONTEXT AND AGENT DESIGN
+======================================================
+
+The 09-implement.md file does not exist yet. Create it.
+
+For implementation specs (09+):
+  - Also create agent instruction files.
+
+For blueprint specs (01-08):
+  - Use a simpler implement context, with no agents.
+
+Step 10: Create the implement context prompt and agent instruction files
+
+/sc:design "Create the implementation context prompt file
+  @Docs/PROMPTS/spec-09-New-ARCA-Docs/09-implement.md for this spec.
+  It needs to be coherent with the actual spec.md, plan.md, and tasks.md.
+
+  For blueprint specs (01-08):
+  This file guides single-author document writing. It must contain:
+  - Full writing context with all domain knowledge needed
+  - Section drafting instructions
+  - RAG query protocol for supplementary info during writing
+  - Review checklist
+  - Done criteria
+
+  For implementation specs (09+):
+  This file guides agent team execution. It must contain:
+  - Agent Team Orchestration Protocol
+  - MANDATORY: tmux multi-pane agent spawning is REQUIRED
+  - Wave execution order with checkpoint gates
+  - Files to create/modify with agent assignments
+  - Key code patterns and snippets
+  - Testing protocol (@scripts/run-tests-external.sh ONLY)
+  - Integration points with other specs
+  - Done criteria
+
+  ALSO for implementation specs (09+):
+  Create a brief instruction .md file for EACH agent member of the
+  team (excluding the orchestrator) in Docs/PROMPTS/spec-09-New-ARCA-Docs/agents/.
+
+  Each agent instruction file MUST include:
+  - Agent type (from configured agents list below)
+  - Model: Sonnet 4.6 (default) or Opus 4.6 (complex orchestrators only)
+  - Mission (what this agent does)
+  - Context Files to read FIRST
+  - Assigned Tasks (from tasks.md)
+  - Domain Knowledge section with specific RAG queries:
+    .venv/bin/python scripts/qdrant/qdrant_search.py -q 'relevant query' -l 5
+  - Files to Create / Files to Modify
+  - Key Patterns and Constraints
+  - NEVER read full research PDFs - all domain knowledge via RAG
+
+  The Orchestrator will spawn agents giving as a first task to read
+  their instruction file and then await further instructions.
+
+  Choose the appropriate agent type for each team member:
+
+  Custom agents:
+    backend-architect      : inherit
+    business-panel-experts : inherit
+    deep-research          : inherit
+    deep-research-agent    : inherit
+    devops-architect       : inherit
+    frontend-architect     : inherit
+    learning-guide         : inherit
+    performance-engineer   : inherit
+    pm-agent               : inherit
+    python-expert          : inherit
+    quality-engineer       : inherit
+    refactoring-expert     : inherit
+    repo-index             : inherit
+    requirements-analyst   : inherit
+    root-cause-analyst     : inherit
+    security-engineer      : inherit
+    self-review            : inherit
+    socratic-mentor        : inherit
+    system-architect       : inherit
+    technical-writer       : inherit
+
+  Built-in agents (always available):
+    claude-code-guide : haiku
+    Explore           : haiku
+    general-purpose   : inherit
+    Plan              : inherit
+    statusline-setup  : sonnet
+
+  IMPORTANT - Domain Knowledge Protocol:
+  Agents must NEVER read full research PDFs directly. All domain
+  knowledge comes through RAG queries or is inlined as 'Critical
+  Domain Facts' in the instruction file.
+
+  Use @'technical-writer (agent)' to write it. You must use these MCP:
+  sequential-thinking : For overall reasoning
+  serena : to execute intelligent semantic code search
+  gitnexus : to analyze complex relations across different files of the codebase and avoid destructive implementations
+"
+
+
+PHASE E: IMPLEMENT
+==================
+
+A separate session is recommended.
+
+Step 11: Execute implementation
+
+For blueprint specs (01-08):
+  - The orchestrator reads implement.md and writes the document.
+
+For implementation specs (09+):
+  - The orchestrator reads implement.md and spawns the agent team.
+
+/speckit.implement "Read @Docs/PROMPTS/spec-09-New-ARCA-Docs/09-implement.md THOROUGHLY TO IMPLEMENT"
+
+
