@@ -26,8 +26,8 @@ deliverables:
    `(tenant, producer_cuit, branch, grain_type, campaign)`.
 2. **AccountMovement model** -- immutable append-only ledger recording all
    account entries. 8 movement types: CEG_DEPOSIT, LPG_SALE, FIJACION, RETIRO,
-   SERVICE_CHARGE, CANJE_GRAIN_DEBIT, CANJE_INPUT_CREDIT, RETENTION_DEDUCTION.
-   Same immutability pattern as `StockMovement` (inventario), `GrainMovement`
+   SERVICE_CHARGE, CANJE_GRAIN_DEBIT, CANJE_INPUT_CREDIT, RETENTION_DEDUCTION,
+   ADJUSTMENT. Same immutability pattern as `StockMovement` (inventario), `GrainMovement`
    (acopio), and `MermaCalculation` (acopio). ADR-008 mandates append-only.
 3. **CEG_DEPOSIT integration** -- when a romaneo transitions to CONFORME,
    the system auto-creates (or finds) a ProducerAccount and inserts a
@@ -40,7 +40,9 @@ deliverables:
 6. **Account statement generation** -- kilos and pesos statement per producer
    filterable by grain type and campaign (SRS-CC03).
 7. **Blind index search** -- `producer_cuit` uses HMAC-SHA256 blind index
-   for equality search (same pattern as `barcode_hash` in inventario).
+   for equality search (same pattern as `barcode_blind_idx` in
+   `Product` and `tax_id_hash` in `Supplier`). Uses `EncryptedCharField`
+   and `BlindIndexField` from `apps/core/encryption/fields.py`.
 8. **DRF serializers and viewsets** implementing REST API Design v1.0 Section 9
    -- accounts CRUD, movements ledger, posicion consolidada, manual entries.
 9. **Test suite** covering models, immutability enforcement, running balance
@@ -76,7 +78,10 @@ This builds directly on:
   HMAC-SHA256 blind index for searchable encrypted fields.
 - `backend/apps/inventario/models.py` -- `StockMovement` demonstrates the
   immutable ledger pattern; `Product` demonstrates blind index search via
-  `barcode_encrypted` / `barcode_hash`.
+  `barcode` (EncryptedCharField) / `barcode_blind_idx` (BlindIndexField).
+- `backend/apps/compras/models.py` -- `Supplier` demonstrates the same
+  encryption pattern: `tax_id_encrypted` / `tax_id_hash`, using
+  `EncryptedCharField` + plain `CharField` with `compute_blind_index()`.
 - `backend/apps/core/models/branch.py` -- `Branch` model (plant locations).
 
 ### What Needs Creating
@@ -202,12 +207,23 @@ Same immutability pattern as StockMovement and GrainMovement:
 
 `producer_cuit` is PII. The Data Model stores it as a plain CharField for
 now, but the REST API Design Section 9.1 notes: "AES-256-GCM encrypted at
-rest". For searchability, spec-13 implements:
-- `producer_cuit_encrypted` -- AES-256-GCM ciphertext (stored)
-- `producer_cuit_hash` -- HMAC-SHA256 blind index (searchable)
+rest" (confirmed by Section 9.8 -- Encrypted CUIT Field Behaviour). For
+searchability, spec-13 implements:
+- `producer_cuit_encrypted` -- `EncryptedCharField` (AES-256-GCM ciphertext)
+- `producer_cuit_hash` -- `BlindIndexField` (HMAC-SHA256 blind index)
 - `producer_cuit` -- derived property (decrypted on access)
 
-Same pattern as `barcode_encrypted` / `barcode_hash` in `Product` model.
+Both field classes are available in `apps/core/encryption/fields.py`. The
+codebase has two naming conventions for blind index fields:
+- `Product.barcode_blind_idx` (BlindIndexField) in inventario
+- `Supplier.tax_id_hash` (CharField + manual compute_blind_index) in compras
+
+Spec-13 follows the `Supplier` naming pattern (`*_hash`) as it is closer to
+the Data Model's intent and more explicit. Both conventions use the same
+underlying `compute_blind_index()` function from `apps/core/encryption/utils.py`.
+
+REST API Design Section 9.8 confirms: only equality search is supported.
+LIKE, range, and prefix queries on CUIT return HTTP 422.
 
 #### Canje Is the Convergence Point (Data Model 8.4)
 
@@ -259,7 +275,7 @@ quantity_kg (grain delta; positive=in, negative=out), ars_amount (ARS delta;
 positive=credit, negative=debit), usd_amount (USD delta), movement_at
 (auto_now_add), reference_document, notes.
 
-**8 authoritative movement types**:
+**9 authoritative movement types**:
 
 | Type | Description | Grain Delta | ARS Delta |
 |------|-------------|------------|----------|
@@ -271,6 +287,7 @@ positive=credit, negative=debit), usd_amount (USD delta), movement_at
 | `CANJE_GRAIN_DEBIT` | Grain leg of canje | -kg | -- |
 | `CANJE_INPUT_CREDIT` | Input invoice credit | -- | -ARS |
 | `RETENTION_DEDUCTION` | Withholding tax | -- | -ARS |
+| `ADJUSTMENT` | Error correction (supervisor-only) | +/-kg | +/-ARS |
 
 **Immutability rules** (same pattern as GrainMovement):
 - No UPDATE -- save() raises ValueError on existing records.
@@ -281,7 +298,8 @@ positive=credit, negative=debit), usd_amount (USD delta), movement_at
 
 ### FR-003: CEG_DEPOSIT from Romaneo Confirmation
 
-When a romaneo transitions to CONFORME, the system shall:
+When a romaneo transitions to CONFORME **and the grain is third-party**
+(`is_own_grain=False` on the resulting GrainLot), the system shall:
 1. Find or create a `ProducerAccount` for (tenant, romaneo.producer_cuit,
    romaneo.branch, romaneo.grain_type, romaneo.campaign).
 2. Create an `AccountMovement` of type `CEG_DEPOSIT` with:
@@ -289,6 +307,14 @@ When a romaneo transitions to CONFORME, the system shall:
    - `romaneo = romaneo` (FK traceability)
    - `ars_amount = None` (no monetary value at reception)
 3. Increment `ProducerAccount.grain_balance_kg += quantity_kg`.
+
+**Own-grain condition (ADR-020)**: When the acopiador purchases grain outright
+(`is_own_grain=True`), the grain does NOT enter a ProducerAccount. Own grain
+is a balance-sheet asset (account 1.3.XX); it has no producer-facing cuenta
+corriente. The spec-12 confirmar currently hardcodes `is_own_grain=False`
+(romaneo.py line 290, comment: "own-grain deferred to spec-13"). Spec-13
+must add `is_own_grain` determination logic and conditionally skip
+CEG_DEPOSIT when `is_own_grain=True`.
 
 This runs alongside (not instead of) the spec-12 GrainMovement DEPOSIT.
 Both happen atomically in the same database transaction during the
@@ -427,8 +453,8 @@ index. Encryption key management follows the existing pattern in
 |-------|-------------|-----------|------|---------|-------------|
 | `id` | UUIDField PK | -- | No | uuid4 | -- |
 | `tenant` | ForeignKey(Tenant) PROTECT | -- | No | -- | Owning tenant |
-| `producer_cuit_encrypted` | CharField | max_length=500 | No | -- | AES-256-GCM (extension for PII compliance) |
-| `producer_cuit_hash` | CharField | max_length=64 | No | -- | HMAC-SHA256 blind index (extension for searchability) |
+| `producer_cuit_encrypted` | EncryptedCharField | max_length=500 | No | -- | AES-256-GCM (from `apps/core/encryption/fields.py`) |
+| `producer_cuit_hash` | BlindIndexField | max_length=64 | No | -- | HMAC-SHA256 blind index (from `apps/core/encryption/fields.py`) |
 | `branch` | ForeignKey(Branch) PROTECT | -- | No | -- | Per-plant scope |
 | `grain_type` | ForeignKey(GrainType) PROTECT | -- | No | -- | One account per grain type |
 | `campaign` | ForeignKey(CampanaConfig) PROTECT | -- | No | -- | Campaign year scope |
@@ -602,15 +628,28 @@ The spec-12 `RomaneoViewSet.confirmar` action already creates a
 GrainMovement DEPOSIT. Spec-13 extends this action to also call
 `CEGDepositService.create_ceg_deposit()` in the same transaction.
 
+**CRITICAL: Transaction Atomicity Fix Required**
+
+The current confirmar action (romaneo.py:167-293) does NOT wrap the
+entire flow in `transaction.atomic()`. The sequence is:
+1. `romaneo.save()` (commits CONFORME status) -- line 270
+2. `create_deposit_from_romaneo()` (has its own inner `transaction.atomic()`) -- line 287
+
+If step 2 fails, romaneo is already CONFORME but no grain deposit exists.
+Spec-13 MUST wrap the entire confirmar flow -- romaneo save, grain deposit,
+AND account credit -- in a single `transaction.atomic()` to prevent
+inconsistent state:
+
 ```python
 # In romaneo viewset confirmar action (pseudo-code):
 with transaction.atomic():
     romaneo.status = "CONFORME"
     romaneo.save()
     # spec-12: grain deposit
-    grain_deposit_service.create_deposit(romaneo)
-    # spec-13: account credit
-    ceg_deposit_service.create_ceg_deposit(romaneo, operator=request.user)
+    create_deposit_from_romaneo(romaneo, storage_unit, is_own_grain)
+    # spec-13: account credit (only for third-party grain)
+    if not is_own_grain:
+        ceg_deposit_service.create_ceg_deposit(romaneo, operator=request.user)
 ```
 
 #### FijacionRecord and LiquidacionPrimaria (DEFERRED)
@@ -718,9 +757,10 @@ are deferred.
 1. **producer_cuit encryption**: Data Model Section 6.1 defines `producer_cuit`
    as a plain CharField. Spec-13 adds `producer_cuit_encrypted` (AES-256-GCM)
    and `producer_cuit_hash` (HMAC-SHA256) per REST API Design Section 9.1
-   ("AES-256-GCM encrypted at rest") and Section 9.2 ("uses HMAC-SHA256 blind
-   index"). The encryption pattern follows the existing `barcode_encrypted` /
-   `barcode_hash` implementation in `Product`.
+   ("AES-256-GCM encrypted at rest"), Section 9.2 ("uses HMAC-SHA256 blind
+   index"), and Section 9.8 (Encrypted CUIT Field Behaviour). The encryption
+   pattern follows the existing `EncryptedCharField` / `BlindIndexField`
+   implementation in `apps/core/encryption/fields.py`.
 
 2. **AccountMovement.liquidacion FK deferred**: Data Model Section 6.2 defines
    this FK to LiquidacionPrimaria. Since LiquidacionPrimaria does not exist
@@ -740,6 +780,18 @@ are deferred.
    recomputing from potentially millions of movements, (c) the
    `check_account_balance` management command validates consistency. This is
    the same pattern used by GrainLot.total_kg in spec-12.
+
+5. **Provenance fields on AccountMovement**: Data Model Section 6.2 does
+   not explicitly list `created_by` or `device_id` on AccountMovement.
+   Spec-13 adds `created_by` (FK to AppUser) per ADR-034 (Provenance Fields)
+   which mandates provenance on all grain domain models. Same extension
+   as GrainMovement.created_by in spec-12.
+
+6. **Transaction atomicity in confirmar**: The existing confirmar action
+   (romaneo.py:167-293) does not wrap the full flow in `transaction.atomic()`.
+   Spec-13 introduces a top-level `transaction.atomic()` encompassing
+   romaneo save + grain deposit (spec-12) + account credit (spec-13).
+   This is a bugfix to the existing flow, not just a spec-13 addition.
 
 ### SRS Traceability Discrepancy
 

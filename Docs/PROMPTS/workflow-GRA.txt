@@ -91,10 +91,12 @@ Improve the specify prompt so it aligns with Project Blueprints and prior specs.
   use serena MCP to read only what's necessary to avoid
   massive token consumption.
 
-  Use @'technical-writer (agent)' to write it. You must use these MCP:
+  Use @'technical-writer (agent)' to write it. You must use these MCP as a MUST:
   sequential-thinking : For overall reasoning
   serena : to execute intelligent semantic code search
   gitnexus : to analyze complex relations across different files of the codebase and avoid destructive implementations
+
+  But also explore all the other MCP active and use them as you deem neccesary to
 "
 
 Step 3: Generate spec.md from the refined context prompt
@@ -145,11 +147,14 @@ Step 5: Create the plan context prompt from scratch
   The plan MUST be coherent with the actual spec.md just generated.
   Read the spec.md to understand what was specified.
 
-  Use @'technical-writer (agent)' to write. You must use these MCP:
+  Use @'technical-writer (agent)' to write. You must use these MCP as a MUST:
   sequential-thinking : For overall reasoning
   serena : to execute intelligent semantic code search
   gitnexus : to analyze complex relations across different files of the codebase and avoid destructive implementations
+
+  But also explore all the other MCP active and use them as you deem neccesary to
 "
+
 
 Step 6: Coherence check against the actual spec
 
@@ -170,10 +175,13 @@ Step 6: Coherence check against the actual spec
   - Plan should structure the document section-by-section
     with research-to-section mapping.
 
-  Use @'technical-writer (agent)' to write it. You must use these MCP:
+  Use @'technical-writer (agent)' to write it. You must use these MCP as a MUST:
   sequential-thinking : For overall reasoning
   serena : to execute intelligent semantic code search
   gitnexus : to analyze complex relations across different files of the codebase and avoid destructive implementations
+
+But also explore all the other MCP active and use them as you deem neccesary to
+
 "
 
 Step 7: Generate plan.md from the refined context prompt
@@ -285,10 +293,12 @@ Step 10: Create the implement context prompt and agent instruction files
   knowledge comes through RAG queries or is inlined as 'Critical
   Domain Facts' in the instruction file.
 
-  Use @'technical-writer (agent)' to write it. You must use these MCP:
+  Use @'technical-writer (agent)' to write it. You must use these MCP as a MUST:
   sequential-thinking : For overall reasoning
   serena : to execute intelligent semantic code search
   gitnexus : to analyze complex relations across different files of the codebase and avoid destructive implementations
+
+  But also explore all the other MCP active and use them as you deem neccesary to
 "
 
 
