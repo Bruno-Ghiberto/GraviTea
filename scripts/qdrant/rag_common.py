@@ -5,7 +5,8 @@ Shared infrastructure for ingestion, embedding, chunking, and Qdrant operations.
 Centralizes configuration, eliminates duplication across ingest scripts, and adds
 contextual chunking with breadcrumb-based structural context.
 
-Used by: ingest_arca_qdrant.py, ingest_wikis_qdrant.py, qdrant_search.py, benchmark
+Used by: ingest_arca_qdrant.py, ingest_wikis_qdrant.py, ingest_acopio_research.py,
+         qdrant_search.py, benchmark
 """
 
 import logging
@@ -24,7 +25,7 @@ import requests
 # ---------------------------------------------------------------------------
 
 QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
-OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://172.26.176.1:11434")
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
 
 # Reuse TCP connections via keep-alive — prevents Windows ephemeral port
 # exhaustion (WinError 10048) when making hundreds of Ollama embed calls.
@@ -110,6 +111,12 @@ COLLECTION_REGISTRY: dict[str, CollectionConfig] = {
         chunk_config=ChunkConfig(max_chars=2000, overlap_chars=250),
         payload_indexes=("topic", "doc_type", "source_file"),
     ),
+    "acopio_research": CollectionConfig(
+        name="acopio_research",
+        model=MODELS["qwen3"],
+        chunk_config=ChunkConfig(max_chars=2000, overlap_chars=250),
+        payload_indexes=("topic", "subtopic", "priority", "source_file"),
+    ),
 }
 
 # Auto-generated reverse lookup: dims -> model name
@@ -150,6 +157,198 @@ def extract_pages(pdf_path: Path) -> list[dict]:
             pages.append({"page": i + 1, "text": text})
     doc.close()
     return pages
+
+
+# ---------------------------------------------------------------------------
+# Markdown text extraction
+# ---------------------------------------------------------------------------
+
+_MD_HEADING_RE = re.compile(r"^(#{1,4})\s+(.+)$", re.MULTILINE)
+
+
+def extract_markdown_sections(md_path: Path) -> list[dict]:
+    """Extract sections from a markdown file, splitting at heading boundaries.
+
+    Returns list of dicts:
+      heading    — the heading text (without ``#`` prefix)
+      depth      — 1 for ``#``, 2 for ``##``, 3 for ``###``, 4 for ``####``
+      text       — body text under the heading (excluding the heading line itself)
+      line_start — 1-based line number where the section starts (heading line)
+      line_end   — 1-based line number where the section ends (inclusive)
+    """
+    try:
+        content = md_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        log.warning("Cannot read markdown file %s: %s", md_path, exc)
+        return []
+
+    if not content.strip():
+        log.warning("Empty markdown file: %s", md_path)
+        return []
+
+    lines = content.split("\n")
+    sections: list[dict] = []
+
+    # Find all heading positions
+    heading_positions: list[tuple[int, int, str]] = []  # (line_idx, depth, heading_text)
+    for idx, line in enumerate(lines):
+        m = _MD_HEADING_RE.match(line)
+        if m:
+            depth = len(m.group(1))
+            heading_text = m.group(2).strip()
+            heading_positions.append((idx, depth, heading_text))
+
+    if not heading_positions:
+        # No headings — treat entire file as a single section
+        full_text = content.strip()
+        if full_text:
+            sections.append({
+                "heading": "",
+                "depth": 0,
+                "text": full_text,
+                "line_start": 1,
+                "line_end": len(lines),
+            })
+        return sections
+
+    # If there is content before the first heading, capture it as a preamble section
+    first_heading_idx = heading_positions[0][0]
+    if first_heading_idx > 0:
+        preamble = "\n".join(lines[:first_heading_idx]).strip()
+        if preamble:
+            sections.append({
+                "heading": "",
+                "depth": 0,
+                "text": preamble,
+                "line_start": 1,
+                "line_end": first_heading_idx,
+            })
+
+    # Build sections from heading positions
+    for i, (line_idx, depth, heading_text) in enumerate(heading_positions):
+        # Section body runs from line after heading to line before next heading (or EOF)
+        body_start = line_idx + 1
+        if i + 1 < len(heading_positions):
+            body_end = heading_positions[i + 1][0]
+        else:
+            body_end = len(lines)
+
+        body = "\n".join(lines[body_start:body_end]).strip()
+        sections.append({
+            "heading": heading_text,
+            "depth": depth,
+            "text": body,
+            "line_start": line_idx + 1,  # 1-based
+            "line_end": body_end,         # 1-based (inclusive of last body line)
+        })
+
+    return sections
+
+
+def build_markdown_breadcrumbs(sections: list[dict]) -> dict[int, str]:
+    """Build breadcrumb strings from a heading hierarchy.
+
+    Uses the heading depth (1-4) to maintain a stack: depth 1 maps to
+    tracker depth 0, depth 2 to tracker depth 1, etc.
+
+    Returns ``{section_index: "H1 Title > H2 Title > H3 Title"}``.
+    """
+    tracker = HeadingTracker()
+    breadcrumbs: dict[int, str] = {}
+
+    for idx, section in enumerate(sections):
+        depth = section["depth"]
+        heading = section["heading"]
+
+        if depth > 0 and heading:
+            # Map markdown depth (1-4) to HeadingTracker depth (0-3)
+            tracker.update(depth - 1, heading)
+
+        breadcrumbs[idx] = tracker.breadcrumb
+
+    return breadcrumbs
+
+
+def chunk_markdown_sections(
+    sections: list[dict],
+    collection_name: str,
+    breadcrumbs: dict[int, str] | None = None,
+) -> list[dict]:
+    """Chunk markdown sections using collection-specific strategy.
+
+    Small sections (< 200 chars) are merged with the next adjacent section
+    at the same or lower depth to avoid overly-tiny chunks.
+
+    Returns list of dicts with keys:
+      text, context_text, page (always 0), chunk_index, section, breadcrumb
+    """
+    cfg = COLLECTION_REGISTRY[collection_name].chunk_config
+    max_chars = cfg.max_chars
+    overlap_chars = cfg.overlap_chars
+
+    # Phase 1: merge small sections into adjacent siblings
+    merged: list[tuple[int, dict]] = []  # (original_index, section_dict)
+    i = 0
+    while i < len(sections):
+        section = sections[i]
+        text = section["text"]
+
+        # Merge small sections forward into the next section at same or lower depth
+        if len(text) < 200 and i + 1 < len(sections):
+            next_section = sections[i + 1]
+            if next_section["depth"] >= section["depth"] or section["depth"] == 0:
+                # Prepend heading context when merging
+                prefix = f"## {section['heading']}\n\n" if section["heading"] else ""
+                combined_text = f"{prefix}{text}\n\n{next_section['text']}"
+                combined = {
+                    "heading": next_section["heading"] or section["heading"],
+                    "depth": next_section["depth"] if next_section["depth"] > 0 else section["depth"],
+                    "text": combined_text,
+                    "line_start": section["line_start"],
+                    "line_end": next_section["line_end"],
+                }
+                merged.append((i + 1, combined))
+                i += 2
+                continue
+
+        merged.append((i, section))
+        i += 1
+
+    # Phase 2: chunk each (possibly merged) section
+    all_chunks: list[dict] = []
+    global_chunk_idx = 0
+
+    for orig_idx, section in merged:
+        text = section["text"]
+        heading = section["heading"]
+        bc = (breadcrumbs or {}).get(orig_idx, "")
+
+        if not text.strip():
+            continue
+
+        if len(text) <= max_chars:
+            text_chunks = [text]
+        else:
+            text_chunks = chunk_text(text, max_chars, overlap_chars)
+
+        for chunk_str in text_chunks:
+            # Build context_text with breadcrumb prepended
+            if bc:
+                context_text = f"[{bc}]\n{chunk_str}"
+            else:
+                context_text = chunk_str
+
+            all_chunks.append({
+                "text": chunk_str,
+                "context_text": context_text,
+                "page": 0,
+                "chunk_index": global_chunk_idx,
+                "section": heading,
+                "breadcrumb": bc,
+            })
+            global_chunk_idx += 1
+
+    return all_chunks
 
 
 # ---------------------------------------------------------------------------

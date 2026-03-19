@@ -22,6 +22,7 @@ Usage:
 """
 
 import argparse
+import json
 import os
 import sys
 
@@ -63,6 +64,28 @@ def _qdrant_results_to_search_results(
             breadcrumb=payload.get("breadcrumb", ""),
         ))
     return results
+
+
+def format_results_json(results: list[SearchResult], query: str) -> str:
+    """Format re-ranked results as JSON for programmatic consumption."""
+    return json.dumps({
+        "query": query,
+        "results": [
+            {
+                "collection": r.collection,
+                "score": round(r.score, 4),
+                "ranked_score": round(r.boosted_score, 4),
+                "source_file": r.source_file,
+                "section": r.section,
+                "breadcrumb": r.breadcrumb,
+                "text": r.text,
+                "topic": r.payload.get("topic", ""),
+                "subtopic": r.payload.get("subtopic", ""),
+                "priority": r.payload.get("priority", ""),
+            }
+            for r in results
+        ],
+    }, indent=2, ensure_ascii=False)
 
 
 def _format_raw_results(raw: dict, collection: str, query: str) -> str:
@@ -119,6 +142,8 @@ def main():
     parser.add_argument("--all", action="store_true", dest="search_all", help="Search ALL collections")
     parser.add_argument("--no-expand", action="store_true", help="Disable query expansion")
     parser.add_argument("--raw", action="store_true", help="Skip re-ranking, show raw per-collection results")
+    parser.add_argument("--json", action="store_true", dest="json_output", help="Output results as JSON for programmatic consumption")
+    parser.add_argument("--output", "-o", default=None, metavar="FILE", help="Write output to FILE instead of stdout")
 
     args = parser.parse_args()
 
@@ -132,15 +157,23 @@ def main():
     )
     target_names = [t.collection for t in targets]
 
-    # Verify Qdrant reachability
+    # Verify Qdrant reachability and filter out missing collections
     try:
         resp = requests.get(f"{QDRANT_URL}/collections", timeout=5)
         resp.raise_for_status()
         existing = {c["name"] for c in resp.json()["result"]["collections"]}
         missing = [name for name in target_names if name not in existing]
         if missing:
-            print(f"ERROR: Collections not found in Qdrant: {', '.join(missing)}", file=sys.stderr)
-            sys.exit(1)
+            if args.collection:
+                # Explicit collection requested but not found — hard fail
+                print(f"ERROR: Collection not found in Qdrant: {args.collection}", file=sys.stderr)
+                sys.exit(1)
+            # Auto-routed: skip missing collections gracefully
+            print(f"[Skip] Collections not found: {', '.join(missing)}", file=sys.stderr)
+            targets = [t for t in targets if t.collection in existing]
+            if not targets:
+                print("ERROR: No valid collections available after filtering", file=sys.stderr)
+                sys.exit(1)
     except requests.ConnectionError:
         print(f"ERROR: Cannot connect to Qdrant at {QDRANT_URL}", file=sys.stderr)
         sys.exit(1)
@@ -189,13 +222,23 @@ def main():
 
         if args.raw:
             # Raw mode: print per-collection results and continue
-            print(_format_raw_results(raw, target.collection, args.query))
+            raw_text = _format_raw_results(raw, target.collection, args.query)
+            if args.output:
+                os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
+                mode = "a" if len(targets) > 1 else "w"
+                with open(args.output, mode, encoding="utf-8") as f:
+                    f.write(raw_text)
+                    f.write("\n")
+            else:
+                print(raw_text)
             continue
 
         results = _qdrant_results_to_search_results(raw, target.collection)
         all_search_results.extend(results)
 
     if args.raw:
+        if args.output and len(targets) > 0:
+            print(f"[Saved] {args.output}", file=sys.stderr)
         return
 
     # --- Step 4: Re-rank ---
@@ -211,7 +254,19 @@ def main():
     )
 
     # --- Step 5: Format + output ---
-    print(format_results(ranked, args.query, show_collection=show_multi))
+    if args.json_output:
+        output_text = format_results_json(ranked, args.query)
+    else:
+        output_text = format_results(ranked, args.query, show_collection=show_multi)
+
+    if args.output:
+        os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
+        with open(args.output, "w", encoding="utf-8") as f:
+            f.write(output_text)
+            f.write("\n")
+        print(f"[Saved] {args.output}", file=sys.stderr)
+    else:
+        print(output_text)
 
 
 if __name__ == "__main__":

@@ -22,6 +22,62 @@ class RouteTarget:
 
 # Ordered list: first match wins (most specific rules first)
 ROUTING_RULES: list[tuple[re.Pattern, list[RouteTarget]]] = [
+    # --- ACOPIO grain operations patterns (highest priority) ---
+    (
+        re.compile(r"\b(CTG|carta\s+de\s+porte|CPE|WSCPE|c[oó]digo\s+de\s+trazabilidad)\b", re.IGNORECASE),
+        [
+            RouteTarget("acopio_research", weight=1.0),
+        ],
+    ),
+    (
+        re.compile(r"\b(liquidaci[oó]n|1116|WSLPG|liquidacion\s+primaria)\b", re.IGNORECASE),
+        [
+            RouteTarget("acopio_research", weight=1.0),
+        ],
+    ),
+    (
+        re.compile(r"\b(acopiador|acopio|silo|granos|grano|cereal|cosecha)\b", re.IGNORECASE),
+        [
+            RouteTarget("acopio_research", weight=1.0),
+        ],
+    ),
+    (
+        re.compile(r"\b(calidad|humedad|zarandeo|merma|peso\s+hectol[ií]trico|romaneo|recepci[oó]n|pesaje)\b", re.IGNORECASE),
+        [
+            RouteTarget("acopio_research", weight=1.0),
+        ],
+    ),
+    (
+        re.compile(r"\b(AGIS|AmericaGIS|competencia|competidor|mercado\s+acopio)\b", re.IGNORECASE),
+        [
+            RouteTarget("acopio_research", filters={"topic": "market"}, weight=1.0),
+        ],
+    ),
+    (
+        re.compile(r"\b(retenciones|IIBB|ingresos\s+brutos|DGR|ARBA|SIRCREB)\b", re.IGNORECASE),
+        [
+            RouteTarget("acopio_research", filters={"topic": "regulatory"}, weight=0.8),
+            RouteTarget("acopio_research", filters={"topic": "financial"}, weight=0.8),
+        ],
+    ),
+    (
+        re.compile(r"\b(productor|cuenta\s+corriente|canje|orden\s+de\s+entrega)\b", re.IGNORECASE),
+        [
+            RouteTarget("acopio_research", weight=1.0),
+        ],
+    ),
+    (
+        re.compile(r"\b(campa[ñn]a|cosecha\s+fina|cosecha\s+gruesa)\b", re.IGNORECASE),
+        [
+            RouteTarget("acopio_research", weight=1.0),
+        ],
+    ),
+    (
+        re.compile(r"\b(balanza|b[aá]scula|weighbridge|Systel|Sipel)\b", re.IGNORECASE),
+        [
+            RouteTarget("acopio_research", weight=1.0),
+        ],
+    ),
     # --- ARCA-specific patterns ---
     (
         re.compile(r"\b(WSAA|ticket\s+de\s+acceso|login\s+ticket|TRA|CMS)\b", re.IGNORECASE),
@@ -93,9 +149,7 @@ ROUTING_RULES: list[tuple[re.Pattern, list[RouteTarget]]] = [
 ]
 
 DEFAULT_ROUTES = [
-    RouteTarget("arca_api_specs", weight=0.8),
-    RouteTarget("arca_dev_guides", weight=0.6),
-    RouteTarget("wikis", weight=0.4),
+    RouteTarget("acopio_research", weight=1.0),
 ]
 
 

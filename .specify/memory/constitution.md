@@ -29,6 +29,10 @@ The backend follows a monolithic modular pattern using Django Apps:
 - `facturacion` - ARCA integration for electronic invoicing (app_label: gravitea_facturacion)
 - `ventas` - Sales processing, customer management, invoice integration (app_label: gravitea_ventas)
 
+**Acopio Vertical Modules (spec-03+):**
+- `acopio` - Grain reception, quality analysis, merma calculation, storage, CPE integration (app_label: gravitea_acopio)
+- `cuentas` - Producer current accounts, grain ledger, price fixation (app_label: gravitea_cuentas)
+
 **Future Modules (Deferred):**
 - `compras` - Purchases and supplier management
 - `clientes` - Customer relationship management (extended CRM beyond ventas.Customer)

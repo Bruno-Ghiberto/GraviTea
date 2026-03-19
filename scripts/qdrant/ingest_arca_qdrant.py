@@ -52,6 +52,10 @@ COLLECTION_MAP: dict[str, list[dict]] = {
         {"path": "WS factura electrónica/wsmtxca-RG-2904.pdf", "ws_name": "wsmtxca", "rg_number": "RG-2904", "doc_type": "technical_spec"},
         {"path": "WS factura electrónica/wsbfev1-RG-5427-y-2861.pdf", "ws_name": "wsbfev1", "rg_number": "RG-5427/2861", "doc_type": "technical_spec"},
         {"path": "WS factura electrónica/wsseg-RG-2668.pdf", "ws_name": "wsseg", "rg_number": "RG-2668", "doc_type": "technical_spec"},
+        # Grain services
+        {"path": "WS Padrón/manual_ws_sr_padron_a4_v1.3.pdf", "ws_name": "ws_sr_padron_a4", "rg_number": "", "doc_type": "technical_spec"},
+        {"path": "WS Padrón/manual_ws_sr_ws_constancia_inscripcion.pdf", "ws_name": "ws_sr_constancia_inscripcion", "rg_number": "", "doc_type": "technical_spec"},
+        {"path": "SIRE/SIRE-especificacion-para-emision-por-lote.pdf", "ws_name": "sire", "rg_number": "", "doc_type": "technical_spec"},
     ],
     "arca_dev_guides": [
         {"path": "WS factura electrónica/manual-desarrollador-ARCA-COMPG-v4-1.pdf", "ws_name": "wsfev1", "version": "v4.1", "doc_type": "developer_manual"},
@@ -61,6 +65,14 @@ COLLECTION_MAP: dict[str, list[dict]] = {
         {"path": "WS factura electrónica/WSSEG-ManualParaElDesarrollador_ARCA.pdf", "ws_name": "wsseg", "version": "", "doc_type": "developer_manual"},
         {"path": "WS factura electrónica/Manual_Desarrollador_WSCT_v1.6.4.pdf", "ws_name": "wsct", "version": "v1.6.4", "doc_type": "developer_manual"},
         {"path": "WS factura electrónica/Web-Service-MTXCA-v25.pdf", "ws_name": "wsmtxca", "version": "v25", "doc_type": "developer_manual"},
+        # Grain services
+        {"path": "WSLPG/manual_wslpg_1.24.pdf", "ws_name": "wslpg", "version": "v1.24", "doc_type": "developer_manual"},
+        {"path": "WSCPE/manual-wscpe.pdf", "ws_name": "wscpe", "version": "", "doc_type": "developer_manual"},
+        {"path": "SIRE/manualSIRE.pdf", "ws_name": "sire", "version": "", "doc_type": "developer_manual"},
+        {"path": "SIRE/SOAP-SIRE-IVA-Manualparaeldesarrollador_V1_0_0.pdf", "ws_name": "sire_iva", "version": "v1.0.0", "doc_type": "developer_manual"},
+        {"path": "SIRE/Preguntas-Frecuentes-Importacion-Lote.pdf", "ws_name": "sire", "version": "", "doc_type": "faq"},
+        {"path": "WSCDC/WSCDC-manual-desarrollador-v4.pdf", "ws_name": "wscdc", "version": "v4", "doc_type": "developer_manual"},
+        {"path": "Preguntas-Frecuentes-WS.pdf", "ws_name": "general", "version": "", "doc_type": "faq"},
     ],
     "arca_setup_certs": [
         {"path": "Certificados/Produccion/WSAA.ObtenerCertificado.pdf", "environment": "produccion", "procedure_type": "cert_generation"},
@@ -133,6 +145,7 @@ def ingest_file(collection: str, file_config: dict, dry_run: bool = False) -> in
         point_id = generate_point_id(rel_path, chunk["page"], chunk["chunk_index"])
         points.append({"id": point_id, "vector": embedding, "payload": payload})
 
+    ensure_collection_exists(collection)
     log.info("  Upserting %d points to %s...", len(points), collection)
     upsert_to_qdrant(collection, points)
     return len(points)

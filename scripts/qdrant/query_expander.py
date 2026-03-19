@@ -32,6 +32,20 @@ SYNONYM_MAP: dict[str, str] = {
     "RLS": "Row Level Security",
     "PyO3": "Python bindings for Rust",
     "SOAP": "Simple Object Access Protocol",
+    "CTG": "Codigo de Trazabilidad de Granos",
+    "CPE": "Carta de Porte Electronica",
+    "WSCPE": "Web Service Carta de Porte Electronica",
+    "WSLPG": "Web Service Liquidacion Primaria de Granos",
+    "IIBB": "Ingresos Brutos",
+    "DGR": "Direccion General de Rentas",
+    "ARBA": "Agencia de Recaudacion de Buenos Aires",
+    "SIRCREB": "Sistema de Recaudacion y Control de Acreditaciones Bancarias",
+    "BCR": "Bolsa de Comercio de Rosario",
+    "MATba": "Mercado a Termino de Buenos Aires",
+    "ROFEX": "Rosario Futures Exchange",
+    "VNR": "Valor Neto de Realizacion",
+    "SENASA": "Servicio Nacional de Sanidad y Calidad Agroalimentaria",
+    "ONCCA": "Oficina Nacional de Control Comercial Agropecuario",
 }
 
 # Precompile patterns: match whole words only, case-insensitive
@@ -70,6 +84,17 @@ _BILINGUAL_SWAPS: list[tuple[str, str]] = [
     ("parametro", "parameter"),
     ("obligatorio", "required"),
     ("validacion", "validation"),
+    ("acopiador", "grain storage operator"),
+    ("liquidacion", "settlement"),
+    ("merma", "grain loss"),
+    ("romaneo", "weighing ticket"),
+    ("retenciones", "withholdings"),
+    ("zarandeo", "dockage"),
+    ("humedad", "moisture"),
+    ("peso hectolitrico", "test weight"),
+    ("campana", "campaign"),
+    ("productor", "producer"),
+    ("cuenta corriente", "current account"),
 ]
 
 

@@ -370,7 +370,7 @@ cd backend && python manage.py migrate
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **GRAVITEA-ERP** (7506 symbols, 16835 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **GraviTea** (7212 symbols, 16573 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -386,7 +386,7 @@ This project is indexed by GitNexus as **GRAVITEA-ERP** (7506 symbols, 16835 rel
 
 1. `gitnexus_query({query: "<error or symptom>"})` — find execution flows related to the issue
 2. `gitnexus_context({name: "<suspect function>"})` — see all callers, callees, and process participation
-3. `READ gitnexus://repo/GRAVITEA-ERP/process/{processName}` — trace the full execution flow step by step
+3. `READ gitnexus://repo/GraviTea/process/{processName}` — trace the full execution flow step by step
 4. For regressions: `gitnexus_detect_changes({scope: "compare", base_ref: "main"})` — see what your branch changed
 
 ## When Refactoring
@@ -425,10 +425,10 @@ This project is indexed by GitNexus as **GRAVITEA-ERP** (7506 symbols, 16835 rel
 
 | Resource | Use for |
 |----------|---------|
-| `gitnexus://repo/GRAVITEA-ERP/context` | Codebase overview, check index freshness |
-| `gitnexus://repo/GRAVITEA-ERP/clusters` | All functional areas |
-| `gitnexus://repo/GRAVITEA-ERP/processes` | All execution flows |
-| `gitnexus://repo/GRAVITEA-ERP/process/{name}` | Step-by-step execution trace |
+| `gitnexus://repo/GraviTea/context` | Codebase overview, check index freshness |
+| `gitnexus://repo/GraviTea/clusters` | All functional areas |
+| `gitnexus://repo/GraviTea/processes` | All execution flows |
+| `gitnexus://repo/GraviTea/process/{name}` | Step-by-step execution trace |
 
 ## Self-Check Before Finishing
 
