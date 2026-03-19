@@ -4,10 +4,16 @@ from apps.acopio.views.reference_data import (
     MermaTableViewSet,
     ToleranceTableViewSet,
 )
+from apps.acopio.views.romaneo import (
+    QualityAnalysisViewSet,
+    RomaneoViewSet,
+)
 
 __all__ = [
     "GrainTypeViewSet",
     "CampanaConfigViewSet",
     "ToleranceTableViewSet",
     "MermaTableViewSet",
+    "RomaneoViewSet",
+    "QualityAnalysisViewSet",
 ]

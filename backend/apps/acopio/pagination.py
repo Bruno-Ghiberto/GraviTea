@@ -18,3 +18,17 @@ class ReferenceDataPagination(PageNumberPagination):
     page_size = 100
     page_size_query_param = "page_size"
     max_page_size = 500
+
+
+class RomaneoPagination(PageNumberPagination):
+    """
+    Page-number pagination for romaneo list endpoint.
+
+    Justified deviation from cursor pagination:
+    Romaneo orders by ts_entrada which may not be unique.
+    Consistent with ReferenceDataPagination in the acopio vertical.
+    """
+
+    page_size = 25
+    page_size_query_param = "page_size"
+    max_page_size = 100

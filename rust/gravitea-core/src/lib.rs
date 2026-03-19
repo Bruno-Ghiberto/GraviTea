@@ -9,6 +9,7 @@ mod export;
 mod observability;
 mod security;
 mod sync;
+mod merma;
 mod validation;
 pub use errors::*;
 
@@ -58,6 +59,8 @@ mod gravitea_rust {
     use super::arca::build_caea_batch_request;
     #[pymodule_export]
     use super::validation::validate_custom_fields;
+    #[pymodule_export]
+    use super::merma::calculate_merma;
 }
 
 #[cfg(test)]
