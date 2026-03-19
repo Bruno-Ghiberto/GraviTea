@@ -80,6 +80,11 @@ def _set_postgres_tenant_context(tenant_id: Optional[UUID]) -> None:
     Args:
         tenant_id: UUID of tenant to set, or None to clear/reset.
     """
+    # SET/RESET session variables are PostgreSQL-specific.
+    # Skip silently on SQLite (used in tests) and other non-PG backends.
+    if connection.vendor != "postgresql":
+        return
+
     try:
         with connection.cursor() as cursor:
             if tenant_id:

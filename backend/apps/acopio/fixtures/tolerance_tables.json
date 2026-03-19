@@ -1,0 +1,13 @@
+[
+  {"model": "gravitea_acopio.tolerancetable", "fields": {"grain_type": "TRI", "parameter": "bonificacion_rebaja", "grado_base": 1, "tolerance_pct": "1.50", "valid_from": "2020-01-01", "valid_to": null, "source_resolution": null}},
+  {"model": "gravitea_acopio.tolerancetable", "fields": {"grain_type": "TRI", "parameter": "bonificacion_rebaja", "grado_base": 2, "tolerance_pct": "0.00", "valid_from": "2020-01-01", "valid_to": null, "source_resolution": null}},
+  {"model": "gravitea_acopio.tolerancetable", "fields": {"grain_type": "TRI", "parameter": "bonificacion_rebaja", "grado_base": 3, "tolerance_pct": "-1.00", "valid_from": "2020-01-01", "valid_to": null, "source_resolution": null}},
+  {"model": "gravitea_acopio.tolerancetable", "fields": {"grain_type": "MAI", "parameter": "bonificacion_rebaja", "grado_base": 1, "tolerance_pct": "1.00", "valid_from": "2020-01-01", "valid_to": null, "source_resolution": null}},
+  {"model": "gravitea_acopio.tolerancetable", "fields": {"grain_type": "MAI", "parameter": "bonificacion_rebaja", "grado_base": 2, "tolerance_pct": "0.00", "valid_from": "2020-01-01", "valid_to": null, "source_resolution": null}},
+  {"model": "gravitea_acopio.tolerancetable", "fields": {"grain_type": "MAI", "parameter": "bonificacion_rebaja", "grado_base": 3, "tolerance_pct": "-1.50", "valid_from": "2020-01-01", "valid_to": null, "source_resolution": null}},
+  {"model": "gravitea_acopio.tolerancetable", "fields": {"grain_type": "SOJ", "parameter": "materias_extranas", "grado_base": 0, "tolerance_pct": "1.00", "valid_from": "2020-01-01", "valid_to": null, "source_resolution": null}},
+  {"model": "gravitea_acopio.tolerancetable", "fields": {"grain_type": "GIR", "parameter": "materias_extranas", "grado_base": 0, "tolerance_pct": "1.00", "valid_from": "2020-01-01", "valid_to": null, "source_resolution": null}},
+  {"model": "gravitea_acopio.tolerancetable", "fields": {"grain_type": "SOR", "parameter": "bonificacion_rebaja", "grado_base": 1, "tolerance_pct": "1.00", "valid_from": "2020-01-01", "valid_to": null, "source_resolution": null}},
+  {"model": "gravitea_acopio.tolerancetable", "fields": {"grain_type": "SOR", "parameter": "bonificacion_rebaja", "grado_base": 2, "tolerance_pct": "0.00", "valid_from": "2020-01-01", "valid_to": null, "source_resolution": null}},
+  {"model": "gravitea_acopio.tolerancetable", "fields": {"grain_type": "SOR", "parameter": "bonificacion_rebaja", "grado_base": 3, "tolerance_pct": "-1.50", "valid_from": "2020-01-01", "valid_to": null, "source_resolution": null}}
+]

@@ -1,0 +1,100 @@
+[
+  {
+    "model": "gravitea_acopio.graintype",
+    "fields": {
+      "code": "TRI",
+      "arca_codigo": 15,
+      "name": "Trigo pan",
+      "humedad_base_pct": "14.00",
+      "hf_secado_pct": "13.50",
+      "manipuleo_fijo_pct": "0.10",
+      "volatil_fijo_pct": "0.30",
+      "grading_system": "GRADO",
+      "is_active": true
+    }
+  },
+  {
+    "model": "gravitea_acopio.graintype",
+    "fields": {
+      "code": "MAI",
+      "arca_codigo": 19,
+      "name": "Maiz",
+      "humedad_base_pct": "14.50",
+      "hf_secado_pct": "13.50",
+      "manipuleo_fijo_pct": "0.25",
+      "volatil_fijo_pct": "0.30",
+      "grading_system": "GRADO",
+      "is_active": true
+    }
+  },
+  {
+    "model": "gravitea_acopio.graintype",
+    "fields": {
+      "code": "SOJ",
+      "arca_codigo": 23,
+      "name": "Soja",
+      "humedad_base_pct": "13.50",
+      "hf_secado_pct": "12.50",
+      "manipuleo_fijo_pct": "0.25",
+      "volatil_fijo_pct": "0.50",
+      "grading_system": "TOLERANCE",
+      "is_active": true
+    }
+  },
+  {
+    "model": "gravitea_acopio.graintype",
+    "fields": {
+      "code": "GIR",
+      "arca_codigo": 2,
+      "name": "Girasol",
+      "humedad_base_pct": "11.00",
+      "hf_secado_pct": "10.50",
+      "manipuleo_fijo_pct": "0.20",
+      "volatil_fijo_pct": "0.50",
+      "grading_system": "TOLERANCE",
+      "is_active": true
+    }
+  },
+  {
+    "model": "gravitea_acopio.graintype",
+    "fields": {
+      "code": "SOR",
+      "arca_codigo": 22,
+      "name": "Sorgo granifero",
+      "humedad_base_pct": "15.00",
+      "hf_secado_pct": "13.50",
+      "manipuleo_fijo_pct": "0.25",
+      "volatil_fijo_pct": "0.50",
+      "grading_system": "GRADO",
+      "is_active": true
+    }
+  },
+  {
+    "model": "gravitea_acopio.graintype",
+    "fields": {
+      "code": "CEB_F",
+      "arca_codigo": 11,
+      "name": "Cebada forrajera",
+      "humedad_base_pct": "14.00",
+      "hf_secado_pct": "13.50",
+      "manipuleo_fijo_pct": "0.20",
+      "volatil_fijo_pct": "0.30",
+      "grading_system": "GRADO",
+      "is_active": true
+    }
+  },
+  {
+    "model": "gravitea_acopio.graintype",
+    "fields": {
+      "code": "CEB_C",
+      "arca_codigo": 17,
+      "name": "Cebada cervecera",
+      "humedad_base_pct": "12.00",
+      "hf_secado_pct": "12.00",
+      "manipuleo_fijo_pct": "0.00",
+      "volatil_fijo_pct": "0.30",
+      "grading_system": "TOLERANCE",
+      "is_active": true
+    }
+  }
+]
