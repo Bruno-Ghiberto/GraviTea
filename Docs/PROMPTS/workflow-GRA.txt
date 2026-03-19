@@ -4,7 +4,7 @@ Speckit Workflow - GraviTea ERP Acopio
 Replace 05 with the spec number and hld with the spec vision.
 
 Example:
-  05=05, hld=hld -> spec-09-New-ARCA-Docs/
+  05=05, hld=hld -> spec-13-accounts/
 
 General rules:
   - Run only one spec per Claude Code session. Each cycle consumes a full context window.
@@ -25,14 +25,14 @@ Step 0: Load project context and persistent memory
 PHASE A: CREATE AND REFINE THE SPECIFY CONTEXT
 ==============================================
 
-The 09-specify.md file does not exist yet.
+The 13-specify.md file does not exist yet.
 Create it first with /sc:design, then improve it with /sc:improve.
 
 Step 1: Create the specify context prompt from scratch
-This produces the initial 09-specify.md file.
+This produces the initial 13-specify.md file.
 
 /sc:design "Create the specification context prompt file
-  @Docs/PROMPTS/spec-09-New-ARCA-Docs/09-specify.md for this spec.
+  @Docs/PROMPTS/spec-13-accounts/13-specify.md for this spec.
 
   This file provides rich context for /speckit.specify. It must contain:
   - Feature Description (what this spec produces)
@@ -72,7 +72,7 @@ Step 2: Coherence check
 Improve the specify prompt so it aligns with Project Blueprints and prior specs.
 
 /sc:improve "Check that definition of the context prompt
-  @Docs/PROMPTS/spec-09-New-ARCA-Docs/09-specify.md is coherent with previous
+  @Docs/PROMPTS/spec-13-accounts/13-specify.md is coherent with previous
   specs and the @'Docs/Project Blueprint/' documents.
 
   IMPORTANT - Domain Knowledge Protocol:
@@ -97,7 +97,7 @@ Improve the specify prompt so it aligns with Project Blueprints and prior specs.
 
 Step 3: Generate spec.md from the refined context prompt
 
-/speckit.specify "Read @Docs/PROMPTS/spec-09-New-ARCA-Docs/09-specify.md"
+/speckit.specify "Read @Docs/PROMPTS/spec-13-accounts/13-specify.md"
 
 Step 4: Clarify ambiguities
 Answer questions and encode the answers back into the spec.
@@ -108,13 +108,13 @@ Answer questions and encode the answers back into the spec.
 PHASE B: CREATE AND REFINE THE PLAN CONTEXT
 ===========================================
 
-The 09-plan.md file does not exist yet.
+The 13-plan.md file does not exist yet.
 Create it, then improve it.
 
 Step 5: Create the plan context prompt from scratch
 
 /sc:design "Create the plan context prompt file
-  @Docs/PROMPTS/spec-09-New-ARCA-Docs/09-plan.md for this spec.
+  @Docs/PROMPTS/spec-13-accounts/13-plan.md for this spec.
 
   This file provides rich context for /speckit.plan. It must contain:
 
@@ -151,7 +151,7 @@ Step 5: Create the plan context prompt from scratch
 
 Step 6: Coherence check against the actual spec
 
-/sc:improve "Let's improve the @Docs/PROMPTS/spec-09-New-ARCA-Docs/09-plan.md
+/sc:improve "Let's improve the @Docs/PROMPTS/spec-13-accounts/13-plan.md
   context prompt, it needs to be coherent with the actual spec.
 
   IMPORTANT - Domain Knowledge Protocol:
@@ -176,7 +176,7 @@ Step 6: Coherence check against the actual spec
 
 Step 7: Generate plan.md from the refined context prompt
 
-/speckit.plan "Read @Docs/PROMPTS/spec-09-New-ARCA-Docs/09-plan.md"
+/speckit.plan "Read @Docs/PROMPTS/spec-13-accounts/13-plan.md"
 
 Step 8: Generate tasks.md from spec + plan
 
@@ -195,7 +195,7 @@ Validate consistency across spec.md, plan.md, and tasks.md.
 PHASE D: CREATE THE IMPLEMENT CONTEXT AND AGENT DESIGN
 ======================================================
 
-The 09-implement.md file does not exist yet. Create it.
+The 13-implement.md file does not exist yet. Create it.
 
 For implementation specs (09+):
   - Also create agent instruction files.
@@ -206,7 +206,7 @@ For blueprint specs (01-08):
 Step 10: Create the implement context prompt and agent instruction files
 
 /sc:design "Create the implementation context prompt file
-  @Docs/PROMPTS/spec-09-New-ARCA-Docs/09-implement.md for this spec.
+  @Docs/PROMPTS/spec-13-accounts/13-implement.md for this spec.
   It needs to be coherent with the actual spec.md, plan.md, and tasks.md.
 
   For blueprint specs (01-08):
@@ -230,7 +230,7 @@ Step 10: Create the implement context prompt and agent instruction files
 
   ALSO for implementation specs (09+):
   Create a brief instruction .md file for EACH agent member of the
-  team (excluding the orchestrator) in Docs/PROMPTS/spec-09-New-ARCA-Docs/agents/.
+  team (excluding the orchestrator) in Docs/PROMPTS/spec-13-accounts/agents/.
 
   Each agent instruction file MUST include:
   - Agent type (from configured agents list below)
@@ -303,6 +303,6 @@ For blueprint specs (01-08):
 For implementation specs (09+):
   - The orchestrator reads implement.md and spawns the agent team.
 
-/speckit.implement "Read @Docs/PROMPTS/spec-09-New-ARCA-Docs/09-implement.md THOROUGHLY TO IMPLEMENT"
+/speckit.implement "Read @Docs/PROMPTS/spec-13-accounts/13-implement.md thoroughly to implement. Remember, the use of 'Agent Teams' feature is a must!"
 
 

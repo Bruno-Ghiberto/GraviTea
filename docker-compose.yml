@@ -45,12 +45,13 @@ services:
   redis:
     image: redis:7-alpine
     container_name: gravitea-redis
+    command: redis-server --requirepass gravitea
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "gravitea", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -69,7 +70,7 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=gravitea.settings.development
       - DATABASE_URL=postgresql://gravitea:gravitea@postgres:5432/gravitea_dev
-      - REDIS_URL=redis://redis:6379/0
+      - REDIS_URL=redis://:gravitea@redis:6379/0
       - SECRET_KEY=docker-dev-secret-key-change-in-production-12345
       - DEBUG=True
       - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,host.docker.internal,gravitea-web
@@ -295,13 +296,14 @@ services:
   redis-test:
     image: redis:7-alpine
     container_name: gravitea-redis-test
+    command: redis-server --requirepass gravitea
     profiles: [test]
     ports:
       - "6380:6379"
     volumes:
       - redis_test_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "gravitea", "ping"]
       interval: 2s
       timeout: 5s
       retries: 10
@@ -317,7 +319,7 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=gravitea.settings.test
       - DATABASE_URL=postgresql://gravitea_test:gravitea_test@postgres-test:5432/gravitea_test
-      - REDIS_URL=redis://redis-test:6379/0
+      - REDIS_URL=redis://:gravitea@redis-test:6379/0
       - SECRET_KEY=test-secret-key-for-testing-only-12345
       - DEBUG=False
       - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,host.docker.internal,gravitea-web-test
