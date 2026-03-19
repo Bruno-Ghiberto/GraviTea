@@ -45,13 +45,15 @@ services:
   redis:
     image: redis:7-alpine
     container_name: gravitea-redis
-    command: redis-server --requirepass gravitea
+    env_file:
+      - ./backend/.env
+    command: sh -c 'redis-server --requirepass "$$REDIS_PASSWORD"'
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "gravitea", "ping"]
+      test: ["CMD-SHELL", 'redis-cli -a "$$REDIS_PASSWORD" ping']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -67,11 +69,11 @@ services:
     container_name: gravitea-web
     ports:
       - "8000:8080"
+    env_file:
+      - ./backend/.env
     environment:
       - DJANGO_SETTINGS_MODULE=gravitea.settings.development
       - DATABASE_URL=postgresql://gravitea:gravitea@postgres:5432/gravitea_dev
-      - REDIS_URL=redis://:gravitea@redis:6379/0
-      - SECRET_KEY=docker-dev-secret-key-change-in-production-12345
       - DEBUG=True
       - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,host.docker.internal,gravitea-web
       - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:5173,http://127.0.0.1:3000

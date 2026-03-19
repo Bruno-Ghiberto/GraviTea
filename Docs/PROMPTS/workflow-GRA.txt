@@ -62,10 +62,12 @@ This produces the initial 13-specify.md file.
   Reference @Docs/PROMPTS/README.md for the spec catalog,
   dependency graph, and research document index.
 
-  Use @'technical-writer (agent)' to write it. You must use these MCP:
+  Use @'technical-writer (agent)' to write it. You must use these MCP as a MUST:
   sequential-thinking : For overall reasoning
   serena : to execute intelligent semantic code search
   gitnexus : to analyze complex relations across different files of the codebase and avoid destructive implementations
+
+  But also explore all the other MCP active and use them as you deem neccesary to
 "
 
 Step 2: Coherence check
