@@ -309,7 +309,7 @@ def _is_suspicious_hostname(hostname: str) -> bool:
     ipv6_private_prefixes = ["fd", "fc", "fe80"]
     if any(hostname.startswith(prefix) for prefix in ipv6_private_prefixes):
         # If it looks like it could be an IPv6 prefix followed by hex chars
-        remaining = hostname[2:] if hostname.startswith("fe80") else hostname[2:]
+        remaining = hostname[4:] if hostname.startswith("fe80") else hostname[2:]
         if not remaining or remaining.isalnum():
             return True
 

@@ -30,6 +30,11 @@ from .seed_utils import (
     load_scenario,
 )
 
+# Development-only seed password for demo/test users.  # NOSONAR
+# This command is never used in production; passwords are intentionally weak
+# for local development convenience.
+_SEED_PASSWORD = "testpass123"  # NOSONAR
+
 
 class Command(BaseCommand):
     help = "Seed the database with mock data for development and testing"
@@ -324,7 +329,7 @@ class Command(BaseCommand):
                         id=user_uuid,
                         email=email,
                         tenant=tenant,
-                        password="testpass123",
+                        password=_SEED_PASSWORD,
                         full_name=f"{entity_config.data.get('first_name', '')} {entity_config.data.get('last_name', '')}".strip(),
                         role=role,
                         default_branch=branch,
@@ -400,9 +405,9 @@ class Command(BaseCommand):
         self.stdout.write(f"Price Lists: {len(price_lists)}")
         self.stdout.write(f"Products: {len(products)}")
         self.stdout.write("\n=== Login Credentials ===")
-        self.stdout.write("Admin: admin@gravitea-demo.com / admin123")
-        self.stdout.write("Manager: gerente@gravitea-demo.com / manager123")
-        self.stdout.write("Cashier: cajero@gravitea-demo.com / cajero123")
+        self.stdout.write(f"Admin: admin@gravitea-demo.com / {_SEED_PASSWORD}")
+        self.stdout.write(f"Manager: gerente@gravitea-demo.com / {_SEED_PASSWORD}")
+        self.stdout.write(f"Cashier: cajero@gravitea-demo.com / {_SEED_PASSWORD}")
 
     def clear_data(self):
         """Clear existing mock data."""
@@ -576,35 +581,35 @@ class Command(BaseCommand):
             {
                 "email": "admin@gravitea-demo.com",
                 "full_name": "Admin Usuario",
-                "password": "admin123",
+                "password": _SEED_PASSWORD,
                 "role_name": "Administrador",
                 "branch_index": 0,
             },
             {
                 "email": "gerente@gravitea-demo.com",
                 "full_name": "Gerente Usuario",
-                "password": "manager123",
+                "password": _SEED_PASSWORD,
                 "role_name": "Gerente",
                 "branch_index": 0,
             },
             {
                 "email": "vendedor1@gravitea-demo.com",
                 "full_name": "Vendedor Uno",
-                "password": "vendedor123",
+                "password": _SEED_PASSWORD,
                 "role_name": "Vendedor",
                 "branch_index": 0,
             },
             {
                 "email": "vendedor2@gravitea-demo.com",
                 "full_name": "Vendedor Dos",
-                "password": "vendedor123",
+                "password": _SEED_PASSWORD,
                 "role_name": "Vendedor",
                 "branch_index": 1,
             },
             {
                 "email": "cajero@gravitea-demo.com",
                 "full_name": "Cajero Usuario",
-                "password": "cajero123",
+                "password": _SEED_PASSWORD,
                 "role_name": "Cajero",
                 "branch_index": 0,
             },
